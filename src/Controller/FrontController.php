@@ -37,6 +37,7 @@ final class FrontController extends AbstractController
     #[Route('/front/login', name: 'app_inscription')]
     public function inscription(Request $request, EntityManagerInterface $entityManager, SessionInterface $session): Response
     {
+        $error=null;
         $utilisateur = new Utilisateur();
         $form = $this->createForm(UtilisateurType::class, $utilisateur);
 
@@ -84,11 +85,14 @@ final class FrontController extends AbstractController
             if ($utilisateur && password_verify($motDePasse, $utilisateur->getMotDePasse())) {
                 $session->set('user_id', $utilisateur->getId());
                 return $this->redirectToRoute('app_controller');
+            } else {
+                $error = 'Email ou mot de passe invalide';
             }
         }
 
         return $this->render('front/login.html.twig', [
             'form' => $form->createView(),
+            'error' => $error,
         ]);
     }
 

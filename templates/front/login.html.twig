@@ -52,7 +52,10 @@
     		<input type="password" name="mot_de_passe" placeholder="Mot De Passe" required />
     		<a href="#">Mot De Passe Oublié ?</a>
     		<button type="submit">Se Connecter</button>
-<		</form>
+			{% if error %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endif %}
+		</form>
 	</div>
 	<div class="overlay-container">
 		<div class="overlay">

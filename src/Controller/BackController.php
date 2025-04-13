@@ -31,7 +31,7 @@ final class BackController extends AbstractController{
     {
         if (!$session->get('user_id')) {
             // Redirige vers la page de connexion si l'utilisateur n'est pas connecté
-            return $this->redirectToRoute('app_back_inscription');
+            return $this->redirectToRoute('app_back_login');
         }
 
         $users = $entityManager->getRepository(Utilisateur::class)->findAll();
@@ -51,6 +51,7 @@ final class BackController extends AbstractController{
     #[Route('/back/login', name: 'app_back_login')]
     public function login( Request $request, EntityManagerInterface $entityManager, SessionInterface $session): Response
     {
+        $error = null;
         if ($request->isMethod('POST')) {
             $email = $request->request->get('email');
             $motDePasse = $request->request->get('mot_de_passe');
@@ -59,12 +60,16 @@ final class BackController extends AbstractController{
     
             $utilisateur = $entityManager->getRepository(Utilisateur::class)->findOneBy(['email' => $email]);
     
-            if ($utilisateur && password_verify($motDePasse, $utilisateur->getMotDePasse())) {
+            if ($utilisateur &&  $utilisateur->getRole() === 'admin' && password_verify($motDePasse, $utilisateur->getMotDePasse())) {
                 $session->set('user_id', $utilisateur->getId());
                 return $this->redirectToRoute('app_back');
+            } else {
+                $error = 'Email ou mot de passe invalide, ou vous n\'êtes pas un administrateur.';
             }
         }
-        return $this->render('back/login.html.twig');
+        return $this->render('back/login.html.twig' , [
+            'error' => $error,
+        ]);
     }
 
     #[Route('/back/inscription', name: 'app_back_inscription')]
