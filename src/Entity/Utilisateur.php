@@ -73,6 +73,9 @@ class Utilisateur implements PasswordAuthenticatedUserInterface
     #[ORM\Column(type: "string", length: 6 , nullable : true)]
     private string $reset_code;
 
+    #[ORM\Column(type: 'boolean')]
+    private bool $ban = false;
+
     public function getId()
     {
         return $this->id;
@@ -161,6 +164,18 @@ class Utilisateur implements PasswordAuthenticatedUserInterface
     public function setPassword(string $password): self
     {
         $this->setMotDePasse($password) ;
+
+        return $this;
+    }
+
+    public function getBan(): bool
+    {
+        return $this->ban;
+    }
+
+    public function setBan(bool $ban): self
+    {
+        $this->ban = $ban;
 
         return $this;
     }

@@ -23,10 +23,18 @@ use App\Entity\Client;
 final class FrontController extends AbstractController
 {
     #[Route('/front', name: 'app_controller')]
-    public function index(SessionInterface $session): Response
+    public function index(SessionInterface $session , EntityManagerInterface $entityManager): Response
     {
+        $userId = $session->get('user_id');
+        
         if (!$session->get('user_id')) {
             // Redirige vers la page de connexion si l'utilisateur n'est pas connecté
+            return $this->redirectToRoute('app_inscription');
+        }
+        $utilisateur = $entityManager->getRepository(Utilisateur::class)->find($userId);
+
+        if ($utilisateur && $utilisateur->getBan()) {
+            $session->remove('user_id'); // Supprime la session pour éviter un accès non autorisé
             return $this->redirectToRoute('app_inscription');
         }
         return $this->render('front/index.html.twig', [
@@ -82,9 +90,15 @@ final class FrontController extends AbstractController
     
             $utilisateur = $entityManager->getRepository(Utilisateur::class)->findOneBy(['email' => $email]);
     
-            if ($utilisateur && password_verify($motDePasse, $utilisateur->getMotDePasse())) {
-                $session->set('user_id', $utilisateur->getId());
-                return $this->redirectToRoute('app_controller');
+            if ($utilisateur) {
+                if ($utilisateur->getBan()) {
+                    $error = "Votre compte est banni, veuillez contacter l'administrateur.";
+                } elseif (password_verify($motDePasse, $utilisateur->getMotDePasse())) {
+                    $session->set('user_id', $utilisateur->getId());
+                    return $this->redirectToRoute('app_controller');
+                } else {
+                    $error = 'Email ou mot de passe invalide';
+                }
             } else {
                 $error = 'Email ou mot de passe invalide';
             }
@@ -255,7 +269,7 @@ final class FrontController extends AbstractController
     #[Route('/logout', name: 'app_logout')]
     public function logout(SessionInterface $session)
     {
-        $session->clear();
+        $session->remove('user_id');
         return $this->redirectToRoute('app_inscription');
     }
 
