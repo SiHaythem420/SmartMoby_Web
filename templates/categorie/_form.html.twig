@@ -1,0 +1,48 @@
+{{ form_start(form, {
+    'attr': {
+        'novalidate': 'novalidate',
+        'data-turbo': 'false'
+    }
+}) }}
+    <div class="card">
+        <div class="card-body">
+            {# Champ Nom avec gestion d'erreur #}
+            <div class="form-group mb-3">
+                {{ form_label(form.nom, 'Nom de la catégorie', {
+                    'label_attr': {'class': 'form-label'}
+                }) }}
+                {{ form_widget(form.nom, {
+                    'attr': {
+                        'class': 'form-control' ~ (form.nom.vars.errors|length ? ' is-invalid' : ''),
+                        'autocomplete': 'off'
+                    }
+                }) }}
+                {{ form_errors(form.nom, {
+                    'attr': {'class': 'invalid-feedback'}
+                }) }}
+            </div>
+
+            {# Champ Description avec gestion d'erreur #}
+            <div class="form-group mb-4">
+                {{ form_label(form.description, 'Description', {
+                    'label_attr': {'class': 'form-label'}
+                }) }}
+                {{ form_widget(form.description, {
+                    'attr': {
+                        'class': 'form-control' ~ (form.description.vars.errors|length ? ' is-invalid' : ''),
+                        'rows': 3,
+                        'autocomplete': 'off'
+                    }
+                }) }}
+                {{ form_errors(form.description, {
+                    'attr': {'class': 'invalid-feedback'}
+                }) }}
+            </div>
+
+            {# Bouton de soumission #}
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-2"></i>{{ button_label|default('Enregistrer') }}
+            </button>
+        </div>
+    </div>
+{{ form_end(form) }}
