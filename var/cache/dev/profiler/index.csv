@@ -393,3 +393,8 @@ e64884,127.0.0.1,GET,http://127.0.0.1:8000/service/assets/img/profile.jpg,174458
 7d2930,127.0.0.1,GET,http://127.0.0.1:8000/service/assets/img/profile.jpg,1744583011,,404,request
 88e724,127.0.0.1,GET,http://127.0.0.1:8000/service/assets/img/client-img4.png,1744583011,f8aaa2,404,request
 f8aaa2,127.0.0.1,GET,http://127.0.0.1:8000/service/assets/img/client-img4.png,1744583011,,404,request
+38aa95,127.0.0.1,GET,http://127.0.0.1:8000/service/,1744583490,,200,request
+56aebf,127.0.0.1,GET,http://127.0.0.1:8000/service/assets/img/client-img4.png,1744583491,6785b3,404,request
+6785b3,127.0.0.1,GET,http://127.0.0.1:8000/service/assets/img/client-img4.png,1744583491,,404,request
+076c01,127.0.0.1,GET,http://127.0.0.1:8000/service/assets/img/profile.jpg,1744583491,f98cce,404,request
+f98cce,127.0.0.1,GET,http://127.0.0.1:8000/service/assets/img/profile.jpg,1744583491,,404,request
