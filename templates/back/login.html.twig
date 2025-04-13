@@ -65,6 +65,9 @@
                                 <small class="text-theme"><strong>Mot De Passe Oublié ?</strong></small>
                             </a>
                         </div>
+                        {% if error %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endif %}
                     </form>
                 </div>
             </div>
