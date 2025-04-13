@@ -3,6 +3,8 @@
 namespace App\Form;
 
 use App\Entity\Vehicule;
+use App\Entity\Conducteur;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -17,7 +19,6 @@ class VehiculeType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-
             ->add('type', TextType::class, [
                 'label' => 'Type',
                 'required' => true,
@@ -45,6 +46,15 @@ class VehiculeType extends AbstractType
                 ],
                 'expanded' => true,
                 'multiple' => false,
+            ])
+            ->add('conducteur', EntityType::class, [
+                'class' => Conducteur::class,
+                'choice_label' => function(Conducteur $conducteur) {
+                    return $conducteur->getId()->getNom() . ' ' . $conducteur->getId()->getPrenom();
+                },
+                'label' => 'Driver',
+                'required' => false,
+                'placeholder' => 'Select a driver (optional)',
             ]);
     }
 

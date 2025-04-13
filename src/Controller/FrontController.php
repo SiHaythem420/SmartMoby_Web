@@ -15,7 +15,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 final class FrontController extends AbstractController
 {
-    #[Route('/front', name: 'app_controller')]
+    #[Route('/front', name: 'app_front')]
     public function index(): Response
     {
         return $this->render('front/index.html.twig', [

@@ -50,7 +50,7 @@ class TrajetType extends AbstractType
                 'scale' => 2,
             ])
             ->add('prix', NumberType::class, [
-                'label' => 'Price (€)',
+                'label' => 'Price (TND)',
                 'required' => true,
                 'scale' => 2,
             ]);
