@@ -52,6 +52,10 @@ class Vehicule
     #[ORM\OneToMany(mappedBy: "vehicule", targetEntity: Trajet::class)]
     private Collection $trajets;
 
+    #[ORM\ManyToOne(targetEntity: Conducteur::class)]
+    #[ORM\JoinColumn(name: "conducteur_id", referencedColumnName: "id", nullable: true)]
+    private ?Conducteur $conducteur = null;
+
     public function __construct()
     {
         $this->trajets = new ArrayCollection();
@@ -131,6 +135,17 @@ class Vehicule
                 $trajet->setVehicule(null);
             }
         }
+        return $this;
+    }
+
+    public function getConducteur(): ?Conducteur
+    {
+        return $this->conducteur;
+    }
+
+    public function setConducteur(?Conducteur $conducteur): self
+    {
+        $this->conducteur = $conducteur;
         return $this;
     }
 }

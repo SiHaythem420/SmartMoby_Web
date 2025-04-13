@@ -2,7 +2,7 @@
 
 <div class="container-fluid">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-10">
             <div class="card shadow-lg">
                 <div class="card-header bg-gradient-primary text-white">
                     <h3 class="card-title mb-0">
@@ -19,7 +19,7 @@
                                     'class': 'form-control form-control-lg',
                                     'placeholder': 'Enter vehicle type'
                                 },
-                                'label': 'Vehicle Type',
+                                'label': 'Type',
                                 'label_attr': {'class': 'form-label fw-bold text-primary'}
                             }) }}
                         </div>
@@ -28,7 +28,8 @@
                                 'attr': {
                                     'class': 'form-control form-control-lg',
                                     'placeholder': 'Enter capacity',
-                                    'min': '1'
+                                    'min': '1',
+                                    'max': '500'
                                 },
                                 'label': 'Capacity',
                                 'label_attr': {'class': 'form-label fw-bold text-primary'}
@@ -47,16 +48,25 @@
                             }) }}
                         </div>
                         <div class="col-md-6">
-                            <div class="form-check form-switch mt-4">
-                                {{ form_row(form.dispo, {
-                                    'attr': {
-                                        'class': 'form-check-input',
-                                        'role': 'switch'
-                                    },
-                                    'label': 'Available',
-                                    'label_attr': {'class': 'form-check-label fw-bold text-primary'}
-                                }) }}
-                            </div>
+                            {{ form_row(form.dispo, {
+                                'attr': {
+                                    'class': 'form-select form-select-lg'
+                                },
+                                'label': 'Availability',
+                                'label_attr': {'class': 'form-label fw-bold text-primary'}
+                            }) }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            {{ form_row(form.conducteur, {
+                                'attr': {
+                                    'class': 'form-select form-select-lg'
+                                },
+                                'label': 'Driver',
+                                'label_attr': {'class': 'form-label fw-bold text-primary'}
+                            }) }}
                         </div>
                     </div>
 
