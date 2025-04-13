@@ -188,7 +188,6 @@ class Utilisateur implements PasswordAuthenticatedUserInterface
         public function removeAdmin(Admin $admin): self
         {
             if ($this->admins->removeElement($admin)) {
-                // set the owning side to null (unless already changed)
                 
             }
     

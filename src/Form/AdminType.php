@@ -22,6 +22,7 @@ class AdminType extends AbstractType
                 'constraints' => [
                     new NotBlank(['message' => 'Le département est obligatoire pour un admin.']),
                 ],
+                'empty_data' => '',
             ]);
     }
     public function configureOptions(OptionsResolver $resolver): void
