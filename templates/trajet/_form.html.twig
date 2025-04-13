@@ -1,0 +1,177 @@
+{% form_theme form 'bootstrap_5_layout.html.twig' %}
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-lg">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-route me-2"></i> {{ form_title|default('Trip Information') }}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            {{ form_row(form.vehicule, {
+                                'attr': {
+                                    'class': 'form-select form-select-lg'
+                                },
+                                'label': 'Vehicle',
+                                'label_attr': {'class': 'form-label fw-bold text-primary'}
+                            }) }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            {{ form_row(form.pointDepart, {
+                                'attr': {
+                                    'class': 'form-control form-control-lg',
+                                    'placeholder': 'Enter departure point'
+                                },
+                                'label': 'Departure Point',
+                                'label_attr': {'class': 'form-label fw-bold text-primary'}
+                            }) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form_row(form.pointArrivee, {
+                                'attr': {
+                                    'class': 'form-control form-control-lg',
+                                    'placeholder': 'Enter arrival point'
+                                },
+                                'label': 'Arrival Point',
+                                'label_attr': {'class': 'form-label fw-bold text-primary'}
+                            }) }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            {{ form_row(form.dateDepart, {
+                                'attr': {
+                                    'class': 'form-control form-control-lg datetimepicker',
+                                    'placeholder': 'Select departure date and time'
+                                },
+                                'label': 'Departure Date & Time',
+                                'label_attr': {'class': 'form-label fw-bold text-primary'}
+                            }) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form_row(form.dateArrivee, {
+                                'attr': {
+                                    'class': 'form-control form-control-lg datetimepicker',
+                                    'placeholder': 'Select arrival date and time'
+                                },
+                                'label': 'Arrival Date & Time',
+                                'label_attr': {'class': 'form-label fw-bold text-primary'}
+                            }) }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            {{ form_row(form.distance, {
+                                'attr': {
+                                    'class': 'form-control form-control-lg',
+                                    'placeholder': 'Enter distance in km',
+                                    'min': '0.1',
+                                    'step': '0.1'
+                                },
+                                'label': 'Distance (km)',
+                                'label_attr': {'class': 'form-label fw-bold text-primary'}
+                            }) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form_row(form.prix, {
+                                'attr': {
+                                    'class': 'form-control form-control-lg',
+                                    'placeholder': 'Enter price in TND',
+                                    'min': '0',
+                                    'step': '0.01'
+                                },
+                                'label': 'Price (TND)',
+                                'label_attr': {'class': 'form-label fw-bold text-primary'}
+                            }) }}
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a href="{{ path('trajet_index') }}" class="btn btn-outline-secondary btn-lg me-md-2">
+                            <i class="fas fa-arrow-left me-2"></i> Back to List
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save me-2"></i> {{ button_label|default('Save') }}
+                        </button>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    .card-header {
+        border-radius: 20px 20px 0 0 !important;
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+    }
+    .form-control, .form-select {
+        border-radius: 12px;
+        padding: 12px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #2196F3;
+        box-shadow: 0 0 0 0.25rem rgba(33, 150, 243, 0.25);
+    }
+    .btn {
+        border-radius: 12px;
+        padding: 12px 24px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .btn-primary {
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+        border: none;
+    }
+    .btn-primary:hover {
+        background: linear-gradient(45deg, #1976D2, #1565C0);
+        transform: translateY(-2px);
+    }
+    .form-label {
+        color: #2196F3;
+        font-size: 1.1rem;
+    }
+    .datetimepicker {
+        background-color: white;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize datetime picker with enhanced options
+        flatpickr(".datetimepicker", {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            time_24hr: true,
+            minDate: "today",
+            altInput: true,
+            altFormat: "F j, Y H:i",
+            locale: "en",
+            theme: "light",
+            allowInput: true,
+            clickOpens: true,
+            time_24hr: true,
+            minuteIncrement: 15
+        });
+    });
+</script> 
