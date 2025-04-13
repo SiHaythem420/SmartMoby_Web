@@ -11,8 +11,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Form\AdminType;
 use App\Entity\Admin;
+use App\Form\UpdateMdpUtilisateurType;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use App\Form\UpdateUtilisateurType;
 final class FrontController extends AbstractController
 {
     #[Route('/front', name: 'app_controller')]
@@ -115,45 +117,94 @@ final class FrontController extends AbstractController
     }
 
     #[Route('front/account_settings', name: 'app_account_settings')]
-public function parametres(Request $request, SessionInterface $session, EntityManagerInterface $entityManager): Response
-{
-    $userId = $session->get('user_id');
-    dump($userId);
+    public function parametres(Request $request, SessionInterface $session, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
+    {
+        $userId = $session->get('user_id');
+        dump($userId);
 
-    if (!$userId) {
+
+        if (!$userId) {
         return $this->redirectToRoute('app_inscription');
-    }
-
-    $user = $entityManager->getRepository(Utilisateur::class)->find($userId);
-    dump($user);
-
-    if (!$user) {
-        return $this->redirectToRoute('app_inscription');
-    }
-
-    $admin = $entityManager->getRepository(Admin::class)->find($userId);
-    if ($admin) {
-        dump($admin);
-    } else {
-        dump('Aucun admin trouvé avec cet ID.');
-    }
-
-    if ($request->isMethod('POST')) {
-        if ($admin) {
-            $user->removeAdmin($admin);
-            $entityManager->remove($admin);
         }
 
-        $entityManager->remove($user);
-        $entityManager->flush();
+        $user = $entityManager->getRepository(Utilisateur::class)->find($userId);
+        dump($user);
+        $user_password = $user->getMotDePasse();
+        
+        $form = $this->createForm(UpdateUtilisateurType::class, $user);
+        $form->handleRequest($request);
 
-        return $this->redirectToRoute('app_inscription');
+        $currentPassword = $request->request->get('inputPasswordCurrent');
+        dump($currentPassword);
+
+        if (!$user) {
+            return $this->redirectToRoute('app_inscription');
+        }
+
+        $form2 = null;
+        $admin = $entityManager->getRepository(Admin::class)->find($userId);
+        if ($admin) {
+            dump($admin);
+            $form2 = $this->createForm(AdminType::class, $admin);
+            $form2->handleRequest($request);
+        } else {
+            dump('Aucun admin trouvé avec cet ID.');
+        }
+
+        
+        dump($user->getRole());
+        
+
+        dump($user);
+
+        if ($request->isMethod('POST')) {
+            if ($request->request->has('delete')) {
+                if ($admin) {
+                    $user->removeAdmin($admin);
+                    $entityManager->remove($admin);
+                }
+
+                $entityManager->remove($user);
+                $entityManager->flush();
+
+                return $this->redirectToRoute('app_inscription');
+
+            } if ($request->request->has('update')) {
+                
+                if($form->isSubmitted() && $form->isValid()) {
+                    $newPassword = $form->get('mot_de_passe')->getData();
+                    dump($newPassword);
+
+                    if ($newPassword) {
+                        $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
+                        $user->setMotDePasse($hashedPassword);
+                    }
+                    $entityManager->persist($user);
+                    $entityManager->flush();
+
+                    return $this->redirectToRoute('app_controller');
+                } else {
+                    dump('Aucun formulaire trouvé.');
+                    dump($form->getErrors(true, false));
+                }
+            } if ($request->request->has('update_admin')){
+                if ($form2->isSubmitted() && $form2->isValid()) {
+                    $entityManager->persist($admin);
+                    $entityManager->flush();
+
+                    return $this->redirectToRoute('app_controller');
+                } else {
+                    dump('Aucun formulaire trouvé.');
+                    dump($form2->getErrors(true, false));
+                }
+            }
+        }
+
+        return $this->render('front/account_settings.html.twig', [
+            'form' => $form->createView(),
+            'form2' => $form2 ? $form2->createView() : null,
+        ]);
     }
-
-    return $this->render('front/account_settings.html.twig', [
-        'user' => $user,
-    ]);
-}
 
 
 

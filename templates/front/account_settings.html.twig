@@ -24,9 +24,7 @@
                     <a class="list-group-item list-group-item-action active" data-toggle="list" href="#account" role="tab">
                       Compte
                     </a>
-                    <a class="list-group-item list-group-item-action" data-toggle="list" href="#password" role="tab">
-                      Mot De Passe
-                    </a>
+                    
                     <a class="list-group-item list-group-item-action" data-toggle="list" href="#supprimer" role="tab">
                       Supprimer le Compte
                     </a>
@@ -52,95 +50,89 @@
                                         </svg>
                                     </a>
 
-                                    <div class="dropdown-menu dropdown-menu-right">
-                                        <a class="dropdown-item" href="#">Action</a>
-                                        <a class="dropdown-item" href="#">Another action</a>
-                                        <a class="dropdown-item" href="#">Something else here</a>
-                                    </div>
+                                    
                                 </div>
                             </div>
-                            <h5 class="card-title mb-0">Private info</h5>
+                            <h5 class="card-title mb-0">Informations Personnelles</h5>
                         </div>
                         <div class="card-body">
-                            <form>
+                            <form action="{{ path('app_account_settings') }}" method="post">
+                                {{form_start(form)}}
                                 <div class="form-row">
                                     <div class="form-group col-md-6">
-                                        <label for="inputFirstName">First name</label>
-                                        <input type="text" class="form-control" id="inputFirstName" placeholder="First name">
+                                        <label for="inputFirstName">Nom</label>
+                                        {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'id': 'inputFirstName', 'placeholder': 'Nom'}}) }}
+                                        <div class="form-error">
+                                            {{ form_errors(form.nom) }}
+                                        </div>
                                     </div>
                                     <div class="form-group col-md-6">
-                                        <label for="inputLastName">Last name</label>
-                                        <input type="text" class="form-control" id="inputLastName" placeholder="Last name">
+                                        <label for="inputLastName">Prénom</label>
+                                        {{ form_widget(form.prenom, {'attr': {'class': 'form-control', 'id': 'inputLastName', 'placeholder': 'Prénom'}}) }}
+                                        <div class="form-error">
+                                            {{ form_errors(form.prenom) }}
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="inputEmail4">Email</label>
-                                    <input type="email" class="form-control" id="inputEmail4" placeholder="Email">
+                                    {{ form_widget(form.email, {'attr': {'class': 'form-control', 'id': 'inputEmail4', 'placeholder': 'Email'}}) }}
+                                    <div class="form-error">
+                                        {{ form_errors(form.email) }}
+                                    </div>
                                 </div>
                                 <div class="form-group">
-                                    <label for="inputAddress">Address</label>
-                                    <input type="text" class="form-control" id="inputAddress" placeholder="1234 Main St">
-                                </div>
-                                <div class="form-group">
-                                    <label for="inputAddress2">Address 2</label>
-                                    <input type="text" class="form-control" id="inputAddress2" placeholder="Apartment, studio, or floor">
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group col-md-6">
-                                        <label for="inputCity">City</label>
-                                        <input type="text" class="form-control" id="inputCity">
-                                    </div>
-                                    <div class="form-group col-md-4">
-                                        <label for="inputState">State</label>
-                                        <select id="inputState" class="form-control">
-                                            <option selected="">Choose...</option>
-                                            <option>...</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group col-md-2">
-                                        <label for="inputZip">Zip</label>
-                                        <input type="text" class="form-control" id="inputZip">
+                                    <label for="inputAddress">Nom D'utilisateur</label>
+                                    {{ form_widget(form.nom_utilisateur, {'attr': {'class': 'form-control', 'id': 'inputAddress', 'placeholder': "Nom D'utilisateur"}}) }}
+                                    <div class="form-error">
+                                        {{ form_errors(form.nom_utilisateur) }}
                                     </div>
                                 </div>
-                                <button type="submit" class="btn btn-primary">Save changes</button>
+                                <div class="form-group" >
+                                    <label for="inputPasswordCurrent">Mot De Passe</label>
+                                    {{ form_widget(form.mot_de_passe, {'attr': {'class': 'form-control', 'id': 'inputAddress', 'placeholder': "Mot De Passe"}}) }}
+                                    <div class="form-error">
+                                        {{ form_errors(form.mot_de_passe) }}
+                                    </div>
+                                </div>
+                                <div class="form-group" style="display: none;">
+                                    <label for="inputAddress">Nom D'utilisateur</label>
+                                    {{ form_widget(form.role, {'attr': {'class': 'form-control', 'id': 'inputAddress', 'placeholder': "Nom D'utilisateur"}}) }}
+                                    <div class="form-error">
+                                        {{ form_errors(form.nom_utilisateur) }}
+                                    </div>
+                                </div>
+                                <button type="submit" name="update" class="btn btn-primary">Sauvegarder</button>
+                                {{form_end(form)}}
                             </form>
+                            {% if form2 is not null %}
+                            <h5 class="card-title mb-0">Informations De L'admin</h5>
+                                <form action="{{ path('app_account_settings') }}" method="post">
+                                    {{ form_start(form2) }}
+                                    <div class="form-group">
+                                        <label for="departement">Département</label>
+                                        {{ form_widget(form2.departement, {'attr': {'class': 'form-control', 'id': 'departement', 'placeholder': 'Département'}}) }}
+                                        <div class="form-error">
+                                            {{ form_errors(form2.departement) }}
+                                        </div>
+                                    </div>
+                                    <button type="submit" name="update_admin" class="btn btn-secondary">Sauvegarder Admin</button>
+                                    {{ form_end(form2) }}
+                                </form>
+                            {% endif %}
 
                         </div>
                     </div>
 
                 </div>
-                <div class="tab-pane fade" id="password" role="tabpanel">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Password</h5>
-
-                            <form>
-                                <div class="form-group">
-                                    <label for="inputPasswordCurrent">Current password</label>
-                                    <input type="password" class="form-control" id="inputPasswordCurrent">
-                                    <small><a href="#">Forgot your password?</a></small>
-                                </div>
-                                <div class="form-group">
-                                    <label for="inputPasswordNew">New password</label>
-                                    <input type="password" class="form-control" id="inputPasswordNew">
-                                </div>
-                                <div class="form-group">
-                                    <label for="inputPasswordNew2">Verify password</label>
-                                    <input type="password" class="form-control" id="inputPasswordNew2">
-                                </div>
-                                <button type="submit" class="btn btn-primary">Save changes</button>
-                            </form>
-
-                        </div>
-                    </div>
-                </div>
+                
                 <div class="tab-pane fade" id="supprimer" role="tabpanel">
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title">Supprimer Le Compte</h5>
                             <p class="card-text">Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.</p>
                             <form method="post" action="{{path('app_account_settings')}}">
-                                <button type="submit" class="btn btn-danger">Supprimer</button>
+                                <button type="submit" name="delete" class="btn btn-danger">Supprimer</button>
                             </form>
                             
                         </div>
