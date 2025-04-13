@@ -56,7 +56,7 @@
                             <h5 class="card-title mb-0">Informations Personnelles</h5>
                         </div>
                         <div class="card-body">
-                            <form action="{{ path('app_account_settings') }}" method="post">
+                            <form action="{{ path('app_back_account_settings') }}" method="post">
                                 {{form_start(form)}}
                                 <div class="form-row">
                                     <div class="form-group col-md-6">
@@ -107,7 +107,7 @@
                             </form>
                             {% if form2 is not null %}
                             <h5 class="card-title mb-0">Informations De L'admin</h5>
-                                <form action="{{ path('app_account_settings') }}" method="post">
+                                <form action="{{ path('app_back_account_settings') }}" method="post">
                                     {{ form_start(form2) }}
                                     <div class="form-group">
                                         <label for="departement">Département</label>
@@ -120,36 +120,7 @@
                                     {{ form_end(form2) }}
                                 </form>
                             {% endif %}
-                            {% if form3 is not null %}
-                            <h5 class="card-title mb-0">Informations De L'organisateur</h5>
-                                <form action="{{ path('app_account_settings') }}" method="post">
-                                    {{ form_start(form3) }}
-                                    <div class="form-group">
-                                        <label for="departement">Numéro De Badge</label>
-                                        {{ form_widget(form3.num_badge, {'attr': {'class': 'form-control', 'id': 'departement', 'placeholder': 'Numero De Badge'}}) }}
-                                        <div class="form-error">
-                                            {{ form_errors(form3.num_badge) }}
-                                        </div>
-                                    </div>
-                                    <button type="submit" name="update_organisateur" class="btn btn-secondary">Sauvegarder Organisateur</button>
-                                    {{ form_end(form3) }}
-                                </form>
-                            {% endif %}
-                            {% if form4 is not null %}
-                            <h5 class="card-title mb-0">Informations De Conducteur</h5>
-                                <form action="{{ path('app_account_settings') }}" method="post">
-                                    {{ form_start(form4) }}
-                                    <div class="form-group">
-                                        <label for="departement">Numéro De Permis</label>
-                                        {{ form_widget(form4.numero_permis, {'attr': {'class': 'form-control', 'id': 'departement', 'placeholder': 'Numéro De Permis'}}) }}
-                                        <div class="form-error">
-                                            {{ form_errors(form4.numero_permis) }}
-                                        </div>
-                                    </div>
-                                    <button type="submit" name="update_conducteur" class="btn btn-secondary">Sauvegarder Conducteur</button>
-                                    {{ form_end(form4) }}
-                                </form>
-                            {% endif %}
+                            
 
 
                         </div>
@@ -162,7 +133,7 @@
                         <div class="card-body">
                             <h5 class="card-title">Supprimer Le Compte</h5>
                             <p class="card-text">Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.</p>
-                            <form method="post" action="{{path('app_account_settings')}}">
+                            <form method="post" action="{{path('app_back_account_settings')}}">
                                 <button type="submit" name="delete" class="btn btn-danger">Supprimer</button>
                             </form>
                             

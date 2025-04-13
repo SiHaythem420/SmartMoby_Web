@@ -11,6 +11,8 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 #[ORM\Entity]
+#[UniqueEntity(fields: ['email'], message: 'Cet email est déjà utilisé.')]
+#[UniqueEntity(fields: ['nom_utilisateur'], message: 'Ce nom d\'utilisateur est déjà pris.')]
 class Utilisateur implements PasswordAuthenticatedUserInterface
 {
 
@@ -43,12 +45,12 @@ class Utilisateur implements PasswordAuthenticatedUserInterface
     )]
     private string $nom_utilisateur;
 
-    #[ORM\Column(type: "string", length: 200)]
+    #[ORM\Column(type: "string", length: 200, unique: true)]
     #[Assert\NotBlank(message:"Email requis !")]
     #[Assert\Email(message:'Email non valide !')]
     private string $email;
 
-    #[ORM\Column(type: "string", length: 200)]
+    #[ORM\Column(type: "string", length: 200 , unique : true)]
     #[Assert\NotBlank(message:"Mot De Passe requis !")]
     #[Assert\Length(
         min: 8,
@@ -168,6 +170,9 @@ class Utilisateur implements PasswordAuthenticatedUserInterface
     public function __construct()
     {
         $this->admins = new ArrayCollection();
+        $this->clients = new ArrayCollection();
+        $this->conducteurs = new ArrayCollection();
+        $this->organisateurs = new ArrayCollection();
     }
 
         public function getAdmins(): Collection
@@ -196,10 +201,79 @@ class Utilisateur implements PasswordAuthenticatedUserInterface
 
     #[ORM\OneToMany(mappedBy: "id", targetEntity: Client::class)]
     private Collection $clients;
+    public function getClients(): Collection
+    {
+        return $this->clients;
+    }
+
+    public function addClient(Client $client): self
+    {
+        if (!$this->clients->contains($client)) {
+            $this->clients[] = $client;
+            $client->setId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeClient(Client $client): self
+    {
+        if ($this->clients->removeElement($client)) {
+            
+        }
+
+        return $this;
+    }
 
     #[ORM\OneToMany(mappedBy: "id", targetEntity: Conducteur::class)]
     private Collection $conducteurs;
+    public function getConducteurs(): Collection
+    {
+        return $this->conducteurs;
+    }
+
+    public function addConducteur(Conducteur $conducteur): self
+    {
+        if (!$this->conducteurs->contains($conducteur)) {
+            $this->conducteurs[] = $conducteur;
+            $conducteur->setId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConducteur(Conducteur $conducteur): self
+    {
+        if ($this->conducteurs->removeElement($conducteur)) {
+            
+        }
+
+        return $this;
+    }
 
     #[ORM\OneToMany(mappedBy: "id", targetEntity: Organisateur::class)]
     private Collection $organisateurs;
+    public function getOrganisateurs(): Collection
+    {
+        return $this->organisateurs;
+    }
+    public function addOrganisateur(Organisateur $organisateur): self
+    {
+        if (!$this->organisateurs->contains($organisateur)) {
+            $this->organisateurs[] = $organisateur;
+            $organisateur->setId($this);
+        }
+
+        return $this;
+    }
+    public function removeOrganisateur(Organisateur $organisateur): self
+    {
+        if ($this->organisateurs->removeElement($organisateur)) {
+            
+        }
+
+        return $this;
+
+    
+    }
 }
