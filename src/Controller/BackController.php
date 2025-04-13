@@ -29,8 +29,16 @@ final class BackController extends AbstractController{
     #[Route('/back', name: 'app_back')]
     public function index(EntityManagerInterface $entityManager , SessionInterface $session): Response
     {
-        if (!$session->get('user_id')) {
-            // Redirige vers la page de connexion si l'utilisateur n'est pas connecté
+        $adminId = $session->get('admin_id');
+
+        if (!$adminId) {
+            return $this->redirectToRoute('app_back_login');
+        }
+
+        $utilisateur = $entityManager->getRepository(Utilisateur::class)->find($adminId);
+
+        if ($utilisateur && $utilisateur->getBan()) {
+            $session->remove('admin_id'); // Supprime la session pour éviter un accès non autorisé
             return $this->redirectToRoute('app_back_login');
         }
 
@@ -60,11 +68,15 @@ final class BackController extends AbstractController{
     
             $utilisateur = $entityManager->getRepository(Utilisateur::class)->findOneBy(['email' => $email]);
     
-            if ($utilisateur &&  $utilisateur->getRole() === 'admin' && password_verify($motDePasse, $utilisateur->getMotDePasse())) {
-                $session->set('user_id', $utilisateur->getId());
-                return $this->redirectToRoute('app_back');
-            } else {
-                $error = 'Email ou mot de passe invalide, ou vous n\'êtes pas un administrateur.';
+            if ($utilisateur) {
+                if ($utilisateur->getBan()) {
+                    $error = 'Votre compte est banni. Veuillez contacter l\'administrateur.';
+                } elseif ($utilisateur->getRole() === 'ADMIN' && password_verify($motDePasse, $utilisateur->getMotDePasse())) {
+                    $session->set('admin_id', $utilisateur->getId());
+                    return $this->redirectToRoute('app_back');
+                } else {
+                    $error = 'Email ou mot de passe invalide, ou vous n\'êtes pas un administrateur.';
+                }
             }
         }
         return $this->render('back/login.html.twig' , [
@@ -125,7 +137,7 @@ final class BackController extends AbstractController{
             $entityManager->flush();
 
             $session->remove('utilisateur_data');
-            $session->set('user_id', $utilisateur->getId());
+            $session->set('admin_id', $utilisateur->getId());
 
             return $this->redirectToRoute('app_back');
         }
@@ -138,14 +150,14 @@ final class BackController extends AbstractController{
     #[Route('/back/logout', name: 'back_logout')]
     public function logout(SessionInterface $session)
     {
-        $session->clear();
+        $session->remove('admin_id');
         return $this->redirectToRoute('app_back_login');
     }
 
     #[Route('/back/account_settings', name: 'app_back_account_settings')] // Correction du slash manquant
     public function parametres_back(Request $request, SessionInterface $session, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
     {
-        $userId = $session->get('user_id');
+        $userId = $session->get('admin_id');
 
         if (!$userId) {
             return $this->redirectToRoute('app_back_login');
@@ -207,6 +219,36 @@ final class BackController extends AbstractController{
             'form' => $form->createView(),
             'form2' => $form2 ? $form2->createView() : null,
         ]);
+    }
+
+    #[Route('/back/user/ban/{id}', name: 'user_ban')]
+    public function banUser(int $id, EntityManagerInterface $entityManager): Response
+    {   
+        $user = $entityManager->getRepository(Utilisateur::class)->find($id);
+
+        if (!$user) {
+            throw $this->createNotFoundException('Utilisateur non trouvé.');
+        }
+
+        $user->setBan(true); // Met la variable "ban" à 1
+        $entityManager->flush();
+
+        return $this->redirectToRoute('app_back'); // Redirige vers la page principale
+    }
+    
+    #[Route('/back/user/unban/{id}', name: 'user_unban')]
+    public function unbanUser(int $id, EntityManagerInterface $entityManager): Response
+    {
+        $user = $entityManager->getRepository(Utilisateur::class)->find($id);
+
+        if (!$user) {
+            throw $this->createNotFoundException('Utilisateur non trouvé.');
+        }
+
+        $user->setBan(false); // Met la variable "ban" à 0
+        $entityManager->flush();
+
+        return $this->redirectToRoute('app_back');
     }
 
     }
