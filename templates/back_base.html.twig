@@ -58,7 +58,7 @@
             <!--Logo-->
             <div class="col-sm-3 pl-0 text-center header-logo">
                <div class="bg-theme mr-3 pt-3 pb-2 mb-0">
-                    <h3 class="logo"><a href="#" class="text-secondary logo"><i class="fa fa-rocket"></i> Sleek<span class="small">admin</span></a></h3>
+                    <h3 class="logo"><a href="#" class="text-secondary logo"><i class="fa fa-rocket"></i> SmartMoby<span class="small">admin</span></a></h3>
                </div>
             </div>
             <!--Logo-->
@@ -116,20 +116,22 @@
                     
 
                     <!--Sidebar Navigation Menu-->
-                    <div class="sidebar-menu-container">
-                        <ul class="sidebar-menu mt-4 mb-4">
-                            <li class="parent">
-                                <a href="#" onclick="toggle_menu('dashboard'); return false" class=""><i class="fa fa-dashboard mr-3"> </i>
-                                    <span class="none">Dashboard <i class="fa fa-angle-down pull-right align-bottom"></i></span>
-                                </a>
-                                <ul class="children" id="dashboard">
-                                    <li class="child"><a href="index.html" class="ml-4"><i class="fa fa-angle-right mr-2"></i> Default</a></li>
-                                </ul>
-                            </li>
-                            </li>
-                            
-                        </ul>
-                    </div>
+<div class="sidebar-menu-container">
+    <ul class="sidebar-menu mt-4 mb-4">
+        <li class="parent">
+            <a href="#" onclick="toggle_menu('dashboard'); return false" class=""><i class="fa fa-dashboard mr-3"> </i>
+                <span class="none">Dashboard <i class="fa fa-angle-down pull-right align-bottom"></i></span>
+            </a>
+            <ul class="children" id="dashboard">
+                <li class="child"><a href="index.html" class="ml-4"><i class="fa fa-angle-right mr-2"></i> Utilisateurs </a></li>
+                <!-- Nouveau champ pour "Produits" -->
+                <li class="child"><a href="{{path('app_back_add_event')}}" class="ml-4"><i class="fa fa-angle-right mr-2"></i> evenment </a></li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+                    
                     <!--Sidebar Naigation Menu-->
                 </div>
             </div>
@@ -147,7 +149,7 @@
                     <div class="product-list">
                         
                         <div class="row border-bottom mb-4">
-                            <div class="col-sm-8 pt-2"><h6 class="mb-4 bc-header">Order listing</h6></div>
+                            <div class="col-sm-8 pt-2"><h6 class="mb-4 bc-header">Liste Des Utilisateurs</h6></div>
                             <div class="col-sm-4 text-right pb-3">
                                 <button type="button" class="btn btn-danger icon-round shadow pull-right">
                                     <i class="fas fa-trash"></i>
@@ -250,13 +252,21 @@
                     {% endif %}
                 </td>
 
+                <td class="align-middle">
+                    {% if user.getBan() == true %}
+                        Banni
+                    {% else %}
+                        Non banni
+                    {% endif %}
+                </td>
+
                 <td class="align-middle text-center">
-                    <button class="btn btn-danger">
+                    <a href="{{ path('user_ban', { id: user.id }) }}" class="btn btn-danger">
                         <i class="fas fa-ban"></i> Bannir
-                    </button>
-                    <button class="btn btn-success">
+                    </a>
+                    <a href="{{ path('user_unban', { id: user.id }) }}" class="btn btn-success">
                         <i class="fas fa-check"></i> Débannir
-                    </button>
+                    </a>
                 </td>
             </tr>
         {% endfor %}
