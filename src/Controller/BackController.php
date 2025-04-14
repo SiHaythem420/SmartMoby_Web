@@ -12,6 +12,7 @@ use App\Entity\Utilisateur;
 use App\Entity\Client;
 use App\Entity\Conducteur;
 use App\Entity\Organisateur;
+use App\Entity\Evenment; // Assurez-vous que le nom de la classe est correct
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -23,14 +24,23 @@ use App\Form\UtilisateurType;
 use App\Form\AdminType;
 use App\Form\UtilisateurBackType;
 use App\Form\UpdateUtilisateurType;
+use App\Form\EvenmentType; 
 
 
 final class BackController extends AbstractController{
     #[Route('/back', name: 'app_back')]
     public function index(EntityManagerInterface $entityManager , SessionInterface $session): Response
     {
-        if (!$session->get('user_id')) {
-            // Redirige vers la page de connexion si l'utilisateur n'est pas connecté
+        $adminId = $session->get('admin_id');
+
+        if (!$adminId) {
+            return $this->redirectToRoute('app_back_login');
+        }
+
+        $utilisateur = $entityManager->getRepository(Utilisateur::class)->find($adminId);
+
+        if ($utilisateur && $utilisateur->getBan()) {
+            $session->remove('admin_id'); // Supprime la session pour éviter un accès non autorisé
             return $this->redirectToRoute('app_back_login');
         }
 
@@ -60,11 +70,15 @@ final class BackController extends AbstractController{
     
             $utilisateur = $entityManager->getRepository(Utilisateur::class)->findOneBy(['email' => $email]);
     
-            if ($utilisateur &&  $utilisateur->getRole() === 'admin' && password_verify($motDePasse, $utilisateur->getMotDePasse())) {
-                $session->set('user_id', $utilisateur->getId());
-                return $this->redirectToRoute('app_back');
-            } else {
-                $error = 'Email ou mot de passe invalide, ou vous n\'êtes pas un administrateur.';
+            if ($utilisateur) {
+                if ($utilisateur->getBan()) {
+                    $error = 'Votre compte est banni. Veuillez contacter l\'administrateur.';
+                } elseif ($utilisateur->getRole() === 'ADMIN' && password_verify($motDePasse, $utilisateur->getMotDePasse())) {
+                    $session->set('admin_id', $utilisateur->getId());
+                    return $this->redirectToRoute('app_back');
+                } else {
+                    $error = 'Email ou mot de passe invalide, ou vous n\'êtes pas un administrateur.';
+                }
             }
         }
         return $this->render('back/login.html.twig' , [
@@ -125,7 +139,7 @@ final class BackController extends AbstractController{
             $entityManager->flush();
 
             $session->remove('utilisateur_data');
-            $session->set('user_id', $utilisateur->getId());
+            $session->set('admin_id', $utilisateur->getId());
 
             return $this->redirectToRoute('app_back');
         }
@@ -138,14 +152,14 @@ final class BackController extends AbstractController{
     #[Route('/back/logout', name: 'back_logout')]
     public function logout(SessionInterface $session)
     {
-        $session->clear();
+        $session->remove('admin_id');
         return $this->redirectToRoute('app_back_login');
     }
 
     #[Route('/back/account_settings', name: 'app_back_account_settings')] // Correction du slash manquant
     public function parametres_back(Request $request, SessionInterface $session, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
     {
-        $userId = $session->get('user_id');
+        $userId = $session->get('admin_id');
 
         if (!$userId) {
             return $this->redirectToRoute('app_back_login');
@@ -209,6 +223,112 @@ final class BackController extends AbstractController{
         ]);
     }
 
+    #[Route('/back/user/ban/{id}', name: 'user_ban')]
+    public function banUser(int $id, EntityManagerInterface $entityManager): Response
+    {   
+        $user = $entityManager->getRepository(Utilisateur::class)->find($id);
+
+        if (!$user) {
+            throw $this->createNotFoundException('Utilisateur non trouvé.');
+        }
+
+        $user->setBan(true); // Met la variable "ban" à 1
+        $entityManager->flush();
+
+        return $this->redirectToRoute('app_back'); // Redirige vers la page principale
     }
+    
+    #[Route('/back/user/unban/{id}', name: 'user_unban')]
+    public function unbanUser(int $id, EntityManagerInterface $entityManager): Response
+    {
+        $user = $entityManager->getRepository(Utilisateur::class)->find($id);
+
+        if (!$user) {
+            throw $this->createNotFoundException('Utilisateur non trouvé.');
+        }
+
+        $user->setBan(false); // Met la variable "ban" à 0
+        $entityManager->flush();
+
+        return $this->redirectToRoute('app_back');
+    }
+
+    //oussema
+    #[Route('/back/add_event', name: 'app_back_add_event')]
+    public function addEvent(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $event = new Evenment(); // Assure-toi que c’est bien ton entité
+        $form = $this->createForm(EvenmentType::class, $event);
+        $form->handleRequest($request);
+
+        // Vérifie si le formulaire est soumis
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->persist($event);
+            $entityManager->flush();
+
+        }
+
+    
+
+        return $this->render('back/add_event.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/back/afficher_event', name: 'app_back_afficher_event')]
+    public function afficherEvent(?int $id, EntityManagerInterface $entityManager, Request $request): Response
+    {
+        $events = $entityManager->getRepository(Evenment::class)->findAll();
+
+       
+
+        return $this->render('back/afficher_event.html.twig', [
+            'events' => $events,
+            
+        ]);
+    }
+
+    #[Route('/back/modifier_event/{id}', name: 'app_back_modifier_event')]
+    public function modifierEvent(int $id, Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $event = $entityManager->getRepository(Evenment::class)->find($id);
+
+        if (!$event) {
+            throw $this->createNotFoundException('Événement non trouvé.');
+        }
+
+        $form = $this->createForm(EvenmentType::class, $event);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+            return $this->redirectToRoute('app_back_afficher_event');
+        }
+
+        return $this->render('back/modifier_event.html.twig', [
+            'form' => $form->createView(),
+            'event' => $event,
+        ]);
+    }
+
+    #[Route('/back/supprimer_event/{id}', name: 'app_back_supprimer_event')]
+    public function supprimerEvent(int $id, EntityManagerInterface $entityManager): Response
+    {
+        $event = $entityManager->getRepository(Evenment::class)->find($id);
+
+        if (!$event) {
+            throw $this->createNotFoundException('Événement non trouvé.');
+        }
+
+        $entityManager->remove($event);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('app_back_afficher_event');
+    }
+
+    
+
+
+}
 
 

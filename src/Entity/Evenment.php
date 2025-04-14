@@ -6,6 +6,9 @@ use Doctrine\ORM\Mapping as ORM;
 
 use Doctrine\Common\Collections\Collection;
 use App\Entity\Fedback;
+use Symfony\Component\Validator\Constraints as Assert; 
+
+
 
 #[ORM\Entity]
 class Evenment
@@ -13,23 +16,27 @@ class Evenment
 
     #[ORM\Id]
     #[ORM\Column(type: "integer")]
+    #[ORM\GeneratedValue(strategy: "AUTO")]
     private int $id_event;
 
     #[ORM\Column(type: "string", length: 50)]
+    #[Assert\NotBlank(message: "Le nom de l'événement est obligatoire.")]
     private string $nom;
 
     #[ORM\Column(type: "date")]
+    
     private \DateTimeInterface $date;
 
     #[ORM\Column(type: "string", length: 50)]
+    #[Assert\NotBlank(message: "Le nom de l'événement est obligatoire.")]
     private string $lieu;
 
-    public function getId_event()
+    public function getIdEvent()
     {
         return $this->id_event;
     }
 
-    public function setId_event($value)
+    public function setIdEvent($value)
     {
         $this->id_event = $value;
     }
