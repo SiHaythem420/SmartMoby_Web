@@ -20,12 +20,16 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Form\UpdateUtilisateurType;
 use App\Entity\Client;
+use App\Entity\Evenment;
+use App\Form\FedbackType;
+use App\Entity\Fedback;
 final class FrontController extends AbstractController
 {
     #[Route('/front', name: 'app_controller')]
     public function index(SessionInterface $session , EntityManagerInterface $entityManager): Response
     {
         $userId = $session->get('user_id');
+        $events = $entityManager->getRepository(Evenment::class)->findAll();
         
         if (!$session->get('user_id')) {
             // Redirige vers la page de connexion si l'utilisateur n'est pas connecté
@@ -39,6 +43,7 @@ final class FrontController extends AbstractController
         }
         return $this->render('front/index.html.twig', [
             'controller_name' => 'FrontController',
+            'events' => $events,
         ]);
     }
 
@@ -415,9 +420,156 @@ final class FrontController extends AbstractController
         ]);
     }
 
+    //oussema
+    #[Route('/front/afficher_event', name: 'afficher_event')]
+    public function afficherEvent(EntityManagerInterface $entityManager): Response
+    {
+        $events = $entityManager->getRepository(Evenment::class)->findAll();
+        return $this->render('front/afficher_event.html.twig', [
+            'events' => $events,
+        ]);
 
+    }
 
+    
+#[Route('/front/ajouter_fedback/{id}', name: 'ajouter_fedback')]
+public function ajouterFedback(Request $request, EntityManagerInterface $entityManager, SessionInterface $session, ?int $id): Response
+{
+    // Vérifiez si l'utilisateur est connecté
+    $userId = $session->get('user_id');
+    if (!$userId) {
+        dump('Utilisateur non connecté, redirection vers la page d\'inscription.');
+        return $this->redirectToRoute('app_inscription');
+    }
 
+    // Récupérez l'événement
+    $event = $entityManager->getRepository(Evenment::class)->find($id);
+    if (!$event) {
+        dump('Événement non trouvé avec l\'ID : ' . $id);
+        throw $this->createNotFoundException('Événement non trouvé.');
+    }
+    dump('Événement trouvé : ', $event);
+
+    // Créez le formulaire
+    $form = $this->createForm(FedbackType::class);
+    $form->handleRequest($request);
+
+    // Vérifiez si le formulaire est soumis
+    if ($form->isSubmitted()) {
+        dump('Formulaire soumis.');
+
+        // Vérifiez si le formulaire est valide
+        if ($form->isValid()) {
+            dump('Formulaire valide.');
+
+            // Récupérez les données du formulaire
+            $fedback = $form->getData();
+            dump('Données du fedback : ', $fedback);
+
+            // Associez l'événement au fedback
+            $fedback->setIdEvent($event);
+            dump('Fedback associé à l\'événement.');
+
+            // Persistez et sauvegardez dans la base de données
+            $entityManager->persist($fedback);
+            $entityManager->flush();
+            dump('Fedback enregistré avec succès.');
+
+            // Redirection après succès
+            return $this->redirectToRoute('afficher_event');
+        } else {
+            dump('Formulaire invalide : ', $form->getErrors(true, false));
+        }
+    } else {
+        dump('Formulaire non soumis.');
+    }
+
+    // Rendu du formulaire
+    return $this->render('front/ajouter_fedback.html.twig', [
+        'controller_name' => 'FrontController',
+        'form' => $form->createView(),
+        'event' => $event,
+    ]);
+}
+#[Route('/front/afficher_fedback/{id}', name: 'afficher_fedback')]
+public function afficherFedback(EntityManagerInterface $entityManager, ?int $id): Response
+{
+    // Récupérez l'événement
+    $event = $entityManager->getRepository(Evenment::class)->find($id);
+    if (!$event) {
+        dump('Événement non trouvé avec l\'ID : ' . $id);
+        throw $this->createNotFoundException('Événement non trouvé.');
+    }
+    dump('Événement trouvé : ', $event);
+
+    // Récupérez les fedbacks associés à l'événement
+    $fedbacks = $entityManager->getRepository(Fedback::class)->findBy(['id_event' => $event]);
+    dump('Fedbacks trouvés : ', $fedbacks);
+
+    return $this->render('front/afficher_fedback.html.twig', [
+        'controller_name' => 'FrontController',
+        'fedbacks' => $fedbacks,
+        'event' => $event,
+    ]);
+}
+
+    #[Route('/front/modifier_fedback/{idFedback}', name: 'modifier_fedback')]
+    public function modifierFedback(Request $request, EntityManagerInterface $entityManager, ?int $idFedback): Response
+    {
+        // Récupérez le fedback à modifier
+        $fedback = $entityManager->getRepository(Fedback::class)->find($idFedback);
+        if (!$fedback) {
+            dump('Fedback non trouvé avec l\'ID : ' . $idFedback);
+            throw $this->createNotFoundException('Fedback non trouvé.');
+        }
+        dump('Fedback trouvé : ', $fedback);
+
+        // Créez le formulaire
+        $form = $this->createForm(FedbackType::class, $fedback);
+        $form->handleRequest($request);
+
+        // Vérifiez si le formulaire est soumis et valide
+        if ($form->isSubmitted() && $form->isValid()) {
+            dump('Formulaire soumis et valide.');
+
+            // Persistez et sauvegardez dans la base de données
+            $entityManager->persist($fedback);
+            $entityManager->flush();
+            dump('Fedback modifié avec succès.');
+
+            // Redirection après succès
+            return $this->redirectToRoute('afficher_fedback', ['id' => $fedback->getIdEvent()->getIdEvent()]);
+        } else {
+            dump('Formulaire invalide : ', $form->getErrors(true, false));
+        }
+
+        // Rendu du formulaire
+        return $this->render('front/modifier_fedback.html.twig', [
+            'controller_name' => 'FrontController',
+            'form' => $form->createView(),
+            'fedback' => $fedback,
+        ]);
+    }
+
+    #[Route('/front/supprimer_fedback/{idFedback}', name: 'supprimer_fedback')]
+    public function supprimerFedback(EntityManagerInterface $entityManager, ?int $idFedback): Response
+    {
+        // Récupérez le fedback à supprimer
+        $fedback = $entityManager->getRepository(Fedback::class)->find($idFedback);
+        if (!$fedback) {
+            dump('Fedback non trouvé avec l\'ID : ' . $idFedback);
+            throw $this->createNotFoundException('Fedback non trouvé.');
+        }
+        dump('Fedback trouvé : ', $fedback);
+
+        // Supprimez le fedback de la base de données
+        $entityManager->remove($fedback);
+        $entityManager->flush();
+        dump('Fedback supprimé avec succès.');
+
+        // Redirection après succès
+        return $this->redirectToRoute('afficher_fedback', ['id' => $fedback->getIdEvent()->getIdEvent()]);
+    }
 
     
     

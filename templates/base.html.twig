@@ -58,7 +58,7 @@ https://templatemo.com/tm-559-zay-shop
                             <a class="nav-link" href="shop.html">Trajet Du Trafic </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="contact.html">Evenements</a>
+                            <a class="nav-link" href="{{path ('afficher_event')}}">Evenements</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="contact.html">Blog</a>
@@ -153,26 +153,18 @@ https://templatemo.com/tm-559-zay-shop
             <div class="col-lg-6 m-auto">
                 <h1 class="h1">Evenements Du Mois</h1>
                 <p>
-                    Oussema houni shy7ot l events mte3 l shhar hedhik
+                    Oussema 
                 </p>
             </div>
         </div>
         <div class="row">
+            {% for event in events|slice(0, 3) %}
             <div class="col-12 col-md-4 p-5 mt-3">
-                <a href="#"><img src="{{asset('img/category_img_01.jpg')}}" class="rounded-circle img-fluid border"></a>
-                <h5 class="text-center mt-3 mb-3">Watches</h5>
+                <a href="#"><img src="{{ asset('img/category_img_01.jpg') }}" class="rounded-circle img-fluid border"></a>
+                <h5 class="text-center mt-3 mb-3">{{ event.getNom() }}</h5>
                 <p class="text-center"><a class="btn btn-success">Go Shop</a></p>
             </div>
-            <div class="col-12 col-md-4 p-5 mt-3">
-                <a href="#"><img src="{{asset('img/category_img_02.jpg')}}" class="rounded-circle img-fluid border"></a>
-                <h2 class="h5 text-center mt-3 mb-3">Shoes</h2>
-                <p class="text-center"><a class="btn btn-success">Go Shop</a></p>
-            </div>
-            <div class="col-12 col-md-4 p-5 mt-3">
-                <a href="#"><img src="{{asset('img/category_img_03.jpg')}}" class="rounded-circle img-fluid border"></a>
-                <h2 class="h5 text-center mt-3 mb-3">Accessories</h2>
-                <p class="text-center"><a class="btn btn-success">Go Shop</a></p>
-            </div>
+            {% endfor %}
         </div>
     </section>
     <!-- End Oussema -->
