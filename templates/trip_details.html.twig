@@ -1,0 +1,65 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Trip Details - Smart Moby{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Trip Details</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h5>From: {{ trip.pointDepart }}</h5>
+                            <p class="text-muted">Date: {{ trip.dateDepart|date('Y-m-d') }}</p>
+                            <p class="text-muted">Time: {{ trip.dateDepart|date('H:i') }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>To: {{ trip.pointArrivee }}</h5>
+                            <p class="text-muted">Distance: {{ trip.distance }} km</p>
+                            <p class="text-muted">Price: {{ trip.prix }} DT</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <h5>Vehicle Information</h5>
+                            <p class="text-muted">Type: {{ trip.vehicule.type }}</p>
+                            <p class="text-muted">
+                                Capacity: {{ trip.vehicule.capacite }} seats
+                                {% if trip.vehicule.capacite > 0 %}
+                                    <span class="badge bg-success rounded-circle">
+                                        <i class="fas fa-check"></i>
+                                    </span>
+                                    <span class="text-success">Available</span>
+                                {% else %}
+                                    <span class="badge bg-danger rounded-circle">
+                                        <i class="fas fa-times"></i>
+                                    </span>
+                                    <span class="text-danger">Not Available</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <a href="{{ path('app_shop') }}" class="btn btn-secondary me-2">Back to Trips</a>
+                        {% if trip.vehicule.capacite > 0 %}
+                            <a href="{{ path('app_book_trip', {'id': trip.id}) }}" class="btn btn-primary">
+                                <i class="fas fa-ticket-alt"></i> Book Now
+                            </a>
+                        {% else %}
+                            <button class="btn btn-primary" disabled>
+                                <i class="fas fa-ticket-alt"></i> Not Available
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
