@@ -13,13 +13,19 @@ use App\Form\AdminType;
 use App\Entity\Admin;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use App\Repository\TrajetRepository;
+use App\Entity\Trajet;
+
 final class FrontController extends AbstractController
 {
     #[Route('/front', name: 'app_front')]
-    public function index(): Response
+    public function index(EntityManagerInterface $entityManager): Response
     {
+
+        $trajets = $entityManager->getRepository(Trajet::class)->findAll();
         return $this->render('front/index.html.twig', [
             'controller_name' => 'app_controller',
+            'trajets' => $trajets,
         ]);
     }
 

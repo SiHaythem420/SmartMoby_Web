@@ -55,7 +55,7 @@ https://templatemo.com/tm-559-zay-shop
                             <a class="nav-link" href="about.html">Services </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="shop.html">Trajet Du Trafic </a>
+                            <a class="nav-link" href="/front/shop">Trajet Du Trafic </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="contact.html">Evenements</a>
@@ -267,95 +267,118 @@ https://templatemo.com/tm-559-zay-shop
     </section>
     <!-- End Fares -->
 
-    <!-- Start Hedi Feed -->
-    <section style="background-color: #f8f9fa;" data-aos="fade-left">
+    <!-- Start Featured Trips Section -->
+    <section id="trips" style="background-color: #f8f9fa;" data-aos="fade-left">
         <div class="container py-5">
             <div class="row text-center py-3">
                 <div class="col-lg-6 m-auto">
-                    <h1 class="h1">Trajets En Vedettte</h1>
+                    <h1 class="h1">Trips</h1>
                     <p>
-                        Hedi houni shy7ot shwaya trajeyet 
+                        Discover your routes and find your way with SmartMoby
                     </p>
                 </div>
             </div>
             <div class="row">
-                <div class="col-12 col-md-4 mb-4">
-                    <div class="card h-100">
-                        <a href="shop-single.html">
-                            <img src="{{asset('img/feature_prod_01.jpg')}}" class="card-img-top" alt="...">
-                        </a>
-                        <div class="card-body">
-                            <ul class="list-unstyled d-flex justify-content-between">
-                                <li>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-muted fa fa-star"></i>
-                                    <i class="text-muted fa fa-star"></i>
-                                </li>
-                                <li class="text-muted text-right">$240.00</li>
-                            </ul>
-                            <a href="shop-single.html" class="h2 text-decoration-none text-dark">Gym Weight</a>
-                            <p class="card-text">
-                                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sunt in culpa qui officia deserunt.
-                            </p>
-                            <p class="text-muted">Reviews (24)</p>
+                {% if trajets is defined and trajets|length > 0 %}
+                    {% set itemsPerPage = 3 %}
+                    {% set totalPages = (trajets|length / itemsPerPage)|round(0, 'ceil') %}
+                    {% set currentPage = app.request.query.getInt('page', 1) %}
+                    {% set start = (currentPage - 1) * itemsPerPage %}
+                    
+                    {% for trajet in trajets|slice(start, itemsPerPage) %}
+                    <div class="col-12 col-md-4 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">{{ trajet.pointDepart }} → {{ trajet.pointArrivee }}</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span class="badge bg-info">
+                                        <i class="fa fa-calendar"></i> {{ trajet.dateDepart|date('Y-m-d') }}
+                                    </span>
+                                    <span class="badge bg-success">
+                                        <i class="fa fa-clock"></i> {{ trajet.dateDepart|date('H:i') }}
+                                    </span>
+                                </div>
+                                <div class="mb-3">
+                                    <p class="mb-1"><i class="fa fa-car text-primary"></i> Vehicle: {{ trajet.vehicule.type }}</p>
+                                    <p class="mb-1"><i class="fa fa-road text-primary"></i> Distance: {{ trajet.distance }} km</p>
+                                    <p class="mb-1"><i class="fa fa-tag text-primary"></i> Price: {{ trajet.prix }} TND</p>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-sm btn-outline-primary">
+                                            <i class="fa fa-map-marker-alt"></i> View Route
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-success">
+                                            <i class="fa fa-ticket-alt"></i> Book Now
+                                        </button>
+                                    </div>
+                                    <small class="text-muted">
+                                        <i class="fa fa-users"></i> {{ random(5, 20) }} seats left
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-light">
+                                <div class="d-flex justify-content-between">
+                                    <span>
+                                        <i class="fa fa-star text-warning"></i>
+                                        <i class="fa fa-star text-warning"></i>
+                                        <i class="fa fa-star text-warning"></i>
+                                        <i class="fa fa-star text-warning"></i>
+                                        <i class="fa fa-star-half-alt text-warning"></i>
+                                    </span>
+                                    <span class="text-muted">({{ random(10, 50) }} reviews)</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-12 col-md-4 mb-4">
-                    <div class="card h-100">
-                        <a href="shop-single.html">
-                            <img src="{{asset('img/feature_prod_02.jpg')}}" class="card-img-top" alt="...">
-                        </a>
-                        <div class="card-body">
-                            <ul class="list-unstyled d-flex justify-content-between">
-                                <li>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-muted fa fa-star"></i>
-                                    <i class="text-muted fa fa-star"></i>
-                                </li>
-                                <li class="text-muted text-right">$480.00</li>
-                            </ul>
-                            <a href="shop-single.html" class="h2 text-decoration-none text-dark">Cloud Nike Shoes</a>
-                            <p class="card-text">
-                                Aenean gravida dignissim finibus. Nullam ipsum diam, posuere vitae pharetra sed, commodo ullamcorper.
-                            </p>
-                            <p class="text-muted">Reviews (48)</p>
-                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12 text-center">
+                        <p class="text-muted">No featured trips available at the moment.</p>
                     </div>
-                </div>
-                <div class="col-12 col-md-4 mb-4">
-                    <div class="card h-100">
-                        <a href="shop-single.html">
-                            <img src="{{asset('img/feature_prod_03.jpg')}}" class="card-img-top" alt="...">
-                        </a>
-                        <div class="card-body">
-                            <ul class="list-unstyled d-flex justify-content-between">
-                                <li>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-warning fa fa-star"></i>
-                                </li>
-                                <li class="text-muted text-right">$360.00</li>
-                            </ul>
-                            <a href="shop-single.html" class="h2 text-decoration-none text-dark">Summer Addides Shoes</a>
-                            <p class="card-text">
-                                Curabitur ac mi sit amet diam luctus porta. Phasellus pulvinar sagittis diam, et scelerisque ipsum lobortis nec.
-                            </p>
-                            <p class="text-muted">Reviews (74)</p>
-                        </div>
-                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- View All Trips Button -->
+            <div class="row mt-4">
+                <div class="col-12 text-center">
+                    <a href="/front/shop" class="btn btn-success btn-lg">
+                        <i class="fa fa-list"></i> View All Trips
+                    </a>
                 </div>
             </div>
+            
+            <!-- Pagination -->
+            {% if trajets is defined and trajets|length > 3 %}
+            <div class="row mt-4">
+                <div class="col-12">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item {% if currentPage == 1 %}disabled{% endif %}">
+                                <a class="page-link" href="{{ path('app_home', {'page': currentPage - 1}) }}#trips" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            {% for i in 1..totalPages %}
+                                <li class="page-item {% if currentPage == i %}active{% endif %}">
+                                    <a class="page-link" href="{{ path('app_home', {'page': i}) }}#trips">{{ i }}</a>
+                                </li>
+                            {% endfor %}
+                            <li class="page-item {% if currentPage == totalPages %}disabled{% endif %}">
+                                <a class="page-link" href="{{ path('app_home', {'page': currentPage + 1}) }}#trips" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </section>
-
-    <!-- End Hedi Feed -->
+    <!-- End Featured Trips Section -->
 
     <!-- Start Hazem -->
     <div id="template-mo-zay-hero-carousel" class="carousel slide" data-bs-ride="carousel" data-aos="fade-right">
