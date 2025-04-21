@@ -3,57 +3,150 @@
 {% block title %}Trip Details - Smart Moby{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container mt-5">
     <div class="row">
         <div class="col-md-8 mx-auto">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Trip Details</h4>
+            <div class="card shadow-lg">
+                <div class="card-header bg-gradient-primary text-white py-3">
+                    <h4 class="mb-0">
+                        <i class="fas fa-route me-2"></i>
+                        Trip Details
+                    </h4>
                 </div>
                 <div class="card-body">
-                    <div class="row mb-3">
+                    <!-- Trip Information -->
+                    <div class="row mb-4">
                         <div class="col-md-6">
-                            <h5>From: {{ trip.pointDepart }}</h5>
-                            <p class="text-muted">Date: {{ trip.dateDepart|date('Y-m-d') }}</p>
-                            <p class="text-muted">Time: {{ trip.dateDepart|date('H:i') }}</p>
+                            <div class="p-3 bg-light rounded">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-map-marker-alt me-2"></i>
+                                    Departure
+                                </h5>
+                                <p class="mb-2">
+                                    <strong>Location:</strong> {{ trip.pointDepart }}
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Date:</strong> {{ trip.dateDepart|date('Y-m-d') }}
+                                </p>
+                                <p class="mb-0">
+                                    <strong>Time:</strong> {{ trip.dateDepart|date('H:i') }}
+                                </p>
+                            </div>
                         </div>
                         <div class="col-md-6">
-                            <h5>To: {{ trip.pointArrivee }}</h5>
-                            <p class="text-muted">Distance: {{ trip.distance }} km</p>
-                            <p class="text-muted">Price: {{ trip.prix }} DT</p>
+                            <div class="p-3 bg-light rounded">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-map-marker-alt me-2"></i>
+                                    Arrival
+                                </h5>
+                                <p class="mb-2">
+                                    <strong>Location:</strong> {{ trip.pointArrivee }}
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Distance:</strong> {{ trip.distance }} km
+                                </p>
+                                <p class="mb-0">
+                                    <strong>Price:</strong> <span class="text-success">{{ trip.prix }} DT</span>
+                                </p>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="row mb-3">
+                    <!-- Vehicle Information -->
+                    <div class="row mb-4">
                         <div class="col-12">
-                            <h5>Vehicle Information</h5>
-                            <p class="text-muted">Type: {{ trip.vehicule.type }}</p>
-                            <p class="text-muted">
-                                Capacity: {{ trip.vehicule.capacite }} seats
-                                {% if trip.vehicule.capacite > 0 %}
-                                    <span class="badge bg-success rounded-circle">
-                                        <i class="fas fa-check"></i>
-                                    </span>
-                                    <span class="text-success">Available</span>
-                                {% else %}
-                                    <span class="badge bg-danger rounded-circle">
-                                        <i class="fas fa-times"></i>
-                                    </span>
-                                    <span class="text-danger">Not Available</span>
-                                {% endif %}
-                            </p>
+                            <div class="p-3 bg-light rounded">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-bus me-2"></i>
+                                    Vehicle Information
+                                </h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p class="mb-2">
+                                            <strong>Type:</strong> {{ trip.vehicule.type }}
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-2">
+                                            <strong>Capacity:</strong> 
+                                            {{ trip.vehicule.capacite }} seats
+                                            {% if trip.vehicule.capacite > 0 %}
+                                                <span class="badge bg-success rounded-pill ms-2">
+                                                    <i class="fas fa-check me-1"></i>Available
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-danger rounded-pill ms-2">
+                                                    <i class="fas fa-times me-1"></i>Not Available
+                                                </span>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
+                    <!-- Driver Information -->
+                    {% if trip.vehicule.conducteur is not null %}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="p-3 bg-light rounded">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-user-tie me-2"></i>
+                                    Driver Information
+                                </h5>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <p class="mb-2">
+                                            <i class="fas fa-user me-2 text-primary"></i>
+                                            <strong>Name:</strong> {{ trip.vehicule.conducteur.id.nom }} {{ trip.vehicule.conducteur.id.prenom }}
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p class="mb-2">
+                                            <i class="fas fa-phone me-2 text-primary"></i>
+                                            <strong>Phone:</strong> {{ trip.vehicule.conducteur.id.email }}
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p class="mb-2">
+                                            <i class="fas fa-id-card me-2 text-primary"></i>
+                                            <strong>License:</strong> {{ trip.vehicule.conducteur.numero_permis }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="p-3 bg-light rounded">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-user-tie me-2"></i>
+                                    Driver Information
+                                </h5>
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    This trip is operated by an automated system. No driver information is available.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Action Buttons -->
                     <div class="text-center mt-4">
-                        <a href="{{ path('app_shop') }}" class="btn btn-secondary me-2">Back to Trips</a>
+                        <a href="{{ path('app_shop') }}" class="btn btn-outline-secondary me-2">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Trips
+                        </a>
                         {% if trip.vehicule.capacite > 0 %}
-                            <a href="{{ path('app_book_trip', {'id': trip.id}) }}" class="btn btn-primary">
-                                <i class="fas fa-ticket-alt"></i> Book Now
+                            <a href="{{ path('app_book_trip', {'id': trip.id}) }}" class="btn btn-success">
+                                <i class="fas fa-ticket-alt me-2"></i>Book Now
                             </a>
                         {% else %}
-                            <button class="btn btn-primary" disabled>
-                                <i class="fas fa-ticket-alt"></i> Not Available
+                            <button class="btn btn-danger" disabled>
+                                <i class="fas fa-ban me-2"></i>Not Available
                             </button>
                         {% endif %}
                     </div>
@@ -62,4 +155,33 @@
         </div>
     </div>
 </div>
+
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(45deg, #0d6efd, #0dcaf0);
+    }
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+    }
+    .btn {
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+    .btn-success {
+        background: linear-gradient(45deg, #198754, #20c997);
+        border: none;
+    }
+    .btn-danger {
+        background: linear-gradient(45deg, #dc3545, #fd7e14);
+        border: none;
+    }
+    .bg-light {
+        background-color: #f8f9fa !important;
+    }
+</style>
 {% endblock %} 
