@@ -11,14 +11,17 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use App\Service\WeatherService;
 
 class ShopController extends AbstractController
 {
     private GoogleMapsService $googleMapsService;
+    private WeatherService $weatherService;
 
-    public function __construct(GoogleMapsService $googleMapsService)
+    public function __construct(GoogleMapsService $googleMapsService, WeatherService $weatherService)
     {
         $this->googleMapsService = $googleMapsService;
+        $this->weatherService = $weatherService;
     }
 
     
@@ -238,11 +241,23 @@ class ShopController extends AbstractController
             ->getQuery()
             ->getResult();
 
+        // Get weather data for major cities
+        $weatherData = [];
+        $majorCities = ['Tunis', 'Sfax', 'Sousse'];
+        foreach ($majorCities as $city) {
+            try {
+                $weatherData[$city] = $this->weatherService->getWeatherByCity($city);
+            } catch (\Exception $e) {
+                $weatherData[$city] = ['error' => 'Weather data unavailable'];
+            }
+        }
+
         return [
             'popularRoutes' => $popularRoutes,
             'bestValueTrips' => $bestValueTrips,
             'vehicleStats' => $vehicleStats,
-            'priceStats' => $priceStats
+            'priceStats' => $priceStats,
+            'weatherData' => $weatherData
         ];
     }
 }

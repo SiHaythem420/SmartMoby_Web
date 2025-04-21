@@ -1119,6 +1119,59 @@ body {
         <div class="col-12">
             <h2 class="h3 mb-4">Trip Insights</h2>
             <div class="row">
+                <!-- Weather Information -->
+                <div class="col-md-12 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-info text-white">
+                            <i class="fas fa-cloud-sun me-2"></i>Weather Conditions
+                        </div>
+                        <div class="card-body">
+                            <!-- Search Form -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="input-group">
+                                        <input type="text" id="weatherSearch" class="form-control" placeholder="Enter city name...">
+                                        <button class="btn btn-primary" onclick="searchWeather()">
+                                            <i class="fas fa-search"></i> Search
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Weather Display -->
+                            <div id="weatherDisplay" class="row">
+                                {% for city, weather in stats.weatherData %}
+                                    <div class="col-md-4 mb-3">
+                                        <div class="weather-card p-3 text-center">
+                                            <h5 class="mb-3">{{ city }}</h5>
+                                            {% if weather.error is not defined %}
+                                                <div class="weather-icon mb-2">
+                                                    <img src="http://openweathermap.org/img/wn/{{ weather.weather[0].icon }}@2x.png" alt="{{ weather.weather[0].description }}">
+                                                </div>
+                                                <div class="weather-details">
+                                                    <h3 class="mb-2">{{ weather.main.temp|round }}°C</h3>
+                                                    <p class="mb-1">{{ weather.weather[0].description|capitalize }}</p>
+                                                    <small class="text-muted">
+                                                        Feels like: {{ weather.main.feels_like|round }}°C
+                                                    </small>
+                                                    <div class="mt-2">
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-wind"></i> {{ weather.wind.speed }} m/s
+                                                            <i class="fas fa-tint ms-2"></i> {{ weather.main.humidity }}%
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            {% else %}
+                                                <p class="text-muted">{{ weather.error }}</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Most Popular Routes -->
                 <div class="col-md-6 mb-4">
                     <div class="card h-100">
@@ -1426,8 +1479,8 @@ body {
         document.getElementById('route-traffic').textContent = traffic;
         
         // Show route info panel
-        document.getElementById('route-info').style.display = 'block';
-    }
+                        document.getElementById('route-info').style.display = 'block';
+                    }
 
     function showAlternativeRoutes(routes) {
         const alternativesContainer = document.getElementById('route-alternatives');
@@ -1635,5 +1688,59 @@ body {
     function updateFavoritesCount() {
         document.getElementById('favorites-count').textContent = favorites.size;
     }
+
+    // Weather Search Functionality
+    async function searchWeather() {
+        const cityInput = document.getElementById('weatherSearch');
+        const city = cityInput.value.trim();
+        
+        if (!city) {
+            alert('Please enter a city name');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/weather/search?city=${encodeURIComponent(city)}`);
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            const weatherDisplay = document.getElementById('weatherDisplay');
+            weatherDisplay.innerHTML = `
+                <div class="col-md-4 mb-3">
+                    <div class="weather-card p-3 text-center">
+                        <h5 class="mb-3">${data.name}</h5>
+                        <div class="weather-icon mb-2">
+                            <img src="http://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png" alt="${data.weather[0].description}">
+                        </div>
+                        <div class="weather-details">
+                            <h3 class="mb-2">${Math.round(data.main.temp)}°C</h3>
+                            <p class="mb-1">${data.weather[0].description.charAt(0).toUpperCase() + data.weather[0].description.slice(1)}</p>
+                            <small class="text-muted">
+                                Feels like: ${Math.round(data.main.feels_like)}°C
+                            </small>
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-wind"></i> ${data.wind.speed} m/s
+                                    <i class="fas fa-tint ms-2"></i> ${data.main.humidity}%
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } catch (error) {
+            alert('Error fetching weather data: ' + error.message);
+        }
+    }
+
+    // Add event listener for Enter key
+    document.getElementById('weatherSearch').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            searchWeather();
+        }
+    });
 </script>
 {% endblock %} 
