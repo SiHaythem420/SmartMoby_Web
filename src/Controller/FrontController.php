@@ -20,6 +20,22 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Form\UpdateUtilisateurType;
 use App\Entity\Client;
+
+use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Google\GoogleAuthenticatorInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Builder\BuilderInterface;
+use Endroid\QrCode\Builder\QrCodeBuilderInterface;
+
+use Endroid\QrCode\Builder\BuilderRegistryInterface;
+
+
+
+
+
+
 final class FrontController extends AbstractController
 {
     #[Route('/front', name: 'app_controller')]
@@ -43,7 +59,7 @@ final class FrontController extends AbstractController
     }
 
     #[Route('/front/login', name: 'app_inscription')]
-    public function inscription(Request $request, EntityManagerInterface $entityManager, SessionInterface $session): Response
+    public function inscription(Request $request, EntityManagerInterface $entityManager, SessionInterface $session,   #[Autowire(service: 'scheb_two_factor.security.google_authenticator')] GoogleAuthenticatorInterface $googleAuthenticator): Response
     {
         $error=null;
         $utilisateur = new Utilisateur();
@@ -94,8 +110,15 @@ final class FrontController extends AbstractController
                 if ($utilisateur->getBan()) {
                     $error = "Votre compte est banni, veuillez contacter l'administrateur.";
                 } elseif (password_verify($motDePasse, $utilisateur->getMotDePasse())) {
+                    
+                    $secret = $googleAuthenticator->generateSecret();
+                    $utilisateur->setGoogleAuthenticatorSecret($secret);
+                    $entityManager->flush();
+                        
+                    
                     $session->set('user_id', $utilisateur->getId());
-                    return $this->redirectToRoute('app_controller');
+                    return $this->redirectToRoute('2fa_login');
+
                 } else {
                     $error = 'Email ou mot de passe invalide';
                 }
@@ -109,6 +132,67 @@ final class FrontController extends AbstractController
             'error' => $error,
         ]);
     }
+
+
+    #[Route('/front/2fa', name: '2fa_login')]
+    public function twoFactorLogin(
+        Request $request, 
+        SessionInterface $session, 
+        EntityManagerInterface $entityManager, 
+        #[Autowire(service: 'scheb_two_factor.security.google_authenticator')] GoogleAuthenticatorInterface $googleAuthenticator
+    ): Response {
+        $userId = $session->get('user_id');
+    
+        if (!$userId) {
+            return $this->redirectToRoute('app_inscription');
+        }
+
+        // Récupérer l'utilisateur
+        $utilisateur = $entityManager->getRepository(Utilisateur::class)->find($userId);
+    
+        if (!$utilisateur) {
+            throw $this->createNotFoundException('Utilisateur introuvable');
+        }
+
+        // Vérifier si le secret est déjà généré
+        if (!$utilisateur->getGoogleAuthenticatorSecret()) {
+        // Générer un secret avec GoogleAuthenticator
+            $secret = $googleAuthenticator->generateSecret();
+
+            // Stocker le secret dans l'utilisateur
+            $utilisateur->setGoogleAuthenticatorSecret($secret);
+            $entityManager->flush();
+        } else {
+            // Si le secret existe déjà, récupérer celui-ci
+            $secret = $utilisateur->getGoogleAuthenticatorSecret();
+        }
+
+        // Traitement du code soumis par l'utilisateur
+        if ($request->isMethod('POST')) {
+            $code = $request->request->get('code'); // Code saisi par l'utilisateur dans le formulaire
+        
+            // Vérifier si le code est valide
+            if ($googleAuthenticator->checkCode($utilisateur, $code)) {
+             // Code valide, authentification réussie
+                return $this->redirectToRoute('app_controller'); // Rediriger vers la page d'accueil ou une autre page
+            } else {
+                // Code invalide
+                $error = 'Code incorrect. Veuillez réessayer.';
+                return $this->render('security/2fa_form.html.twig', [
+                    'secret' => $secret, 
+                    'error' => $error
+                ]);
+            }
+        }
+
+        // Afficher le formulaire avec le secret
+        return $this->render('security/2fa_form.html.twig', [
+            'secret' => $secret // Passer le secret à la vue pour affichage
+        ]);
+    }
+
+
+
 
     #[Route('/front/inscription_admin', name: 'inscription_admin')]
     public function inscriptionAdmin(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
