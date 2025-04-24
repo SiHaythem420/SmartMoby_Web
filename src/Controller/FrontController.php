@@ -31,6 +31,14 @@ use Endroid\QrCode\Builder\QrCodeBuilderInterface;
 
 use Endroid\QrCode\Builder\BuilderRegistryInterface;
 
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
+
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+
 
 
 
@@ -142,52 +150,57 @@ final class FrontController extends AbstractController
         #[Autowire(service: 'scheb_two_factor.security.google_authenticator')] GoogleAuthenticatorInterface $googleAuthenticator
     ): Response {
         $userId = $session->get('user_id');
-    
+
         if (!$userId) {
             return $this->redirectToRoute('app_inscription');
         }
 
-        // Récupérer l'utilisateur
         $utilisateur = $entityManager->getRepository(Utilisateur::class)->find($userId);
-    
+
         if (!$utilisateur) {
             throw $this->createNotFoundException('Utilisateur introuvable');
         }
 
-        // Vérifier si le secret est déjà généré
         if (!$utilisateur->getGoogleAuthenticatorSecret()) {
-        // Générer un secret avec GoogleAuthenticator
             $secret = $googleAuthenticator->generateSecret();
+            $qrCodeContent = $googleAuthenticator->getQRContent($utilisateur);
+            $renderer = new ImageRenderer(
+                new RendererStyle(200),
+                new SvgImageBackEnd()
+            );
+            $writer = new Writer($renderer);
+            $dataUri = 'data:image/svg+xml;base64,' . base64_encode($writer->writeString($qrCodeContent));
 
-            // Stocker le secret dans l'utilisateur
             $utilisateur->setGoogleAuthenticatorSecret($secret);
             $entityManager->flush();
         } else {
-            // Si le secret existe déjà, récupérer celui-ci
             $secret = $utilisateur->getGoogleAuthenticatorSecret();
+            $qrCodeContent = $googleAuthenticator->getQRContent($utilisateur);
+            $renderer = new ImageRenderer(
+                new RendererStyle(400),
+                new SvgImageBackEnd()
+            );
+            $writer = new Writer($renderer);
+            $dataUri = 'data:image/svg+xml;base64,' . base64_encode($writer->writeString($qrCodeContent));
         }
 
-        // Traitement du code soumis par l'utilisateur
         if ($request->isMethod('POST')) {
-            $code = $request->request->get('code'); // Code saisi par l'utilisateur dans le formulaire
+            $code = $request->request->get('code');
         
-            // Vérifier si le code est valide
             if ($googleAuthenticator->checkCode($utilisateur, $code)) {
-             // Code valide, authentification réussie
-                return $this->redirectToRoute('app_controller'); // Rediriger vers la page d'accueil ou une autre page
+                return $this->redirectToRoute('app_controller');
             } else {
-                // Code invalide
-                $error = 'Code incorrect. Veuillez réessayer.';
                 return $this->render('security/2fa_form.html.twig', [
                     'secret' => $secret, 
-                    'error' => $error
+                    'error' => 'Code incorrect. Veuillez réessayer.',
+                    'dataUri' => $dataUri
                 ]);
             }
         }
 
-        // Afficher le formulaire avec le secret
         return $this->render('security/2fa_form.html.twig', [
-            'secret' => $secret // Passer le secret à la vue pour affichage
+            'secret' => $secret,
+            'dataUri' => $dataUri
         ]);
     }
 
