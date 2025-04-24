@@ -1,0 +1,15 @@
+<h1>Authentification à deux facteurs</h1>
+
+<p>Veuillez ajouter ce secret dans votre application Google Authenticator : </p>
+
+<p><strong>{{ secret }}</strong></p>
+
+<p>Entrez ensuite le code généré par l'application :</p>
+
+<form method="POST">
+    <label for="code">Code de sécurité</label>
+    <input type="text" name="code" id="code" required />
+    <button type="submit">Valider</button>
+</form>
+
+
