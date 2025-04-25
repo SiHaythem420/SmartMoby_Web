@@ -268,6 +268,7 @@ final class BackController extends AbstractController{
     $sheet->fromArray([
         ['Nom', 'Prénom', 'Nom d\'utilisateur', 'Email', 'Mot de passe', 'Role', 'Département', 'Badge', 'Permis']
     ], null, 'A1');
+    
 
     $users = $entityManager->getRepository(Utilisateur::class)->findAll();
     $admins = $entityManager->getRepository(Admin::class)->findAll();
@@ -322,6 +323,15 @@ final class BackController extends AbstractController{
             $permis
         ], null, 'A' . $row);
         $row++;
+        $sheet->getStyle('A1:I1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:I1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A1:I' . ($row - 1))->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+        foreach (range('A', 'I') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+        $sheet->getStyle('A1:I' . ($row - 1))->getFont()->setSize(14);
+
+
     }
 
     $writer = new Mpdf($spreadsheet);
