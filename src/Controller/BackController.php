@@ -24,6 +24,13 @@ use App\Form\AdminType;
 use App\Form\UtilisateurBackType;
 use App\Form\UpdateUtilisateurType;
 
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Pdf\Mpdf;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+
+
+
+
 
 final class BackController extends AbstractController{
     #[Route('/back', name: 'app_back')]
@@ -251,6 +258,88 @@ final class BackController extends AbstractController{
         return $this->redirectToRoute('app_back');
     }
 
+
+    #[Route('/back/export/pdf', name: 'export_users_pdf')]
+    public function exportUsersPdf(EntityManagerInterface $entityManager): Response
+    {
+    $spreadsheet = new Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+
+    $sheet->fromArray([
+        ['Nom', 'Prénom', 'Nom d\'utilisateur', 'Email', 'Mot de passe', 'Role', 'Département', 'Badge', 'Permis']
+    ], null, 'A1');
+
+    $users = $entityManager->getRepository(Utilisateur::class)->findAll();
+    $admins = $entityManager->getRepository(Admin::class)->findAll();
+    $organisateurs = $entityManager->getRepository(Organisateur::class)->findAll();
+    $clients = $entityManager->getRepository(Client::class)->findAll();
+    $conducteurs = $entityManager->getRepository(Conducteur::class)->findAll();
+
+
+    $row = 2;
+    foreach ($users as $user) {
+        // Déterminer le département avant de créer le tableau
+        $departement = 'N/A';
+        if ($user->getRole() === 'ADMIN') {
+            foreach ($admins as $admin) {
+                if ( $admin->getId() ===  $user) {
+                    $departement = $admin->getDepartement();
+                    break;
+                }
+            }
+        }
+
+        $badge = 'N/A';
+        if ($user->getRole() === 'ORGANISATEUR') {
+            foreach ($organisateurs as $organisateur) {
+                if ($organisateur->getId() === $user) {
+                    $badge = $organisateur->getNumBadge();
+                    break;
+                }
+            }
+        }
+
+        $permis = 'N/A';
+        if ($user->getRole() === 'CONDUCTEUR') {
+            foreach ($conducteurs as $conducteur) {
+                if ($conducteur->getId() === $user) {
+                    $permis = $conducteur->getNumeroPermis();
+                    break;
+                }
+            }
+        }
+
+        // Créer le tableau avec les valeurs
+        $sheet->fromArray([
+            $user->getNom(),
+            $user->getPrenom(),
+            $user->getNomUtilisateur(),
+            $user->getEmail(),
+            $user->getMotDePasse(),
+            $user->getRole(),
+            $departement,
+            $badge,
+            $permis
+        ], null, 'A' . $row);
+        $row++;
     }
+
+    $writer = new Mpdf($spreadsheet);
+    $filename = 'liste_utilisateurs.pdf';
+
+    ob_start();
+    $writer->save('php://output');
+    $pdfContent = ob_get_clean();
+
+    return new Response($pdfContent, 200, [
+        'Content-Type' => 'application/pdf',
+        'Content-Disposition' => (new ResponseHeaderBag())->makeDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            $filename
+        ),
+    ]);
+    }
+
+}
 
 
