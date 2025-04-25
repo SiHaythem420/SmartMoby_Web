@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app.request.locale }}">
 
 <head>
-    <title>{% block title %} Zay Shop eCommerce HTML CSS Template {% endblock %} </title>
+    <title>{% block title %}{{ 'app.shop.banner.title'|trans }}{% endblock %}</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="{{ 'app.shop.banner.description'|trans }}">
+    <meta name="author" content="Smart Moby">
 
     {% block css %}
     <link rel="apple-touch-icon" href="{{asset('img/apple-icon.png')}}">
@@ -72,30 +74,39 @@ https://templatemo.com/tm-559-zay-shop
                 <div class="flex-fill">
                     <ul class="nav navbar-nav d-flex justify-content-between mx-lg-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="/front/index">Acceuil</a>
+                            <a class="nav-link" href="/front/index">{{ 'app.shop.navigation.home'|trans }}</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="about.html">Services </a>
+                            <a class="nav-link" href="about.html">{{ 'app.shop.navigation.services'|trans }}</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/front/shop">Trajet Du Trafic </a>
+                            <a class="nav-link" href="{{ path('app_shop') }}">{{ 'app.shop.navigation.traffic_routes'|trans }}</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="contact.html">Evenements</a>
+                            <a class="nav-link" href="contact.html">{{ 'app.shop.navigation.events'|trans }}</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="contact.html">Blog</a>
+                            <a class="nav-link" href="contact.html">{{ 'app.shop.navigation.blog'|trans }}</a>
                         </li>
                     </ul>
                 </div>
                 <div class="navbar align-self-center d-flex">
                     <div class="d-lg-none flex-sm-fill mt-3 mb-4 col-7 col-sm-auto pr-3">
                         <div class="input-group">
-                            <input type="text" class="form-control" id="inputMobileSearch" placeholder="Search ...">
+                            <input type="text" class="form-control" id="inputMobileSearch" placeholder="{{ 'app.shop.search.placeholder'|trans }}">
                             <div class="input-group-text">
                                 <i class="fa fa-fw fa-search"></i>
                             </div>
                         </div>
+                    </div>
+                    <div class="dropdown me-3">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ app.request.locale|upper }}
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="languageDropdown">
+                            <li><a class="dropdown-item" href="{{ path('app_language', {'locale': 'en'}) }}">English</a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_language', {'locale': 'fr'}) }}">Français</a></li>
+                        </ul>
                     </div>
                     <a class="nav-icon d-none d-lg-inline" href="#" data-bs-toggle="modal" data-bs-target="#templatemo_search">
                         <i class="fa fa-fw fa-search text-dark mr-2"></i>
@@ -103,12 +114,11 @@ https://templatemo.com/tm-559-zay-shop
                     
                     <div class="dropdown">
                         <a class="nav-icon position-relative text-decoration-none dropdown-toggle" href="#" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fa fa-fw fa-user text-dark mr-3"></i>
-                                
+                            <i class="fa fa-fw fa-user text-dark mr-3"></i>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="">Paramètres</a></li>
-                            <li><a class="dropdown-item" href="">Se Déconnecter</a></li>
+                            <li><a class="dropdown-item" href="">{{ 'app.shop.navigation.settings'|trans }}</a></li>
+                            <li><a class="dropdown-item" href="">{{ 'app.shop.navigation.logout'|trans }}</a></li>
                         </ul>
                     </div>
                 </div>
@@ -128,7 +138,7 @@ https://templatemo.com/tm-559-zay-shop
             </div>
             <form action="" method="get" class="modal-content modal-body border-0 p-0">
                 <div class="input-group mb-2">
-                    <input type="text" class="form-control" id="inputModalSearch" name="q" placeholder="Search ...">
+                    <input type="text" class="form-control" id="inputModalSearch" name="q" placeholder="{{ 'app.shop.search.placeholder'|trans }}">
                     <button type="submit" class="input-group-text bg-success text-light">
                         <i class="fa fa-fw fa-search text-white"></i>
                     </button>
@@ -151,12 +161,9 @@ https://templatemo.com/tm-559-zay-shop
                         </div>
                         <div class="col-lg-6 mb-0 d-flex align-items-center">
                             <div class="text-align-left align-self-center">
-                                <h1 class="h1 text-success"><b>Smart Moby</b> La Mobilité Intelligente</h1>
-                                <h3 class="h2">Réinventer la mobilité pour un avenir plus intelligent !</h3>
-                                <p>
-                                    Bienvenue sur Smart Moby, votre partenaire pour une mobilité moderne, connectée et durable. Simplifiez vos déplacements dès aujourd'hui ! 
-                                    
-                                </p>
+                                <h1 class="h1 text-success"><b>Smart Moby</b> {{ 'app.shop.banner.title'|trans }}</h1>
+                                <h3 class="h2">{{ 'app.shop.banner.subtitle'|trans }}</h3>
+                                <p>{{ 'app.shop.banner.description'|trans }}</p>
                             </div>
                         </div>
                     </div>
@@ -174,10 +181,8 @@ https://templatemo.com/tm-559-zay-shop
     <section class="container py-5" data-aos="fade-left">
         <div class="row text-center pt-3">
             <div class="col-lg-6 m-auto">
-                <h1 class="h1">Evenements Du Mois</h1>
-                <p>
-                    Oussema houni shy7ot l events mte3 l shhar hedhik
-                </p>
+                <h1 class="h1">{{ 'app.shop.events.title'|trans }}</h1>
+                <p>{{ 'app.shop.events.description'|trans }}</p>
             </div>
         </div>
         <div class="row">
@@ -206,10 +211,8 @@ https://templatemo.com/tm-559-zay-shop
         <div class="container py-5">
             <div class="row text-center py-3">
                 <div class="col-lg-6 m-auto">
-                    <h1 class="h1">Services En Vedettte</h1>
-                    <p>
-                        Fares houni shy7ot shwaya servicet 
-                    </p>
+                    <h1 class="h1">{{ 'app.shop.services.title'|trans }}</h1>
+                    <p>{{ 'app.shop.services.description'|trans }}</p>
                 </div>
             </div>
             <div class="row">
@@ -295,9 +298,9 @@ https://templatemo.com/tm-559-zay-shop
         <div class="container py-5">
             <div class="row text-center py-3">
                 <div class="col-lg-6 m-auto">
-                    <h1 class="h1">Trips</h1>
+                    <h1 class="h1">{{ 'app.shop.title'|trans }}</h1>
                     <p>
-                        Discover your routes and find your way with SmartMoby
+                        {{ 'app.shop.trip.discover'|trans }}
                     </p>
                 </div>
             </div>
@@ -324,21 +327,21 @@ https://templatemo.com/tm-559-zay-shop
                                     </span>
                                 </div>
                                 <div class="mb-3">
-                                    <p class="mb-1"><i class="fa fa-car text-primary"></i> Vehicle: {{ trajet.vehicule.type }}</p>
-                                    <p class="mb-1"><i class="fa fa-road text-primary"></i> Distance: {{ trajet.distance }} km</p>
-                                    <p class="mb-1"><i class="fa fa-tag text-primary"></i> Price: {{ trajet.prix }} TND</p>
+                                    <p class="mb-1"><i class="fa fa-car text-primary"></i> {{ 'app.shop.trip.details.vehicle'|trans }}: {{ trajet.vehicule.type }}</p>
+                                    <p class="mb-1"><i class="fa fa-road text-primary"></i> {{ 'app.shop.trip.details.distance'|trans }}: {{ trajet.distance }} km</p>
+                                    <p class="mb-1"><i class="fa fa-tag text-primary"></i> {{ 'app.shop.trip.details.price'|trans }}: {{ trajet.prix }} TND</p>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="btn-group">
                                         <button type="button" class="btn btn-sm btn-outline-primary">
-                                            <i class="fa fa-map-marker-alt"></i> View Route
+                                            <i class="fa fa-map-marker-alt"></i> {{ 'app.shop.trip.details.view_route'|trans }}
                                         </button>
                                         <button type="button" class="btn btn-sm btn-outline-success">
-                                            <i class="fa fa-ticket-alt"></i> Book Now
+                                            <i class="fa fa-ticket-alt"></i> {{ 'app.shop.trip.details.book_now'|trans }}
                                         </button>
                                     </div>
                                     <small class="text-muted">
-                                        <i class="fa fa-users"></i> {{ random(5, 20) }} seats left
+                                        <i class="fa fa-users"></i> {{ random(5, 20) }} {{ 'app.shop.trip.details.seats_left'|trans }}
                                     </small>
                                 </div>
                             </div>
@@ -351,7 +354,7 @@ https://templatemo.com/tm-559-zay-shop
                                         <i class="fa fa-star text-warning"></i>
                                         <i class="fa fa-star-half-alt text-warning"></i>
                                     </span>
-                                    <span class="text-muted">({{ random(10, 50) }} reviews)</span>
+                                    <span class="text-muted">({{ random(10, 50) }} {{ 'app.shop.trip.details.reviews'|trans }})</span>
                                 </div>
                             </div>
                         </div>
@@ -359,7 +362,7 @@ https://templatemo.com/tm-559-zay-shop
                     {% endfor %}
                 {% else %}
                     <div class="col-12 text-center">
-                        <p class="text-muted">No featured trips available at the moment.</p>
+                        <p class="text-muted">{{ 'app.shop.pagination.no_trips'|trans }}</p>
                     </div>
                 {% endif %}
             </div>
@@ -368,7 +371,7 @@ https://templatemo.com/tm-559-zay-shop
             <div class="row mt-4">
                 <div class="col-12 text-center">
                     <a href="/front/shop" class="btn btn-success btn-lg">
-                        <i class="fa fa-list"></i> View All Trips
+                        <i class="fa fa-list"></i> {{ 'app.shop.pagination.view_all'|trans }}
                     </a>
                 </div>
             </div>
@@ -380,7 +383,7 @@ https://templatemo.com/tm-559-zay-shop
                     <nav aria-label="Page navigation">
                         <ul class="pagination justify-content-center">
                             <li class="page-item {% if currentPage == 1 %}disabled{% endif %}">
-                                <a class="page-link" href="{{ path('app_home', {'page': currentPage - 1}) }}#trips" aria-label="Previous">
+                                <a class="page-link" href="{{ path('app_home', {'page': currentPage - 1}) }}#trips" aria-label="{{ 'app.shop.pagination.previous'|trans }}">
                                     <span aria-hidden="true">&laquo;</span>
                                 </a>
                             </li>
@@ -390,7 +393,7 @@ https://templatemo.com/tm-559-zay-shop
                                 </li>
                             {% endfor %}
                             <li class="page-item {% if currentPage == totalPages %}disabled{% endif %}">
-                                <a class="page-link" href="{{ path('app_home', {'page': currentPage + 1}) }}#trips" aria-label="Next">
+                                <a class="page-link" href="{{ path('app_home', {'page': currentPage + 1}) }}#trips" aria-label="{{ 'app.shop.pagination.next'|trans }}">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
                             </li>
@@ -444,15 +447,15 @@ https://templatemo.com/tm-559-zay-shop
                     <ul class="list-unstyled text-light footer-link-list">
                         <li>
                             <i class="fas fa-map-marker-alt fa-fw"></i>
-                            Cité El Ghazela, Ariana, Tunis
+                            {{ 'app.shop.footer.address'|trans }}
                         </li>
                         <li>
                             <i class="fa fa-phone fa-fw"></i>
-                            <a class="text-decoration-none" >+216 98 444 555</a>
+                            <a class="text-decoration-none">{{ 'app.shop.footer.phone'|trans }}</a>
                         </li>
                         <li>
                             <i class="fa fa-envelope fa-fw"></i>
-                            <a class="text-decoration-none" >info@smart_moby.com</a>
+                            <a class="text-decoration-none">{{ 'app.shop.footer.email'|trans }}</a>
                         </li>
                     </ul>
                 </div>
@@ -470,8 +473,7 @@ https://templatemo.com/tm-559-zay-shop
                 <div class="row pt-2">
                     <div class="col-12">
                         <p class="text-left text-light">
-                            Copyright &copy; 2025 Smart Moby Co., Ltd.
-                            
+                            {{ 'app.shop.footer.copyright'|trans }}
                         </p>
                     </div>
                 </div>

@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Trips - Smart Moby{% endblock %}
+{% block title %}{{ 'app.shop.title'|trans }}{% endblock %}
 
 {% block stylesheets %}
 {{ parent() }}
@@ -770,7 +770,7 @@ body {
         <div class="col-12">
             <div class="card border-0">
                 <div class="card-header bg-primary text-white py-2">
-                    <i class="fas fa-map-marked-alt me-2"></i>Interactive Map
+                    <i class="fas fa-map-marked-alt me-2"></i>{{ 'map'|trans }}
                 </div>
                 <div class="card-body p-0">
                     <div class="map-container">
@@ -781,7 +781,7 @@ body {
                                 <input type="text" 
                                        id="departure-input" 
                                        class="location-input" 
-                                       placeholder="Departure Point">
+                                       placeholder="{{ 'app.shop.map.departure'|trans }}">
                             </div>
                             
                             <div class="input-container">
@@ -789,58 +789,60 @@ body {
                                 <input type="text" 
                                        id="arrival-input" 
                                        class="location-input" 
-                                       placeholder="Arrival Point">
+                                       placeholder="{{ 'app.shop.map.arrival'|trans }}">
                             </div>
                             
                             <button type="button" class="search-button" id="search-trips">
-                                <i class="fas fa-search me-1"></i>Search Trips
+                                <i class="fas fa-search me-1"></i>{{ 'app.shop.map.search'|trans }}
                             </button>
 
                             <button class="clear-button" id="clear-markers">
-                                <i class="fas fa-times me-1"></i>Clear Route
+                                <i class="fas fa-times me-1"></i>{{ 'app.shop.map.clear'|trans }}
                             </button>
                             </div>
-                        </div>
+                        
+                        <!-- Route Details Panel -->
                         <div id="route-info">
                         <button class="close-route-info" onclick="toggleRouteInfo()">
                             <i class="fas fa-times"></i>
                             </button>
                         <h6 class="mb-2">
-                            <i class="fas fa-route text-primary me-2"></i>Route Details
+                                <i class="fas fa-route text-primary me-2"></i>{{ 'app.shop.map.route_details'|trans }}
                         </h6>
                         <div class="route-details">
                             <div class="route-detail">
                                 <i class="fas fa-road text-primary"></i>
                                 <div class="value" id="route-distance">-</div>
-                                <div class="label">Distance</div>
+                                    <div class="label">{{ 'app.shop.map.distance'|trans }}</div>
                         </div>
                             <div class="route-detail">
                                 <i class="fas fa-clock text-primary"></i>
                                 <div class="value" id="route-duration">-</div>
-                                <div class="label">Duration</div>
+                                    <div class="label">{{ 'app.shop.map.duration'|trans }}</div>
                     </div>
                             <div class="route-detail">
                                 <i class="fas fa-gas-pump text-primary"></i>
                                 <div class="value" id="route-fuel">-</div>
-                                <div class="label">Fuel Cost</div>
+                                    <div class="label">{{ 'app.shop.map.fuel_cost'|trans }}</div>
                 </div>
                             <div class="route-detail">
                                 <i class="fas fa-traffic-light text-primary"></i>
                                 <div class="value" id="route-traffic">-</div>
-                                <div class="label">Traffic</div>
+                                    <div class="label">{{ 'app.shop.map.traffic'|trans }}</div>
                             </div>
                         </div>
                         
                         <div class="route-alternatives" id="route-alternatives">
                             <h6 class="mb-2">
-                                <i class="fas fa-random text-primary me-2"></i>Alternative Routes
+                                    <i class="fas fa-random text-primary me-2"></i>{{ 'app.shop.map.alternative_routes'|trans }}
                             </h6>
                         </div>
 
                         <div class="route-instructions" id="route-instructions">
                             <h6 class="mb-2">
-                                <i class="fas fa-directions text-primary me-2"></i>Directions
+                                    <i class="fas fa-directions text-primary me-2"></i>{{ 'app.shop.map.directions'|trans }}
                             </h6>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -969,7 +971,7 @@ body {
 
                             <!-- Time Range -->
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Time Range</label>
+                                <label class="form-label">Time Range </label>
                                 <select class="form-select" name="time_range">
                                     <option value="">Any Time</option>
                                     <option value="morning" {% if app.request.query.get('time_range') == 'morning' %}selected{% endif %}>Morning (6:00 - 12:00)</option>
@@ -999,7 +1001,7 @@ body {
                                 </div>
                             </div>
 
-                            <!-- Price Range -->
+                            <!-- Price Range  -->
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Maximum Price (TND)</label>
                                 <div class="d-flex align-items-center">
@@ -1033,17 +1035,17 @@ body {
     <!-- Add Advanced Search Button next to the search form -->
     <div class="col-md-4">
         <button type="button" class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#advancedSearchModal">
-            <i class="fas fa-search-plus me-2"></i>Shorten your way
+            <i class="fas fa-search-plus me-2"></i>{{ 'app.shop.search.shorten_way'|trans }}
         </button>
     </div>
 
     <div class="row">
         <div class="col-lg-3">
-            <h1 class="h2 pb-4">Filter Trips</h1>
+            <h1 class="h2 pb-4">{{ 'app.shop.filters.title'|trans }}</h1>
             <ul class="list-unstyled templatemo-accordion">
                 <li class="pb-3">
                     <a class="collapsed d-flex justify-content-between h3 text-decoration-none" href="#">
-                        Vehicle Type
+                        {{ 'app.shop.filters.vehicle_type'|trans }}
                         <i class="fa fa-fw fa-chevron-circle-down mt-1"></i>
                     </a>
                     <ul class="collapse show list-unstyled pl-3">
@@ -1129,7 +1131,7 @@ body {
                         <li class="list-inline-item">
                             <a class="h3 text-dark text-decoration-none mr-3" 
                                href="{{ path('app_shop', {'page': 1}) }}">
-                                All Trips
+                                {{ 'app.shop.trip.details.all_trips'|trans }}
                             </a>
                         </li>
                     </ul>
@@ -1139,15 +1141,15 @@ body {
                         <select class="form-control" onchange="window.location.href=this.value">
                             <option value="{{ path('app_shop', app.request.query.all|merge({'sort_by': 'time', 'page': 1})) }}" 
                                     {% if sortBy == 'time' %}selected{% endif %}>
-                                Sort by Time
+                                {{ 'app.shop.sort.time'|trans }}
                             </option>
                             <option value="{{ path('app_shop', app.request.query.all|merge({'sort_by': 'price', 'page': 1})) }}" 
                                     {% if sortBy == 'price' %}selected{% endif %}>
-                                Sort by Price
+                                {{ 'app.shop.sort.price'|trans }}
                             </option>
                             <option value="{{ path('app_shop', app.request.query.all|merge({'sort_by': 'distance', 'page': 1})) }}" 
                                     {% if sortBy == 'distance' %}selected{% endif %}>
-                                Sort by Distance
+                                {{ 'app.shop.sort.distance'|trans }}
                             </option>
                         </select>
                     </div>
@@ -1207,7 +1209,7 @@ body {
                     {% endfor %}
                 {% else %}
                     <div class="col-12 text-center">
-                        <p class="text-muted">No trips available at the moment.</p>
+                        <p class="text-muted">{{ 'app.shop.no_trips'|trans }}</p>
                     </div>
                 {% endif %}
             </div>
@@ -1215,36 +1217,7 @@ body {
             <!-- Pagination -->
             <div class="row mt-4">
                 <div class="col-12">
-                    <nav aria-label="Page navigation">
-                        <ul class="pagination pagination-lg justify-content-center">
-                            {% if currentPage > 1 %}
-                                <li class="page-item">
-                                    <a class="page-link rounded-0 mr-3 shadow-sm border-top-0 border-left-0" 
-                                       href="{{ path('app_shop', app.request.query.all|merge({'page': currentPage - 1})) }}">
-                                        <span aria-hidden="true">&laquo;</span>
-                                    </a>
-                                </li>
-                            {% endif %}
-                            
-                            {% for i in 1..totalPages %}
-                                <li class="page-item {% if currentPage == i %}active{% endif %}">
-                                    <a class="page-link rounded-0 mr-3 shadow-sm border-top-0 border-left-0" 
-                                       href="{{ path('app_shop', app.request.query.all|merge({'page': i})) }}">
-                                        {{ i }}
-                                    </a>
-                                </li>
-                            {% endfor %}
-                            
-                            {% if currentPage < totalPages %}
-                                <li class="page-item">
-                                    <a class="page-link rounded-0 mr-3 shadow-sm border-top-0 border-left-0" 
-                                       href="{{ path('app_shop', app.request.query.all|merge({'page': currentPage + 1})) }}">
-                                        <span aria-hidden="true">&raquo;</span>
-                                    </a>
-                                </li>
-                            {% endif %}
-                        </ul>
-                    </nav>
+                    {{ knp_pagination_render(trajets, 'pagination/custom_pagination.html.twig') }}
                 </div>
             </div>
         </div>
@@ -1253,23 +1226,20 @@ body {
     <!-- Statistics Section -->
     <div id="statistics" class="row mt-5">
         <div class="col-12">
-            <h2 class="h3 mb-4">Trip Insights</h2>
+            <h2 class="h3 mb-4">{{ 'app.shop.statistics.title'|trans }}</h2>
             <div class="row">
                 <!-- Weather Information -->
                 <div class="col-md-12 mb-4">
                     <div class="card h-100">
                         <div class="card-header bg-info text-white">
-                            <i class="fas fa-cloud-sun me-2"></i>Weather Conditions
+                            <i class="fas fa-cloud-sun me-2"></i>{{ 'app.shop.statistics.weather'|trans }}
                         </div>
                         <div class="card-body">
                             <!-- Search Form -->
                             <div class="row mb-4">
                                 <div class="col-md-6">
                                     <div class="input-group">
-                                        <input type="text" id="weatherSearch" class="form-control" placeholder="Search for a city..." onkeydown="if(event.key === 'Enter') searchWeather()">
-                                        <button class="btn btn-primary" onclick="searchWeather()">
-                                            <i class="fas fa-search"></i> Search
-                                        </button>
+                                        <input type="text" id="weatherSearch" class="form-control" placeholder="{{ 'app.shop.weather.search'|trans }}">
                                     </div>
                                 </div>
                             </div>
@@ -1288,7 +1258,7 @@ body {
                                                     <h3 class="mb-2">{{ weather.main.temp|round }}°C</h3>
                                                     <p class="mb-1">{{ weather.weather[0].description|capitalize }}</p>
                                                     <small class="text-muted">
-                                                        Feels like: {{ weather.main.feels_like|round }}°C
+                                                        {{ 'app.shop.weather.feels_like'|trans }}: {{ weather.main.feels_like|round }}°C
                                                     </small>
                                                     <div class="mt-2">
                                                         <small class="text-muted">
@@ -1312,7 +1282,7 @@ body {
                 <div class="col-md-6 mb-4">
                     <div class="card h-100">
                         <div class="card-header bg-primary text-white">
-                            <i class="fas fa-star me-2"></i>Most Popular Routes
+                            <i class="fas fa-star me-2"></i>{{ 'app.shop.statistics.popular_routes'|trans }}
                         </div>
                         <div class="card-body">
                             <ul class="list-group list-group-flush">
@@ -1322,7 +1292,7 @@ body {
                                         <i class="fas fa-route text-primary me-2"></i>
                                         {{ route.pointDepart }} → {{ route.pointArrivee }}
                                     </span>
-                                    <span class="badge bg-primary rounded-pill">{{ route.tripCount }} trips</span>
+                                    <span class="badge bg-primary rounded-pill">{{ route.tripCount }} {{ 'app.shop.trip.details.trips'|trans }}</span>
                                 </li>
                                 {% endfor %}
                             </ul>
@@ -1334,7 +1304,7 @@ body {
                 <div class="col-md-6 mb-4">
                     <div class="card h-100">
                         <div class="card-header bg-success text-white">
-                            <i class="fas fa-percentage me-2"></i>Best Value Trips
+                            <i class="fas fa-percentage me-2"></i>{{ 'app.shop.statistics.best_value'|trans }}
                         </div>
                         <div class="card-body">
                             <ul class="list-group list-group-flush">
@@ -1348,7 +1318,7 @@ body {
                                         <span class="badge bg-success rounded-pill">{{ (trip.pricePerKm)|number_format(2) }} TND/km</span>
                                     </div>
                                     <small class="text-muted">
-                                        Distance: {{ trip.distance }}km | Price: {{ trip.prix }} TND
+                                        {{ 'app.shop.trip.details.distance'|trans }}: {{ trip.distance }}km | {{ 'app.shop.trip.details.price'|trans }}: {{ trip.prix }} TND
                                     </small>
                                 </li>
                                 {% endfor %}
@@ -1361,7 +1331,7 @@ body {
                 <div class="col-md-6 mb-4">
                     <div class="card h-100">
                         <div class="card-header bg-info text-white">
-                            <i class="fas fa-bus me-2"></i>Vehicle Distribution
+                            <i class="fas fa-bus me-2"></i>{{ 'app.shop.statistics.vehicle_distribution'|trans }}
                         </div>
                         <div class="card-body">
                             <ul class="list-group list-group-flush">
@@ -1371,7 +1341,7 @@ body {
                                         <i class="fas fa-{{ stat.type == 'Bus' ? 'bus' : (stat.type == 'Métro' ? 'train' : 'taxi') }} text-info me-2"></i>
                                         {{ stat.type }}
                                     </span>
-                                    <span class="badge bg-info rounded-pill">{{ stat.count }} trips</span>
+                                    <span class="badge bg-info rounded-pill">{{ stat.count }} {{ 'app.shop.trip.details.trips'|trans }}</span>
                                 </li>
                                 {% endfor %}
                             </ul>
@@ -1383,7 +1353,7 @@ body {
                 <div class="col-md-6 mb-4">
                     <div class="card h-100">
                         <div class="card-header bg-warning text-dark">
-                            <i class="fas fa-money-bill-wave me-2"></i>Average Prices by Vehicle
+                            <i class="fas fa-money-bill-wave me-2"></i>{{ 'app.shop.statistics.average_prices'|trans }}
                         </div>
                         <div class="card-body">
                             <ul class="list-group list-group-flush">
@@ -1433,6 +1403,7 @@ body {
     let departureMarker;
     let arrivalMarker;
     let currentRoute;
+    let weatherSearchTimeout;
 
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize map centered on Tunis capital
@@ -1725,6 +1696,21 @@ body {
             arrivalInput.value = '';
             map.setView([36.8065, 10.1815], 12);
         });
+        
+        // Weather search functionality
+        const weatherSearchInput = document.getElementById('weatherSearch');
+        if (weatherSearchInput) {
+            weatherSearchInput.addEventListener('input', function() {
+                clearTimeout(weatherSearchTimeout);
+                const city = this.value.trim();
+                
+                if (city.length >= 3) { // Only search if at least 3 characters
+                    weatherSearchTimeout = setTimeout(() => {
+                        searchWeather(city);
+                    }, 500); // Wait 500ms after user stops typing
+                }
+            });
+        }
     });
 
     function updateRoute() {
@@ -1969,12 +1955,8 @@ body {
     }
 
     // Weather Search Functionality
-    async function searchWeather() {
-        const cityInput = document.getElementById('weatherSearch');
-        const city = cityInput.value.trim();
-        
+    async function searchWeather(city) {
         if (!city) {
-            alert('Please enter a city name');
             return;
         }
 
@@ -2011,15 +1993,13 @@ body {
                 </div>
             `;
         } catch (error) {
-            alert('Error fetching weather data: ' + error.message);
+            const weatherDisplay = document.getElementById('weatherDisplay');
+            weatherDisplay.innerHTML = `
+                <div class="col-12 text-center">
+                    <p class="text-danger">{{ 'app.shop.weather.error'|trans }}</p>
+                        </div>
+                    `;
         }
     }
-
-    // Add event listener for Enter key
-    document.getElementById('weatherSearch').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            searchWeather();
-        }
-    });
 </script>
 {% endblock %} 
