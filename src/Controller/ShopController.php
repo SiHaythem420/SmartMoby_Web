@@ -9,9 +9,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Doctrine\ORM\Tools\Pagination\Paginator;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use App\Service\WeatherService;
+use Doctrine\ORM\EntityManagerInterface;
 
 class ShopController extends AbstractController
 {
@@ -26,182 +27,97 @@ class ShopController extends AbstractController
 
     
     #[Route('/front/shop', name: 'app_shop')]
-    public function index(Request $request, TrajetRepository $trajetRepository): Response
-    {
-        $page = $request->query->getInt('page', 1);
-        $itemsPerPage = 9;
-        
-        // Get search parameters
-        $departure = $request->query->get('departure');
-        $arrival = $request->query->get('arrival');
+    public function index(
+        Request $request,
+        TrajetRepository $trajetRepository,
+        PaginatorInterface $paginator,
+        EntityManagerInterface $entityManager
+    ): Response {
+        // Get filter parameters from request
         $vehicleType = $request->query->get('vehicle_type');
-        $timeFilter = $request->query->get('time');
+        $timeFilter = $request->query->get('time', 'all');
         $priceRange = $request->query->get('price_range');
         $sortBy = $request->query->get('sort_by', 'time');
-
-        // Get advanced search parameters
-        $dateFrom = $request->query->get('date_from');
-        $dateTo = $request->query->get('date_to');
-        $timeRange = $request->query->get('time_range');
-        $vehicleTypes = $request->query->all('vehicle_types');
-        $maxPrice = $request->query->get('max_price', 100);
-        $maxStops = $request->query->get('max_stops');
-        $minRating = $request->query->get('min_rating');
-
-        // Get map-based search parameters
-        $maxDistance = $request->query->get('max_distance', 50); // Default 50km radius
-
-        // Build query based on filters
-        $qb = $trajetRepository->createQueryBuilder('t')
-            ->leftJoin('t.vehicule', 'v');
-
-        // Apply map-based search if departure and arrival are provided
-        if ($departure && $arrival) {
-            // For now, we'll use a simple LIKE query
-            // In a real application, you'd want to use geospatial queries
-            $qb->andWhere('(LOWER(t.pointDepart) LIKE LOWER(:departure) OR LOWER(t.pointArrivee) LIKE LOWER(:departure))')
-               ->andWhere('(LOWER(t.pointArrivee) LIKE LOWER(:arrival) OR LOWER(t.pointDepart) LIKE LOWER(:arrival))')
-               ->setParameter('departure', '%' . $departure . '%')
-               ->setParameter('arrival', '%' . $arrival . '%');
-        }
-
-        // Apply search filters with more flexible matching
-        if ($departure) {
-            $qb->andWhere('(LOWER(t.pointDepart) LIKE LOWER(:departure) OR LOWER(t.pointArrivee) LIKE LOWER(:departure))')
-                ->setParameter('departure', '%' . $departure . '%');
-        }
         
-        if ($arrival) {
-            $qb->andWhere('(LOWER(t.pointArrivee) LIKE LOWER(:arrival) OR LOWER(t.pointDepart) LIKE LOWER(:arrival))')
-                ->setParameter('arrival', '%' . $arrival . '%');
-        }
-
+        // Build query based on filters
+        $queryBuilder = $trajetRepository->createQueryBuilder('t')
+            ->leftJoin('t.vehicule', 'v');
+            
         // Apply vehicle type filter
         if ($vehicleType) {
-            $qb->andWhere('v.type = :vehicleType')
+            $queryBuilder->andWhere('v.type = :vehicleType')
                 ->setParameter('vehicleType', $vehicleType);
         }
-
+        
         // Apply time filter
         if ($timeFilter === 'today') {
             $today = new \DateTime();
-            $qb->andWhere('t.dateDepart >= :todayStart')
-                ->andWhere('t.dateDepart < :todayEnd')
-                ->setParameter('todayStart', $today->format('Y-m-d 00:00:00'))
-                ->setParameter('todayEnd', $today->format('Y-m-d 23:59:59'));
+            $today->setTime(0, 0, 0);
+            $tomorrow = clone $today;
+            $tomorrow->modify('+1 day');
+            
+            $queryBuilder->andWhere('t.dateDepart >= :today AND t.dateDepart < :tomorrow')
+                ->setParameter('today', $today)
+                ->setParameter('tomorrow', $tomorrow);
         } elseif ($timeFilter === 'tomorrow') {
-            $tomorrow = (new \DateTime())->modify('+1 day');
-            $qb->andWhere('t.dateDepart >= :tomorrowStart')
-                ->andWhere('t.dateDepart < :tomorrowEnd')
-                ->setParameter('tomorrowStart', $tomorrow->format('Y-m-d 00:00:00'))
-                ->setParameter('tomorrowEnd', $tomorrow->format('Y-m-d 23:59:59'));
+            $tomorrow = new \DateTime();
+            $tomorrow->setTime(0, 0, 0);
+            $tomorrow->modify('+1 day');
+            $dayAfterTomorrow = clone $tomorrow;
+            $dayAfterTomorrow->modify('+1 day');
+            
+            $queryBuilder->andWhere('t.dateDepart >= :tomorrow AND t.dateDepart < :dayAfterTomorrow')
+                ->setParameter('tomorrow', $tomorrow)
+                ->setParameter('dayAfterTomorrow', $dayAfterTomorrow);
         }
-
-        // Apply date range filter
-        if ($dateFrom && $dateTo) {
-            $qb->andWhere('t.dateDepart >= :dateFrom')
-               ->andWhere('t.dateDepart <= :dateTo')
-               ->setParameter('dateFrom', $dateFrom . ' 00:00:00')
-               ->setParameter('dateTo', $dateTo . ' 23:59:59');
-        }
-
-        // Apply time range filter
-        if ($timeRange) {
-            switch ($timeRange) {
-                case 'morning':
-                    $qb->andWhere('TIME(t.dateDepart) >= :timeFrom')
-                       ->andWhere('TIME(t.dateDepart) < :timeTo')
-                       ->setParameter('timeFrom', '06:00:00')
-                       ->setParameter('timeTo', '12:00:00');
+        
+        // Apply price range filter
+        if ($priceRange) {
+            switch ($priceRange) {
+                case 'under_10':
+                    $queryBuilder->andWhere('t.prix < 10');
                     break;
-                case 'afternoon':
-                    $qb->andWhere('TIME(t.dateDepart) >= :timeFrom')
-                       ->andWhere('TIME(t.dateDepart) < :timeTo')
-                       ->setParameter('timeFrom', '12:00:00')
-                       ->setParameter('timeTo', '18:00:00');
+                case '10_15':
+                    $queryBuilder->andWhere('t.prix >= 10 AND t.prix <= 15');
                     break;
-                case 'evening':
-                    $qb->andWhere('TIME(t.dateDepart) >= :timeFrom')
-                       ->andWhere('TIME(t.dateDepart) < :timeTo')
-                       ->setParameter('timeFrom', '18:00:00')
-                       ->setParameter('timeTo', '00:00:00');
-                    break;
-                case 'night':
-                    $qb->andWhere('TIME(t.dateDepart) >= :timeFrom')
-                       ->andWhere('TIME(t.dateDepart) < :timeTo')
-                       ->setParameter('timeFrom', '00:00:00')
-                       ->setParameter('timeTo', '06:00:00');
+                case 'over_20':
+                    $queryBuilder->andWhere('t.prix > 20');
                     break;
             }
         }
-
-        // Apply vehicle types filter
-        if (!empty($vehicleTypes)) {
-            $qb->andWhere('v.type IN (:vehicleTypes)')
-               ->setParameter('vehicleTypes', $vehicleTypes);
-        }
-
-        // Apply price range filter
-        if ($priceRange === 'under_10') {
-            $qb->andWhere('t.prix < 10');
-        } elseif ($priceRange === '10_15') {
-            $qb->andWhere('t.prix >= 10 AND t.prix <= 15');
-        } elseif ($priceRange === 'over_20') {
-            $qb->andWhere('t.prix > 20');
-        }
-
-        // Apply stops filter
-        if ($maxStops !== null && $maxStops !== '') {
-            $qb->andWhere('t.numberOfStops <= :maxStops')
-               ->setParameter('maxStops', $maxStops);
-        }
-
-        // Apply rating filter
-        if ($minRating) {
-            $qb->andWhere('t.rating >= :minRating')
-               ->setParameter('minRating', $minRating);
-        }
-
-        // Apply sorting
-        if ($sortBy === 'price') {
-            $qb->orderBy('t.prix', 'ASC');
-        } elseif ($sortBy === 'distance') {
-            $qb->orderBy('t.distance', 'ASC');
-        } else {
-            $qb->orderBy('t.dateDepart', 'ASC');
-        }
-
-        // Get total count before pagination
-        $totalQuery = clone $qb;
-        $totalQuery->select('COUNT(t.id)');
-        $totalItems = $totalQuery->getQuery()->getSingleScalarResult();
-
-        // Get paginated results
-        $qb->setFirstResult($itemsPerPage * ($page - 1))
-            ->setMaxResults($itemsPerPage);
         
-        $trajets = $qb->getQuery()->getResult();
-        $totalPages = ceil($totalItems / $itemsPerPage);
-
-        // Get statistics
+        // Apply sorting
+        switch ($sortBy) {
+            case 'price':
+                $queryBuilder->orderBy('t.prix', 'ASC');
+                break;
+            case 'distance':
+                $queryBuilder->orderBy('t.distance', 'ASC');
+                break;
+            case 'time':
+            default:
+                $queryBuilder->orderBy('t.dateDepart', 'ASC');
+                break;
+        }
+        
+        $query = $queryBuilder->getQuery();
+        
+        $trajets = $paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1),
+            9 // Items per page
+        );
+        
+        // Get statistics for the dashboard
         $stats = $this->getTripStatistics($trajetRepository);
-
-        // Add debug information
-        $this->addFlash('info', sprintf('Found %d trips in total', $totalItems));
 
         return $this->render('shop.html.twig', [
             'trajets' => $trajets,
-            'currentPage' => $page,
-            'totalPages' => $totalPages,
             'vehicleType' => $vehicleType,
             'timeFilter' => $timeFilter,
             'priceRange' => $priceRange,
             'sortBy' => $sortBy,
-            'departure' => $departure,
-            'arrival' => $arrival,
-            'totalItems' => $totalItems,
-            'stats' => $stats,
-            'google_maps_api_key' => $this->googleMapsService->getApiKey()
+            'stats' => $stats
         ]);
     }
 
