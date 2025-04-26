@@ -7,6 +7,7 @@
 	{% block css %}
 	<link rel="stylesheet" href="{{ asset('css/login.css') }}">
 	{% endblock %}
+	<script src="https://www.google.com/recaptcha/enterprise.js" async defer></script>
 </head>
 <body>
     
@@ -39,6 +40,8 @@
 				<div class="form-error">
         			{{ form_errors(form.role) }}
     			</div>
+
+				<div class="g-recaptcha" data-sitekey="6LcJ1yUrAAAAAMH0_qXnbAl-RUqi5Rp61TpKEy4L" data-action="LOGIN"></div>
 			
         		
         		<button class="button-inscrire">S'inscrire</button>
