@@ -39,6 +39,7 @@ use BaconQrCode\Writer;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Renderer\ImageRenderer;
 
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 
 
@@ -67,7 +68,7 @@ final class FrontController extends AbstractController
     }
 
     #[Route('/front/login', name: 'app_inscription')]
-    public function inscription(Request $request, EntityManagerInterface $entityManager, SessionInterface $session,   #[Autowire(service: 'scheb_two_factor.security.google_authenticator')] GoogleAuthenticatorInterface $googleAuthenticator): Response
+    public function inscription(Request $request, EntityManagerInterface $entityManager, SessionInterface $session,   #[Autowire(service: 'scheb_two_factor.security.google_authenticator')] GoogleAuthenticatorInterface $googleAuthenticator, HttpClientInterface $httpClient): Response
     {
         $error=null;
         $utilisateur = new Utilisateur();
@@ -76,6 +77,30 @@ final class FrontController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $recaptchaResponse = $request->request->get('g-recaptcha-response');
+            $recaptchaSecret = '6LcJ1yUrAAAAAALNLPF50_KxSl-pE0uutguYzu8i';
+            $recaptchaUrl = 'https://www.google.com/recaptcha/api/siteverify';
+
+            // Modification de la requête à l'API reCAPTCHA
+            $response = $httpClient->request('POST', $recaptchaUrl, [
+                'body' => [
+                    'secret' => $recaptchaSecret,
+                    'response' => $recaptchaResponse
+                ]
+            ]);
+
+            $data = $response->toArray();
+            
+            if (!$data['success']) {
+                $error = "Veuillez vérifier le reCAPTCHA.";
+                return $this->render('front/login.html.twig', [
+                    'form' => $form->createView(),
+                    'error' => $error,
+                ]);
+            }
+
+            // Si le captcha est validé, continuez avec le reste du code
+            if (!$error) {
             $role = $form->get('role')->getData();
             if ($role === 'admin') {
                 $utilisateur = $form->getData();
@@ -106,6 +131,7 @@ final class FrontController extends AbstractController
             $entityManager->flush();
 
             return $this->redirectToRoute('app_controller'); // Redirige après l'inscription
+        }
         }
 
         if ($request->isMethod('POST')) {
@@ -523,6 +549,14 @@ final class FrontController extends AbstractController
             return $this->redirectToRoute('app_inscription');
         }
         return $this->render('front/index_ai.html.twig', [
+            'controller_name' => 'FrontController',
+        ]);
+    }
+
+    #[Route('/front/test' , name: 'app_test')]
+    public function test(): Response
+    {
+        return $this->render('front/test.html.twig', [
             'controller_name' => 'FrontController',
         ]);
     }
