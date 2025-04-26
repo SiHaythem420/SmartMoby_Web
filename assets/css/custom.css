@@ -24,3 +24,26 @@ Custom Css
 .pdf-button i {
     font-size: 1.2em;
 }
+
+.navbar-nav {
+    flex-wrap: nowrap; /* Empêche le wrapping des éléments */
+    gap: 20px;
+}
+
+.nav-item {
+    flex: 0 0 auto; /* Empêche les éléments de rétrécir */
+}
+
+.nav-link {
+    padding: 10px 15px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+@media (max-width: 991px) { /* Pour les écrans mobiles */
+    .navbar-nav {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+}
