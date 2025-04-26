@@ -124,7 +124,7 @@ final class FrontController extends AbstractController
                     $entityManager->flush();
                         
                     
-                    $session->set('user_id', $utilisateur->getId());
+                    $session->set('temp_user_id', $utilisateur->getId());
                     return $this->redirectToRoute('2fa_login');
 
                 } else {
@@ -149,7 +149,7 @@ final class FrontController extends AbstractController
         EntityManagerInterface $entityManager, 
         #[Autowire(service: 'scheb_two_factor.security.google_authenticator')] GoogleAuthenticatorInterface $googleAuthenticator
     ): Response {
-        $userId = $session->get('user_id');
+        $userId = $session->get('temp_user_id');
 
         if (!$userId) {
             return $this->redirectToRoute('app_inscription');
@@ -188,6 +188,8 @@ final class FrontController extends AbstractController
             $code = $request->request->get('code');
         
             if ($googleAuthenticator->checkCode($utilisateur, $code)) {
+                $session->remove('temp_user_id');
+                $session->set('user_id', $utilisateur->getId());
                 return $this->redirectToRoute('app_controller');
             } else {
                 return $this->render('security/2fa_form.html.twig', [
@@ -513,8 +515,13 @@ final class FrontController extends AbstractController
     }
 
     #[Route('/front/ai', name: 'app_ai')]
-    public function ai(): Response
+    public function ai(SessionInterface $session): Response
     {
+        $userId = $session->get('user_id');
+        
+        if (!$session->get('user_id')) {
+            return $this->redirectToRoute('app_inscription');
+        }
         return $this->render('front/index_ai.html.twig', [
             'controller_name' => 'FrontController',
         ]);
