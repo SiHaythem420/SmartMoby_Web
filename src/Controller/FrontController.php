@@ -512,6 +512,14 @@ final class FrontController extends AbstractController
         ]);
     }
 
+    #[Route('/front/ai', name: 'app_ai')]
+    public function ai(): Response
+    {
+        return $this->render('front/index_ai.html.twig', [
+            'controller_name' => 'FrontController',
+        ]);
+    }
+
 
 
 
