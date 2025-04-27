@@ -1,0 +1,102 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Add New Blog Post{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0 text-dark">
+                    <i class="fas fa-plus-circle me-2 text-primary"></i>New Blog Post
+                </h1>
+                <a href="{{ path('list-blog') }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-times me-1"></i> Cancel
+                </a>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    {{ form_start(blog_form) }}
+                    
+                        {# Title Field - Minimal #}
+                        <div class="mb-4">
+                            {{ form_label(blog_form.title, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(blog_form.title, {
+                                'attr': {
+                                    'class': 'form-control',
+                                    'placeholder': 'Enter post title'
+                                }
+                            }) }}
+                        </div>
+
+                        {# Content Field - Clean #}
+                        <div class="mb-4">
+                            {{ form_label(blog_form.content, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(blog_form.content, {
+                                'attr': {
+                                    'class': 'form-control',
+                                    'rows': 10,
+                                    'placeholder': 'Write your content here...'
+                                }
+                            }) }}
+                        </div>
+
+                        {# Date and Featured - Compact #}
+                        <div class="row mb-4 g-3">
+                            <div class="col-md-6">
+                                {{ form_label(blog_form.date, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(blog_form.date, {
+                                    'attr': {'class': 'form-control'}
+                                }) }}
+                            </div>
+                            <div class="col-md-6 d-flex align-items-end">
+                                <div class="form-check form-switch ps-0">
+                                    {{ form_widget(blog_form.isFeatured, {
+                                        'attr': {'class': 'form-check-input ms-0 me-2'}
+                                    }) }}
+                                    {{ form_label(blog_form.isFeatured, null, {
+                                        'label_attr': {'class': 'form-check-label'}
+                                    }) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        {# Image Upload - Simplified #}
+                        <div class="mb-4">
+                            {{ form_label(blog_form.imageFile, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(blog_form.imageFile, {
+                                'attr': {'class': 'form-control'}
+                            }) }}
+                        </div>
+
+                        {# Single Submit Button - Centered #}
+                        <div class="text-center mt-4 pt-3 border-top">
+                            <button type="submit" class="btn btn-primary px-4 py-2">
+                                <i class="fas fa-paper-plane me-2"></i> Publish Post
+                            </button>
+                        </div>
+                    {{ form_end(blog_form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 8px;
+    }
+    textarea.form-control {
+        min-height: 300px;
+        resize: vertical;
+    }
+    .form-check-input {
+        margin-left: 0;
+    }
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+    }
+</style>
+{% endblock %}
