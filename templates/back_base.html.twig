@@ -168,6 +168,10 @@
                         
                         <div class="table-responsive product-list">
                             
+                            <div class="mb-3">
+                                <input type="text" id="searchInput" class="form-control" placeholder="Rechercher...">
+                            </div>
+
                             <table class="table table-bordered table-striped mt-0" id="productList">
                                 <thead>
                                     <tr>
@@ -466,6 +470,66 @@
     <script>
         //Nice select
         $('.bulk-actions').niceSelect();
+    </script>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const tableBody = document.querySelector('#productList tbody');
+    let timeoutId;
+
+    searchInput.addEventListener('keyup', function() {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            const searchTerm = this.value;
+            
+            fetch(`/api/search-users?term=${encodeURIComponent(searchTerm)}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                tableBody.innerHTML = '';
+                
+                data.forEach(user => {
+                    const row = `
+                        <tr>
+                            <td style="width: 10px;" class="p-0 pr-1 align-middle">
+                                <div class="form-check-box cta">
+                                    <span class="color1">
+                                        <input type="checkbox" id="order${user.id}">
+                                        <label for="order${user.id}"></label>
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="align-middle">${user.nom}</td>
+                            <td class="align-middle">${user.prenom}</td>
+                            <td class="align-middle">${user.nomUtilisateur}</td>
+                            <td class="align-middle">${user.email}</td>
+                            <td class="align-middle">${user.motDePasse}</td>
+                            <td class="align-middle">${user.role}</td>
+                            <td class="align-middle">${user.role === 'ADMIN' ? (user.departement || 'N/A') : 'N/A'}</td>
+                            <td class="align-middle">${user.role === 'ORGANISATEUR' ? (user.numBadge || 'N/A') : 'N/A'}</td>
+                            <td class="align-middle">${user.role === 'CONDUCTEUR' ? (user.numeroPermis || 'N/A') : 'N/A'}</td>
+                            <td class="align-middle">${user.ban ? 'Banni' : 'Non banni'}</td>
+                            <td class="align-middle text-center">
+                                <a href="/back/user/ban/${user.id}" class="btn btn-danger">
+                                    <i class="fas fa-ban"></i> Bannir
+                                </a>
+                                <a href="/back/user/unban/${user.id}" class="btn btn-success">
+                                    <i class="fas fa-check"></i> Débannir
+                                </a>
+                            </td>
+                        </tr>
+                    `;
+                    tableBody.insertAdjacentHTML('beforeend', row);
+                });
+            })
+            .catch(error => console.error('Erreur:', error));
+        }, 300);
+    });
+});
     </script>
   </body>
 </html>
