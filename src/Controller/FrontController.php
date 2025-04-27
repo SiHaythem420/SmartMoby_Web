@@ -41,6 +41,13 @@ use BaconQrCode\Renderer\ImageRenderer;
 
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
+use App\Form\MotDePasseOublie1Type;
+use App\Form\MotDePasseOublie2Type;
+use App\Form\MotDePasseOublie3Type;
+
+use \Mailjet\Resources;
+
+
 
 
 
@@ -561,12 +568,215 @@ final class FrontController extends AbstractController
         ]);
     }
 
+    #[Route('/front/mot_de_passe_oublie', name: 'mot_de_passe_oublie')]
+    public function motDePasseOublie(Request $request, SessionInterface $session, EntityManagerInterface $entityManager): Response
+    {
+        if ($request->isMethod('POST')) {
+            $email = $request->request->get('email');
+            
+            // Rechercher l'utilisateur dans la base de données
+            $utilisateur = $entityManager->getRepository(Utilisateur::class)->findOneBy(['email' => $email]);
+            
+            if (!$utilisateur) {
+                $this->addFlash('error', 'Aucun compte associé à cet email');
+                return $this->redirectToRoute('mot_de_passe_oublie');
+            }
+            
+            // Générer le code de réinitialisation
+            $resetCode = sprintf('%06d', random_int(0, 999999));
+            
+            // Sauvegarder le code dans la base de données
+            $utilisateur->setResetCode($resetCode);
+            $entityManager->persist($utilisateur);
+            $entityManager->flush();
+            
+            // Sauvegarder l'email dans la session
+            $session->set('reset_email', $email);
 
-
-
-
+            try {
+                $apiKey = $_ENV['MAILJET_API_KEY'];
+                $apiSecret = $_ENV['MAILJET_API_SECRET'];
     
+                if (!$apiKey || !$apiSecret) {
+                    $this->addFlash('error', 'Configuration email manquante');
+                    return $this->redirectToRoute('mot_de_passe_oublie');
+                }
     
+                $mj = new \Mailjet\Client($apiKey, $apiSecret, true, ['version' => 'v3.1']);
+    
+                $body = [
+                    'Messages' => [
+                        [
+                            'From' => [
+                                'Email' => "sihaythemabdellaoui@gmail.com",
+                                'Name' => "Smart Moby"
+                            ],
+                            'To' => [
+                                [
+                                    'Email' => $email
+                                ]
+                            ],
+                            'Subject' => "Code de réinitialisation de mot de passe",
+                            'TextPart' => "Votre code de réinitialisation est : " . $resetCode,
+                            'HTMLPart' => "<h3>Réinitialisation de mot de passe</h3><br />Votre code de réinitialisation est : " . $resetCode
+                        ]
+                    ]
+                ];
+    
+                $response = $mj->post(Resources::$Email, ['body' => $body]);
+    
+                if ($response->success()) {
+                    return $this->redirectToRoute('app_mot_de_passe_oublie2');
+                }
+    
+                $this->addFlash('error', 'Erreur lors de l\'envoi de l\'email');
+                return $this->redirectToRoute('mot_de_passe_oublie');
+    
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Service email indisponible');
+                return $this->redirectToRoute('mot_de_passe_oublie');
+            }
+        }
 
+        return $this->render('front/mot_de_passe_oublie1.html.twig');
+    }
+
+    #[Route('/front/mot_de_passe_oublie2', name: 'app_mot_de_passe_oublie2')]
+    public function motDePasseOublie2(Request $request, SessionInterface $session, EntityManagerInterface $entityManager): Response
+    {
+        $email = $session->get('reset_email');
+        if(!$email){
+            return $this->redirectToRoute('mot_de_passe_oublie');
+        }
+
+        if ($request->isMethod('POST')) {
+            $resetCode = $request->request->get('reset_code');
+            $utilisateur = $entityManager->getRepository(Utilisateur::class)->findOneBy([
+                'email' => $email,
+                'reset_code' => $resetCode
+            ]);
+
+            if (!$utilisateur) {
+                $this->addFlash('error', 'Code de réinitialisation invalide');
+                return $this->redirectToRoute('app_mot_de_passe_oublie2');
+            }
+
+            // Si le code est valide, on stocke l'ID de l'utilisateur en session
+            $session->set('reset_user_id', $utilisateur->getId());
+            return $this->redirectToRoute('app_mot_de_passe_oublie3');
+        }
+
+        return $this->render('front/mot_de_passe_oublie2.html.twig', [
+            'FrontController' => 'FrontController'
+        ]);
+    }
+
+    #[Route('/front/mot_de_passe_oublie3', name: 'app_mot_de_passe_oublie3')]
+    public function motDePasseOublie3(Request $request, SessionInterface $session, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
+    {
+        $userId = $session->get('reset_user_id');
+        if (!$userId) {
+            return $this->redirectToRoute('mot_de_passe_oublie');
+        }
+
+        $utilisateur = $entityManager->getRepository(Utilisateur::class)->find($userId);
+        if (!$utilisateur) {
+            return $this->redirectToRoute('mot_de_passe_oublie');
+        }
+
+        $form = $this->createForm(MotDePasseOublie3Type::class, $utilisateur);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Hasher le nouveau mot de passe
+            $hashedPassword = $passwordHasher->hashPassword(
+                $utilisateur,
+                $form->get('mot_de_passe')->getData()
+            );
+            
+            // Mettre à jour le mot de passe
+            $utilisateur->setMotDePasse($hashedPassword);
+            // Effacer le code de réinitialisation
+            $utilisateur->setResetCode("");
+            
+            $entityManager->persist($utilisateur);
+            $entityManager->flush();
+
+            // Nettoyer la session
+            $session->remove('reset_user_id');
+            $session->remove('reset_email');
+
+            $this->addFlash('success', 'Votre mot de passe a été modifié avec succès');
+            return $this->redirectToRoute('app_inscription');
+        }
+
+        return $this->render('front/mot_de_passe_oublie3.html.twig', [
+            'FrontController' => 'FrontController',
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('front/send_email', name: 'send_email')]
+    public function sendEmail(Request $request, EntityManagerInterface $entityManager, SessionInterface $session)   
+    {
+        try {
+            $apiKey = $_ENV['MAILJET_API_KEY'];
+            $apiSecret = $_ENV['MAILJET_API_SECRET'];
+
+            if (!$apiKey || !$apiSecret) {
+                throw new \RuntimeException('Mailjet API credentials are not configured');
+            }
+
+            // Create Mailjet client
+            $mj = new \Mailjet\Client($apiKey, $apiSecret, true, ['version' => 'v3.1']);
+
+            // Prepare message
+            $body = [
+                'Messages' => [
+                    [
+                        'From' => [
+                            'Email' => "sihaythemabdellaoui@gmail.com",
+                            'Name' => "Smart Moby"
+                        ],
+                        'To' => [
+                            [
+                                'Email' => "haythemabdellaoui007@gmail.com"
+                            ]
+                        ],
+                        'Subject' => "Password Reset Request",
+                        'TextPart' => "Your password reset code is: XXXXX",
+                        'HTMLPart' => "<h3>Password Reset Request</h3><br />Your password reset code is: XXXXX"
+                    ]
+                ]
+            ];
+
+            // Send email
+            $response = $mj->post(Resources::$Email, ['body' => $body]);
+
+            if ($response->success()) {
+                return $this->json([
+                    'status' => 'success',
+                    'message' => 'Email sent successfully'
+                ]);
+            }
+
+            // Log the error details
+            $errorDetails = $response->getData();
+            
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Failed to send email',
+                'details' => $errorDetails
+            ], 500);
+
+        } catch (\Exception $e) {
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Email service error',
+                'details' => $e->getMessage()
+            ], 500);
+        }
+    }
 
 }
+

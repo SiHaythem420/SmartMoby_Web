@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+	{% block css %}
+	<link rel="stylesheet" href="{{ asset('css/login.css') }}">
+	{% endblock %}
+</head>
+<body>
+    
+<div class="container" id="container">
+	<div class="form-container sign-up-container">
+		<form action="{{ path('app_inscription') }}" method="post">
+    		<h1>Créer Un Compte</h1>
+    		
+		</form>
+	</div>
+	<div class="form-container sign-in-container">
+		<form method="POST" path="{{ path('app_mot_de_passe_oublie2') }}">
+            <input type = "text" name = "reset_code" placeholder = "Code de réinitialisation" required />
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            <button type="submit" style="margin-top: 20px;">Valider</button>
+		
+        </form>
+	</div>
+	<div class="overlay-container">
+		<div class="overlay">
+			<div class="overlay-panel overlay-left">
+				<h1>Bonjour !</h1>
+				<p>Entrez vos informations personnelles et commencez l'aventure ! </p>
+				<button class="ghost" id="signIn">Se Connecter ?</button>
+			</div>
+			<div class="overlay-panel overlay-right">
+				<h1> Mot de passe oublié </h1>
+				<p>Entrez le code de réinitialisation envoyé à votre email</p>
+				
+			</div>
+		</div>
+	</div>
+</div>
+
+{% block js %}
+<script src="{{ asset('js/login.js') }}"></script>
+{% endblock %}
+</body>
+</html>
