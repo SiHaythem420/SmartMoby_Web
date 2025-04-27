@@ -28,11 +28,6 @@ services:
             $slugger: '@Symfony\Component\String\Slugger\SluggerInterface'
 
 
-            parameters:
-    env(DEEP_TRANSLATE_API_KEY): ''
-    env(DEEP_TRANSLATE_API_HOST): ''
 
-    App\Service\DeepTranslateService:
-        arguments:
-            $apiKey: '%env(54c18af5b6mshf7f78a660ff45fep1c79e3jsn5327daf7875c)%'
-            $apiHost: '%env(deep-translate1.p.rapidapi.com)%'
+
+ 
