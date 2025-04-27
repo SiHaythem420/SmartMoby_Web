@@ -1,0 +1,139 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Featured Blogs{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .carousel-container {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+        
+        .blog-carousel {
+            display: flex;
+            transition: transform 0.5s ease;
+            width: 100%;
+        }
+        
+        .blog-card-wrapper {
+            flex: 0 0 33.33%;
+            padding: 0 15px;
+            box-sizing: border-box;
+        }
+        
+        .blog-card {
+            height: 100%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .carousel-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            cursor: pointer;
+            z-index: 10;
+            border: none;
+        }
+        
+        .carousel-nav.prev {
+            left: 20px;
+        }
+        
+        .carousel-nav.next {
+            right: 20px;
+        }
+        
+        .carousel-nav:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .view-all-btn {
+            text-align: center;
+            margin-top: 40px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="text-center mb-5">Featured Blog Posts</h1>
+    
+    <div class="carousel-container">
+        <button class="carousel-nav prev" onclick="moveCarousel(-1)" aria-label="Previous">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        
+        <div class="blog-carousel" id="blogCarousel">
+            {% for blog in blogs %}
+            <div class="blog-card-wrapper">
+                <div class="blog-card card">
+                    {% if blog.image %}
+                    <img src="{{ asset('uploads/blogs/' ~ blog.image) }}" class="card-img-top" alt="{{ blog.title }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                    <img src="{{ asset('img/blog-placeholder.jpg') }}" class="card-img-top" alt="Blog post" style="height: 200px; object-fit: cover;">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ blog.title }}</h5>
+                        <p class="text-muted"><small>{{ blog.date|date('F j, Y') }}</small></p>
+                        <p class="card-text">{{ blog.content|striptags|slice(0, 100) ~ '...' }}</p>
+                        <a href="{{ path('show-blog', {'id': blog.id}) }}" class="btn btn-primary">Read More</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <button class="carousel-nav next" onclick="moveCarousel(1)" aria-label="Next">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+    
+    <div class="view-all-btn">
+        <a href="{{ path('list-blog') }}" class="btn btn-outline-primary btn-lg">
+            <i class="fas fa-list me-2"></i> View All Blog Posts
+        </a>
+    </div>
+</div>
+
+<script>
+    const carousel = document.getElementById('blogCarousel');
+    const cards = document.querySelectorAll('.blog-card-wrapper');
+    const cardCount = cards.length;
+    const visibleCards = 3;
+    let currentPosition = 0;
+    
+    function updateCarousel() {
+        const cardWidth = 100 / visibleCards;
+        carousel.style.transform = `translateX(-${currentPosition * cardWidth}%)`;
+        
+        // Update button states
+        document.querySelector('.carousel-nav.prev').disabled = currentPosition === 0;
+        document.querySelector('.carousel-nav.next').disabled = 
+            currentPosition >= cardCount - visibleCards;
+    }
+    
+    function moveCarousel(direction) {
+        const moveBy = direction * visibleCards;
+        currentPosition = Math.max(0, 
+            Math.min(currentPosition + moveBy, cardCount - visibleCards));
+        updateCarousel();
+    }
+    
+    // Initialize
+    updateCarousel();
+</script>
+{% endblock %}

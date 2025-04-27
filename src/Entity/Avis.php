@@ -3,14 +3,15 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-
+use App\Entity\Blog; // Add this import
 
 #[ORM\Entity]
+#[ORM\Table(name: 'avis')] // Explicit table name mapping
 class Avis
 {
-
     #[ORM\Id]
-    #[ORM\Column(type: "integer")]
+    #[ORM\GeneratedValue(strategy: "AUTO")]
+    #[ORM\Column(name: "avis_id", type: "integer")]
     private int $id;
 
     #[ORM\Column(type: "string", length: 255)]
@@ -22,43 +23,64 @@ class Avis
     #[ORM\Column(type: "date")]
     private \DateTimeInterface $date;
 
-    public function getId()
+    #[ORM\ManyToOne(targetEntity: Blog::class, inversedBy: 'avis')]
+    #[ORM\JoinColumn(name: 'blog_id', referencedColumnName: 'blog_id', nullable: false)]
+    private Blog $blog;
+
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function setId($value)
+    public function setId(int $id): self
     {
-        $this->id = $value;
+        $this->id = $id;
+        return $this;
     }
 
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    public function setName($value)
+    public function setName(string $name): self
     {
-        $this->name = $value;
+        $this->name = $name;
+        return $this;
     }
 
-    public function getComment()
+    public function getComment(): string
     {
         return $this->comment;
     }
 
-    public function setComment($value)
+    public function setComment(string $comment): self
     {
-        $this->comment = $value;
+        $this->comment = $comment;
+        return $this;
     }
 
-    public function getDate()
+    public function getDate(): \DateTimeInterface
     {
         return $this->date;
     }
 
-    public function setDate($value)
+    public function setDate(\DateTimeInterface $date): self
     {
-        $this->date = $value;
+        $this->date = $date;
+        return $this;
     }
+
+    public function getBlog(): ?Blog
+    {
+        return $this->blog;
+    }
+
+    public function setBlog(?Blog $blog): static
+    {
+        $this->blog = $blog;
+        return $this;
+    }
+
+    
 }
