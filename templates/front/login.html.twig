@@ -53,7 +53,7 @@
     		<h1>Se Connecter</h1>
     		<input type="email" name="email" placeholder="Email" required />
     		<input type="password" name="mot_de_passe" placeholder="Mot De Passe" required />
-    		<a href="#">Mot De Passe Oublié ?</a>
+    		<a href={{ path('mot_de_passe_oublie') }}>Mot De Passe Oublié ?</a>
     		<button type="submit">Se Connecter</button>
 			{% if error %}
                 <div class="alert alert-danger">{{ error }}</div>
