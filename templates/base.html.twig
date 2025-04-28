@@ -72,21 +72,24 @@ https://templatemo.com/tm-559-zay-shop
 
             <div class="align-self-center collapse navbar-collapse flex-fill  d-lg-flex justify-content-lg-between" id="templatemo_main_nav">
                 <div class="flex-fill">
-                    <ul class="nav navbar-nav d-flex justify-content-between mx-lg-auto">
+                    <ul class="nav navbar-nav d-flex justify-content-evenly align-items-center w-100">
                         <li class="nav-item">
-                            <a class="nav-link" href="/front/index">{{ 'app.shop.navigation.home'|trans }}</a>
+                            <a class="nav-link" href="">Accueil</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="about.html">{{ 'app.shop.navigation.services'|trans }}</a>
+                            <a class="nav-link" href="about.html">Services</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ path('app_shop') }}">{{ 'app.shop.navigation.traffic_routes'|trans }}</a>
+                            <a class="nav-link" href="shop.html">Trajet Du Trafic</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="contact.html">{{ 'app.shop.navigation.events'|trans }}</a>
+                            <a class="nav-link" href="contact.html">Evenements</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="contact.html">{{ 'app.shop.navigation.blog'|trans }}</a>
+                            <a class="nav-link" href="contact.html">Blog</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href={{path('app_ai')}}>SmartMoby AI</a>
                         </li>
                     </ul>
                 </div>
@@ -117,8 +120,8 @@ https://templatemo.com/tm-559-zay-shop
                             <i class="fa fa-fw fa-user text-dark mr-3"></i>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="">{{ 'app.shop.navigation.settings'|trans }}</a></li>
-                            <li><a class="dropdown-item" href="">{{ 'app.shop.navigation.logout'|trans }}</a></li>
+                            <li><a class="dropdown-item" href="{{path ('app_account_settings')}}">Paramètres</a></li>
+                            <li><a class="dropdown-item" href="{{path ('app_logout')}}">Se Déconnecter</a></li>
                         </ul>
                     </div>
                 </div>

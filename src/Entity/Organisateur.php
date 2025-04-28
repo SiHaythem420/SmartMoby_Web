@@ -3,10 +3,12 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 use App\Entity\Utilisateur;
 
 #[ORM\Entity]
+#[UniqueEntity(fields: ['num_badge'], message: 'Ce numéro de badge est déjà utilisé.')]
 class Organisateur
 {
 
@@ -15,7 +17,7 @@ class Organisateur
     #[ORM\JoinColumn(name: 'id', referencedColumnName: 'id', onDelete: 'CASCADE')]
     private Utilisateur $id;
 
-    #[ORM\Column(type: "integer")]
+    #[ORM\Column(type: "integer" , unique :true)]
     private int $num_badge;
 
     public function getId()
@@ -28,12 +30,12 @@ class Organisateur
         $this->id = $value;
     }
 
-    public function getNum_badge()
+    public function getNumBadge()
     {
         return $this->num_badge;
     }
 
-    public function setNum_badge($value)
+    public function setNumBadge($value)
     {
         $this->num_badge = $value;
     }
