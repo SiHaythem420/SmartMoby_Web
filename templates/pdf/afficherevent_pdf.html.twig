@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Liste des Événements</title>
+    <style>
+        body { 
+            font-family: helvetica; 
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #4a90e2;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4a90e2;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .date-generation {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .title {
+            background: #4a90e2;
+            color: white;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 18px;
+            border-radius: 5px;
+        }
+
+        .events-summary {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .summary-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4a90e2;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            background: white;
+        }
+
+        th {
+            background-color: #4a90e2;
+            color: white;
+            padding: 12px;
+            font-size: 12px;
+            text-align: left;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 11px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .event-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .status-upcoming {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .status-past {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+
+        .page-break {
+            page-break-after: always;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">SmartMoby</div>
+        <div class="date-generation">Généré le {{ "now"|date('d/m/Y à H:i') }}</div>
+    </div>
+
+    <div class="title">
+        Liste des Événements
+    </div>
+
+    <div class="events-summary">
+        <div class="summary-number">{{ events|length }}</div>
+        <div>Événements au total</div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Nom de l'événement</th>
+                <th>Date</th>
+                <th>Lieu</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for event in events %}
+                <tr>
+                    <td>{{ event.nom }}</td>
+                    <td>{{ event.date|date('d/m/Y') }}</td>
+                    <td>{{ event.lieu }}</td>
+                    <td>
+                        {% if event.date > date() %}
+                            <span class="event-status status-upcoming">À venir</span>
+                        {% else %}
+                            <span class="event-status status-past">Passé</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <p>SmartMoby - Document confidentiel</p>
+        <p>© {{ "now"|date('Y') }} Tous droits réservés</p>
+    </div>
+</body>
+</html>

@@ -97,49 +97,45 @@ https://templatemo.com/tm-559-zay-shop
     <!-- Close Header -->
 
     <!-- Modal -->
-    {%block content %}
-    <table class="table table-bordered table-striped mt-0" id="productList">
-                                <thead>
-                                    <tr>
-                                        
-                                        <th>commentaire</th>
-                                        <th>note</th>
-                                        
-                                        <th>Actions</th>
-                                        
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for fedback in fedbacks %}
-            <tr>
-                
-                <td class="align-middle">{{ fedback.getCommentaire() }}</td>
-                
-                <td class="align-middle">{{ fedback.getNote() }}</td>
-                <td class="align-middle text-center">
-                    <button class="btn btn-success" data-toggle="modal" data-target="#orderUpdate" data-id="{{ fedback.getId() }}" >
-                        <i class="fa fa-pencil"></i>
-                    </button>
-                    <button class="btn btn-danger" data-id="{{ fedback.getId() }}" >    
-                    <i class="fas fa-trash" ></i>
-                    </button>
-                </td>              
-    
-</td>
+    {% block content %}
+<div class="container my-5">
+    <div class="text-center mb-5">
+        <h1 class="text-success">Liste des Feedbacks</h1>
+    </div>
 
-                
-                {% endfor %}
-                
-                
-                
-                
-            </tr>
-        
+    <div class="row g-4">
+        {% for fedback in fedbacks %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-sm h-100 border-0">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">
+                            <i class="fa fa-comment-dots me-2"></i>Commentaire
+                        </h5>
+                        <p class="card-text">{{ fedback.getCommentaire() }}</p>
+                        <p class="card-text">
+                            <i class="fa fa-star text-warning me-1"></i>
+                            <strong>Note:</strong> {{ fedback.getNote() }}/5
+                        </p>
+                    </div>
+                    <div class="card-footer bg-transparent d-flex justify-content-between">
+                        <button class="btn btn-outline-success btn-sm update-feedback" data-id="{{ fedback.getId() }}">
+                            <i class="fa fa-pencil-alt"></i> Modifier
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm delete-feedback" data-id="{{ fedback.getId() }}">
+                            <i class="fa fa-trash-alt"></i> Supprimer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-12">
+                <p class="text-center text-muted">Aucun feedback disponible pour le moment.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
 
-                                    
-                            </table>
-
-    {% endblock %}
 
 
     <!-- Start Footer -->
@@ -205,7 +201,7 @@ https://templatemo.com/tm-559-zay-shop
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         // Sélectionnez tous les boutons avec la classe "btn-success"
-        const buttons = document.querySelectorAll('.btn-danger');
+        const buttons = document.querySelectorAll('.delete-feedback');
 
         buttons.forEach(button => {
             button.addEventListener('click', function () {
@@ -223,7 +219,7 @@ https://templatemo.com/tm-559-zay-shop
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         // Sélectionnez tous les boutons avec la classe "btn-success"
-        const buttons = document.querySelectorAll('.btn-success');
+        const buttons = document.querySelectorAll('.update-feedback');
 
         buttons.forEach(button => {
             button.addEventListener('click', function () {

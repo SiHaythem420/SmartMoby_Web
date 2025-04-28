@@ -1,0 +1,20 @@
+# config/packages/nucleos_dompdf.yaml
+nucleos_dompdf:
+  defaults:
+    defaultFont: 'helvetica'
+    # Active le chargement des assets distants (CSS, images via asset())
+    isRemoteEnabled: true
+    # Utilise le parser HTML5 pour un meilleur rendu
+    isHtml5ParserEnabled: true
+    # Exemples d’autres options que tu peux ajouter ici directement :
+    # dpi: 150
+    # defaultPaperSize: 'a4'
+    # defaultPaperOrientation: 'portrait'
+    # chroot: '%kernel.project_dir%/public'  # pour restreindre l’accès aux fichiers locaux
+    isPhpEnabled: true
+    isFontSubsettingEnabled: true
+    defaultMediaType: 'screen'
+    defaultPaperSize: 'A4'
+    defaultPaperOrientation: 'portrait'
+    dpi: 96
+    fontHeightRatio: 1.1

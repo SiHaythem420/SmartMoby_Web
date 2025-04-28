@@ -1,247 +1,265 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <title>{% block title %} Zay Shop eCommerce HTML CSS Template {% endblock %} </title>
+    <title>{% block title %}SMART MOBY - Événements{% endblock %}</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     {% block css %}
-    <link rel="apple-touch-icon" href="{{asset('img/apple-icon.png')}}">
-    <link rel="shortcut icon" type="image/x-icon" href="{{asset('img/favicon.ico')}}">
-
-    <link rel="stylesheet" href="{{asset('css/bootstrap.min.css')}}">
-    <link rel="stylesheet" href="{{asset('css/templatemo.css')}}">
-    <link rel="stylesheet" href="{{asset('css/custom.css')}}">
-
-    <!-- Load fonts style after rendering the layout styles -->
+    <link rel="apple-touch-icon" href="{{ asset('img/apple-icon.png') }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('img/favicon.ico') }}">
+    <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/templatemo.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;200;300;400;500;700;900&display=swap">
-    <link rel="stylesheet" href="{{asset('css/fontawesome.min.css')}}">
+    <link rel="stylesheet" href="{{ asset('css/fontawesome.min.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
     {% endblock %}
-    <!--
 
-    
-TemplateMo 559 Zay Shop
+    <style>
+        .page-link {
+            color: #0d6efd;
+            border: 1px solid #dee2e6;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
 
-https://templatemo.com/tm-559-zay-shop
+        .page-link:hover {
+            background-color: #e2e6ea;
+            color: #0a58ca;
+            transform: scale(1.05);
+        }
 
--->
+        .page-item.active .page-link {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+        }
+
+        .page-item.disabled .page-link {
+            color: #6c757d;
+        }
+    </style>
 </head>
 
 <body>
-    
-
-    {% block header %}
-    <!-- Header -->
-    <nav class="navbar navbar-expand-lg navbar-light shadow">
-        <div class="container d-flex justify-content-between align-items-center">
-
-            <a class="navbar-brand text-success logo h1 align-self-center" href="index.html">
-                SMART MOBY
-            </a>
-
-            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#templatemo_main_nav" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="align-self-center collapse navbar-collapse flex-fill  d-lg-flex justify-content-lg-between" id="templatemo_main_nav">
-                <div class="flex-fill">
-                    <ul class="nav navbar-nav d-flex justify-content-between mx-lg-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="">Acceuil</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="about.html">Services </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="shop.html">Trajet Du Trafic </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{path ('afficher_event')}}">Evenements</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="contact.html">Blog</a>
-                        </li>
+{% block header %}
+<nav class="navbar navbar-expand-lg navbar-light shadow">
+    <div class="container d-flex justify-content-between align-items-center">
+        <a class="navbar-brand text-success logo h1 align-self-center" href="index.html">SMART MOBY</a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#templatemo_main_nav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="align-self-center collapse navbar-collapse flex-fill d-lg-flex justify-content-lg-between" id="templatemo_main_nav">
+            <div class="flex-fill">
+                <ul class="nav navbar-nav d-flex justify-content-between mx-lg-auto">
+                    <li class="nav-item"><a class="nav-link" href="#">Acceuil</a></li>
+                    <li class="nav-item"><a class="nav-link" href="about.html">Services</a></li>
+                    <li class="nav-item"><a class="nav-link" href="shop.html">Trajet Du Trafic</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ path('afficher_event') }}">Evenements</a></li>
+                    <li class="nav-item"><a class="nav-link" href="contact.html">Blog</a></li>
+                </ul>
+            </div>
+            <div class="navbar align-self-center d-flex">
+                <a class="nav-icon d-none d-lg-inline" href="#" data-bs-toggle="modal" data-bs-target="#templatemo_search">
+                    <i class="fa fa-fw fa-search text-dark mr-2"></i>
+                </a>
+                <div class="dropdown">
+                    <a class="nav-icon position-relative text-decoration-none dropdown-toggle" href="#" id="userDropdown" data-bs-toggle="dropdown">
+                        <i class="fa fa-fw fa-user text-dark mr-3"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item" href="{{ path('app_account_settings') }}">Paramètres</a></li>
+                        <li><a class="dropdown-item" href="{{ path('app_logout') }}">Se Déconnecter</a></li>
                     </ul>
                 </div>
-                <div class="navbar align-self-center d-flex">
-                    <div class="d-lg-none flex-sm-fill mt-3 mb-4 col-7 col-sm-auto pr-3">
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="inputMobileSearch" placeholder="Search ...">
-                            <div class="input-group-text">
-                                <i class="fa fa-fw fa-search"></i>
+            </div>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <input type="text" id="searchInput" class="form-control" placeholder="Rechercher un événement...">
+        </div>
+        <div class="col-md-6">
+            <select id="sortSelect" class="form-select">
+                <option value="date_desc">Date (Plus récent)</option>
+                <option value="date_asc">Date (Plus ancien)</option>
+                <option value="nom_asc">Nom (A-Z)</option>
+                <option value="nom_desc">Nom (Z-A)</option>
+                <option value="lieu_asc">Lieu (A-Z)</option>
+                <option value="lieu_desc">Lieu (Z-A)</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-md-4 d-flex justify-content-start mb-3">
+    <a href="/events/pdf" class="btn btn-danger btn-lg shadow rounded-pill">
+        <i class="fa fa-file-pdf me-2"></i> Télécharger le PDF
+    </a>
+</div>
+
+                            
+                        
+
+    <div class="row g-4" id="eventList">
+        {% for event in events %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <h5 class="card-title text-success">
+                        <i class="fa fa-calendar-alt me-2"></i>{{ event.getNom() }}
+                    </h5>
+                    <p class="card-text">
+                        <i class="fa fa-clock text-muted me-1"></i>
+                        <strong>Date:</strong> {{ event.getDate()|date('Y-m-d') }}
+                    </p>
+                    <p class="card-text">
+                        <i class="fa fa-map-marker-alt text-muted me-1"></i>
+                        <strong>Lieu:</strong> {{ event.getLieu() }}
+                    </p>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <a href="{{ path('afficher_fedback', {'id': event.getIdEvent()}) }}" class="btn btn-primary">Voir</a>
+                            </div>
+                            <div class="col-md-4">
+                                <a href="{{ path('ajouter_fedback', {'id': event.getIdEvent()}) }}" class="btn btn-secondary">Feedback</a>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-info" onclick="showQRCode('{{ path('event_qr_image', {'id_event': event.getIdEvent()}) }}')">
+                                    <i class="fa fa-qrcode"></i> QR
+                                </button>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Modal pour afficher le QR Code -->
+    <div class="modal fade" id="qrCodeModal" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="qrCodeModalLabel">QR Code de l'événement</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="qrCodeImage" src="" alt="QR Code" style="max-width: 100%; height: auto;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-5 d-flex justify-content-center">
+        <div class="text-center text-muted mb-3">
+            Page {{ events.currentPageNumber }} sur {{ events.pageCount }} – Total : {{ events.totalItemCount }} événements
+        </div>
+    </div>
+
+    <div class="mt-5 d-flex justify-content-center">
+        <nav>
+            {{ knp_pagination_render(events,'@KnpPaginator/Pagination/bootstrap_v5_pagination.html.twig' ) }}
+        </nav>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script src="{{ asset('js/jquery-1.11.0.min.js') }}"></script>
+<script src="{{ asset('js/jquery-migrate-1.2.1.min.js') }}"></script>
+<script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ asset('js/templatemo.js') }}"></script>
+<script src="{{ asset('js/custom.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+
+<script>
+let currentQuery = '';
+let currentSort = 'date_desc';
+
+function showQRCode(url) {
+    // Vider d'abord la source de l'image
+    document.getElementById('qrCodeImage').src = '';
+    // Puis définir la nouvelle source
+    document.getElementById('qrCodeImage').src = url;
+    const modal = new bootstrap.Modal(document.getElementById('qrCodeModal'));
+    modal.show();
+}
+
+function updateEvents() {
+    fetch(`/search-events?query=${encodeURIComponent(currentQuery)}&sort=${currentSort}`)
+        .then(response => response.json())
+        .then(data => {
+            const eventList = document.getElementById('eventList');
+            eventList.innerHTML = '';
+            
+            data.events.forEach(event => {
+                eventList.innerHTML += `
+                    <div class="col-md-6 col-lg-4" data-aos="fade-up">
+                        <div class="card h-100 shadow-sm border-0">
+                            <div class="card-body">
+                                <h5 class="card-title text-success">
+                                    <i class="fa fa-calendar-alt me-2"></i>${event.nom}
+                                </h5>
+                                <p class="card-text">
+                                    <i class="fa fa-clock text-muted me-1"></i>
+                                    <strong>Date:</strong> ${event.date}
+                                </p>
+                                <p class="card-text">
+                                    <i class="fa fa-map-marker-alt text-muted me-1"></i>
+                                    <strong>Lieu:</strong> ${event.location}
+                                </p>
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <a href="/front/afficher_fedback/${event.id}" class="btn btn-primary">Voir</a>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <a href="/front/ajouter_fedback/${event.id}" class="btn btn-secondary">Feedback</a>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <button class="btn btn-info" onclick="showQRCode('/event/${event.id}/qr_image')">
+                                                <i class="fa fa-qrcode"></i> QR
+                                            </button>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <a href="/events/pdf" class="btn btn-danger">
+                                                <i class="fa fa-file-pdf"></i> PDF
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <a class="nav-icon d-none d-lg-inline" href="#" data-bs-toggle="modal" data-bs-target="#templatemo_search">
-                        <i class="fa fa-fw fa-search text-dark mr-2"></i>
-                    </a>
-                    
-                    <div class="dropdown">
-                        <a class="nav-icon position-relative text-decoration-none dropdown-toggle" href="#" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fa fa-fw fa-user text-dark mr-3"></i>
-                                
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="{{path ('app_account_settings')}}">Paramètres</a></li>
-                            <li><a class="dropdown-item" href="{{path ('app_logout')}}">Se Déconnecter</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </nav>
-    {% endblock %}
-    <!-- Close Header -->
-
-    <!-- Modal -->
-    {%block content %}
-    <table class="table table-bordered table-striped mt-0" id="productList">
-                                <thead>
-                                    <tr>
-                                        
-                                        <th>Nom</th>
-                                        <th>Date</th>
-                                        <th>Lieu</th>
-                                        <th>Actions</th>
-                                        
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for event in events %}
-            <tr>
-                
-                <td class="align-middle">{{ event.getNom() }}</td>
-                <td class="align-middle">{{ event.getDate()|date('Y-m-d') }}</td>
-                <td class="align-middle">{{ event.getLieu() }}</td>
-                <td class="align-middle text-center">
-                    <button class="btn btn-theme" data-toggle="modal" data-target="#orderInfo" data-id="{{ event.getIdEvent() }}">
-                        <i class="fa fa-eye"></i>
-                    </button>
-                    
-                </td>
-                <td class="align-middle text-center">
-    <button class="btn btn-outline-primary btn-sm" data-id="{{ event.getIdEvent() }}" title="Ajouter un Feedback">
-        <i class="fa fa-comment-dots"></i> Ajouter un Feedback
-    </button>
-</td>
-
-                
-                {% endfor %}
-                
-                
-                
-                
-            </tr>
-        
-
-                                    
-                            </table>
-
-    {% endblock %}
-
-
-    <!-- Start Footer -->
-     {% block footer %}
-    <footer class="bg-dark" id="tempaltemo_footer">
-        <div class="container">
-            <div class="row">
-
-                <div class="col-md-4 pt-5">
-                    <h2 class="h2 text-success border-bottom pb-3 border-light logo">Smart Moby</h2>
-                    <ul class="list-unstyled text-light footer-link-list">
-                        <li>
-                            <i class="fas fa-map-marker-alt fa-fw"></i>
-                            Cité El Ghazela, Ariana, Tunis
-                        </li>
-                        <li>
-                            <i class="fa fa-phone fa-fw"></i>
-                            <a class="text-decoration-none" >+216 98 444 555</a>
-                        </li>
-                        <li>
-                            <i class="fa fa-envelope fa-fw"></i>
-                            <a class="text-decoration-none" >info@smart_moby.com</a>
-                        </li>
-                    </ul>
-                </div>
-
-                
-
-            </div>
-
-            
-                
-        </div>
-
-        <div class="w-100 bg-black py-3">
-            <div class="container">
-                <div class="row pt-2">
-                    <div class="col-12">
-                        <p class="text-left text-light">
-                            Copyright &copy; 2025 Smart Moby Co., Ltd.
-                            
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </footer>
-    {% endblock %}
-    <!-- End Footer -->
-
-    {% block js %}
-    <!-- Start Script -->
-    <script src="{{asset('js/jquery-1.11.0.min.js')}}"></script>
-    <script src="{{asset('js/jquery-migrate-1.2.1.min.js')}}"></script>
-    <script src="{{asset('js/bootstrap.bundle.min.js')}}"></script>
-    <script src="{{asset('js/templatemo.js')}}"></script>
-    <script src="{{asset('js/custom.js')}}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-    <script>
-        AOS.init(); // Initialise AOS
-    </script>
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Sélectionnez tous les boutons avec la classe "btn-success"
-        const buttons = document.querySelectorAll('.btn-sm');
-
-        buttons.forEach(button => {
-            button.addEventListener('click', function () {
-                // Récupérez l'id_event à partir de l'attribut data-id
-                const idEvent = this.getAttribute('data-id');
-                console.log('ID de l\'événement :', idEvent);
-               window.location.href = `/front/ajouter_fedback/${idEvent}`;
-
-                // Vous pouvez maintenant utiliser l'idEvent comme vous le souhaitez
-                // Par exemple, le transmettre à un formulaire ou effectuer une requête AJAX
+                `;
             });
-        });
-    });
+        })
+        .catch(error => console.error('Erreur:', error));
+}
+
+document.getElementById('searchInput').addEventListener('input', function() {
+    currentQuery = this.value;
+    updateEvents();
+});
+
+document.getElementById('sortSelect').addEventListener('change', function() {
+    currentSort = this.value;
+    updateEvents();
+});
+
+// Animation initiale
+AOS.init({
+    duration: 800,
+    once: true
+});
 </script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Sélectionnez tous les boutons avec la classe "btn-success"
-        const buttons = document.querySelectorAll('.btn-theme');
-
-        buttons.forEach(button => {
-            button.addEventListener('click', function () {
-                // Récupérez l'id_event à partir de l'attribut data-id
-                const idEvent = this.getAttribute('data-id');
-                console.log('ID de l\'événement :', idEvent);
-               window.location.href = `/front/afficher_fedback/${idEvent}`;
-
-                // Vous pouvez maintenant utiliser l'idEvent comme vous le souhaitez
-                // Par exemple, le transmettre à un formulaire ou effectuer une requête AJAX
-            });
-        });
-    });
-</script>
-
-    {% endblock %}
-    <!-- End Script -->
-</body>
-
-</html>
+{% endblock %}

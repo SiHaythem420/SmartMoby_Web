@@ -21,6 +21,9 @@ class Evenment
 
     #[ORM\Column(type: "string", length: 50)]
     #[Assert\NotBlank(message: "Le nom de l'événement est obligatoire.")]
+    #[Assert\Length(max: 50, maxMessage: "Le nom ne doit pas dépasser {{ limit }} caractères.")]
+    #[Assert\Regex(pattern: "/^[a-zA-Z0-9\s]+$/", message: "Le nom ne doit contenir que des lettres et des chiffres.")]
+    
     private string $nom;
 
     #[ORM\Column(type: "date")]
@@ -28,7 +31,9 @@ class Evenment
     private \DateTimeInterface $date;
 
     #[ORM\Column(type: "string", length: 50)]
-    #[Assert\NotBlank(message: "Le nom de l'événement est obligatoire.")]
+    #[Assert\NotBlank(message: "Le lieu de l'événement est obligatoire.")]
+    #[Assert\Length(max: 50, maxMessage: "Le lieu ne doit pas dépasser {{ limit }} caractères.")]
+    #[Assert\Regex(pattern: "/^[a-zA-Z0-9\s]+$/", message: "Le lieu ne doit contenir que des lettres et des chiffres.")]
     private string $lieu;
 
     public function getIdEvent()

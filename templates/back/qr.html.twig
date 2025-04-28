@@ -1,0 +1,9 @@
+
+{% block content %}
+    <h1>evenement cree avec succes 🎉</h1>
+    <p>l'événement <strong>{{ event.nom }}</strong> !</p>
+
+    <h3>Voici votre QR Code :</h3>
+    <img src="{{ qrPath }}" alt="QR Code">
+
+{% endblock %}
