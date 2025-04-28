@@ -6,28 +6,32 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Doctrine\ORM\EntityManagerInterface;
-
 use App\Entity\Admin;
 use App\Entity\Utilisateur;
 use App\Entity\Client;
 use App\Entity\Conducteur;
 use App\Entity\Organisateur;
-use App\Entity\Evenment; // Assurez-vous que le nom de la classe est correct
-
+use App\Entity\Evenment;
+use App\Form\EvenmentType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use App\Service\InfobipSmsSender;
+use App\Service\GoogleAuthService;
+use App\Service\QrCodeService;
+use Endroid\QrCode\Builder\BuilderInterface;
+use Nucleos\DompdfBundle\Wrapper\DompdfWrapperInterface;
+use App\Repository\EvenmentRepository;
 
-use App\Form\UtilisateurType;
-use App\Form\AdminType;
-use App\Form\UtilisateurBackType;
-use App\Form\UpdateUtilisateurType;
-use App\Form\EvenmentType; 
+final class BackController extends AbstractController
+{
+    private GoogleAuthService $googleAuthService;
 
+    public function __construct(GoogleAuthService $googleAuthService)
+    {
+        $this->googleAuthService = $googleAuthService;
+    }
+     
 
-final class BackController extends AbstractController{
     #[Route('/back', name: 'app_back')]
     public function index(EntityManagerInterface $entityManager , SessionInterface $session): Response
     {
@@ -255,36 +259,151 @@ final class BackController extends AbstractController{
 
     //oussema
     #[Route('/back/add_event', name: 'app_back_add_event')]
-    public function addEvent(Request $request, EntityManagerInterface $entityManager): Response
-    {
-        $event = new Evenment(); // Assure-toi que c’est bien ton entité
+    public function addEvent(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        InfobipSmsSender $messageSender,
+        GoogleAuthService $googleAuthService,
+        QrCodeService $qrCodeService,
+        SessionInterface $session
+    ): Response {
+        $event = new Evenment();
         $form = $this->createForm(EvenmentType::class, $event);
         $form->handleRequest($request);
 
-        // Vérifie si le formulaire est soumis
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($event);
             $entityManager->flush();
 
-        }
+            $phoneNumber = '21652991996';
+            $eventTitle = $event->getNom();
+            $messageContent = sprintf(' user, l\'événement sous le nom "%s" a été bien ajouté.', $eventTitle);
 
-    
+            if ($messageSender->sendWhatsAppMessage($phoneNumber, $messageContent)) {
+                $this->addFlash('success', 'Le message WhatsApp a été envoyé avec succès.');
+            } else {
+                $this->addFlash('error', 'Échec de l\'envoi du message WhatsApp.');
+            }
+
+            $googleClient = $googleAuthService->getClient();
+            if (!$googleClient->getAccessToken()) {
+                $authUrl = $googleAuthService->getAuthUrl();
+                return $this->redirect($authUrl);
+            }
+
+            $startDate = $event->getDate()->format('Y-m-d');
+            $endDate = $event->getDate()->format('Y-m-d');
+
+            try {
+                $googleAuthService->createEvent([
+                    'summary' => $event->getNom(),
+                    'start_date' => $startDate,
+                    'end_date' => $endDate,
+                    'location' => $event->getLieu(),
+                    'attendees' => [],
+                ]);
+                $this->addFlash('success', 'Événement ajouté avec succès et synchronisé avec Google Calendar.');
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Erreur lors de la synchronisation avec Google Calendar: ' . $e->getMessage());
+            }
+
+            return $this->generateQrCode($event, $qrCodeService, $session);
+        }
 
         return $this->render('back/add_event.html.twig', [
             'form' => $form->createView(),
         ]);
     }
+    #[Route('/event/{id_event}/qr_image', name: 'event_qr_image')]
+    public function generateQrImage(int $id_event, EntityManagerInterface $em, QrCodeService $qrCodeService): Response
+    {
+        $event = $em->getRepository(Evenment::class)->find($id_event);
+
+        if (!$event) {
+            throw $this->createNotFoundException('Événement introuvable.');
+        }
+
+        $data = sprintf(
+            "Événement : %s\nDate : %s\nLieu : %s",
+            $event->getNom(),
+            $event->getDate()->format('d/m/Y'),
+            $event->getLieu()
+        );
+
+        $qrImage = $qrCodeService->generateQrCodeBinary($data); // retourne l'image binaire (pas enregistré en fichier)
+
+        return new Response($qrImage, 200, [
+            'Content-Type' => 'image/png'
+        ]);
+    }
+
+    #[Route('/events/{id_event}/qr', name: 'event_show_qr')]
+    public function showQr(int $id_event, SessionInterface $session, EntityManagerInterface $em): Response
+    {
+        $qrPath = $session->get('qr_path');
+
+        if (!$qrPath) {
+            $this->addFlash('error', 'Aucun QR Code trouvé.');
+            return $this->redirectToRoute('app_back_afficher_event');
+        }
+
+        $event = $em->getRepository(Evenment::class)->find($id_event);
+
+        if (!$event) {
+            throw $this->createNotFoundException('Événement introuvable.');
+        }
+
+        return $this->render('back/qr.html.twig', [
+            'qrPath' => $qrPath,
+            'event' => $event,
+        ]);
+    }
+
+    private function generateQrCode(Evenment $event, QrCodeService $qrCodeService, SessionInterface $session): Response
+    {
+        $data = sprintf(
+            "Événement : %s\nDate : %s\nLieu : %s",
+            $event->getNom(),
+            $event->getDate()->format('d/m/Y'),
+            $event->getLieu()
+        );
+
+        $qrPath = $qrCodeService->generateQrCode($data);
+        $session->set('qr_path', $qrPath);
+
+        return $this->redirectToRoute('event_show_qr', [
+            'id_event' => $event->getIdEvent()
+        ]);
+    }
+
+    // pour google calendar AUTH // 
+    #[Route('/oauth/callback', name: 'google_oauth_callback')]
+    public function googleOauthCallback(Request $request, GoogleAuthService $googleAuthService)
+    {
+        // Récupère le code de Google dans l'URL
+        $accessToken = $googleAuthService->fetchAccessToken($request);
+
+        if ($accessToken) {
+            $this->addFlash('success', 'Vous êtes maintenant connecté à Google.');
+        } else {
+            $this->addFlash('error', 'Échec de l\'authentification avec Google.');
+        }
+
+        // Rediriger vers la page d'ajout d'événement ou une autre page
+        return $this->redirectToRoute('app_back_add_event');
+    }
+
+
+
+    
+
 
     #[Route('/back/afficher_event', name: 'app_back_afficher_event')]
-    public function afficherEvent(?int $id, EntityManagerInterface $entityManager, Request $request): Response
+    public function afficherEvent(EntityManagerInterface $entityManager): Response
     {
         $events = $entityManager->getRepository(Evenment::class)->findAll();
-
-       
-
         return $this->render('back/afficher_event.html.twig', [
             'events' => $events,
-            
         ]);
     }
 
@@ -325,10 +444,58 @@ final class BackController extends AbstractController{
 
         return $this->redirectToRoute('app_back_afficher_event');
     }
+// src/Controller/BackEventController.php (ou un nom similaire)
+/*#[Route('/back/search_event', name: 'search_event', methods: ['GET'])]
+public function searchEvent(Request $request, EventRepository $eventRepo, PaginatorInterface $paginator): Response
+{
+    $query = $request->query->get('q', '');
+    $eventsQuery = $eventRepo->createQueryBuilder('e')
+        ->where('e.nom LIKE :query')
+        ->setParameter('query', '%' . $query . '%')
+        ->getQuery();
 
-    
+    $events = $paginator->paginate($eventsQuery, $request->query->getInt('page', 1), 10);
 
+    return $this->render('back/_events_list.html.twig', [
+        'events' => $events,
+    ]);
+}*/
 
+    #[Route('/hybridaction/zybTrackerStatisticsAction', name: 'zyb_tracker_statistics')]
+    public function zybTrackerStatisticsAction(Request $request): Response
+    {
+        // Votre logique de tracking ici
+        return new JsonResponse(['status' => 'success']);
+    }
+
+    #[Route('/back/events/pdf', name: 'back_events_pdf')]
+    public function eventsPdf(EvenmentRepository $evenmentRepository, DompdfWrapperInterface $pdf): Response
+    {
+        try {
+            $events = $evenmentRepository->findAll();
+
+            if (empty($events)) {
+                $this->addFlash('warning', 'Aucun événement à afficher.');
+                return $this->redirectToRoute('app_back');
+            }
+
+            $html = $this->renderView('pdf/back_events_pdf.html.twig', [
+                'events' => $events,
+            ]);
+
+            return $pdf->streamHtml(
+                $html,
+                'evenements_admin.pdf',
+                [
+                    'isRemoteEnabled' => true,
+                    'defaultFont' => 'helvetica',
+                    'isHtml5ParserEnabled' => true,
+                    'dpi' => 150
+                ]
+            );
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Erreur lors de la génération du PDF: ' . $e->getMessage());
+            return $this->redirectToRoute('app_back');
+        }
+    }
 }
-
-

@@ -4,6 +4,11 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    infobip.api_url: '%env(INFOBIP_API_URL)%'
+    infobip.api_key: '%env(INFOBIP_API_KEY)%'
+    infobip.sms_sender: '%env(INFOBIP_SENDER)%'
+    infobip.whatsapp_template: '%env(INFOBIP_WHATSAPP_TEMPLATE)%'
+    infobip.whatsapp_language: '%env(INFOBIP_WHATSAPP_LANGUAGE)%'
 
 services:
     Symfony\Component\Finder\Finder: ~
@@ -12,6 +17,22 @@ services:
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        bind:
+            string $apiUrl: '%env(INFOBIP_API_URL)%'
+            string $apiKey: '%env(INFOBIP_API_KEY)%'
+            string $sender: '%env(INFOBIP_SENDER)%'  # Assurez-vous que $sender est bien lié à l'environnement
+            string $template: '%infobip.whatsapp_template%'
+            string $language: '%infobip.whatsapp_language%'
+    
+     # Service pour l'envoi de messages WhatsApp Infobip
+    App\Service\InfobipSmsSender:
+        arguments:
+            $httpClient: '@Symfony\Contracts\HttpClient\HttpClientInterface'
+            $apiUrl: '%env(INFOBIP_API_URL)%'
+            $apiKey: '%env(INFOBIP_API_KEY)%'
+            $sender: '%env(INFOBIP_SENDER)%'
+            $template: '%infobip.whatsapp_template%'
+            $language: '%infobip.whatsapp_language%'
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name

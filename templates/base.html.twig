@@ -2,6 +2,25 @@
 <html lang="en">
 
 <head>
+<style>
+.page-link {
+    color: #0d6efd;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.page-link:hover {
+    background-color: #e9ecef;
+    transform: translateY(-2px);
+    color: #0a58ca;
+}
+
+.page-item.active .page-link {
+    background-color: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
+}
+</style>
+
     <title>{% block title %} Zay Shop eCommerce HTML CSS Template {% endblock %} </title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -18,6 +37,8 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;200;300;400;500;700;900&display=swap">
     <link rel="stylesheet" href="{{asset('css/fontawesome.min.css')}}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
     {% endblock %}
     <!--
 
@@ -441,6 +462,17 @@ https://templatemo.com/tm-559-zay-shop
     </script>
     {% endblock %}
     <!-- End Script -->
+    <script>
+        document.getElementById('search-input').addEventListener('input', function () {
+        const query = this.value;
+        fetch(`/back/search_event?q=${encodeURIComponent(query)}`)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('events-list').innerHTML = html;
+        });
+});
+</script>
+
 </body>
 
 </html>

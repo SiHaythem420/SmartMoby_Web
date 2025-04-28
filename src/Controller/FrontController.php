@@ -4,11 +4,13 @@ namespace App\Controller;
 
 use App\Entity\Utilisateur;
 use App\Form\UtilisateurType;
-use Doctrine\ORM\EntityManagerInterface;
+namespace App\Controller;
+
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
 use App\Form\AdminType;
 use App\Entity\Admin;
 use App\Entity\Conducteur;
@@ -23,6 +25,22 @@ use App\Entity\Client;
 use App\Entity\Evenment;
 use App\Form\FedbackType;
 use App\Entity\Fedback;
+use Knp\Component\Pager\PaginatorInterface;
+use App\Repository\EvenmentRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\Utilisateur;
+use App\Form\UtilisateurType;
+use App\Repository\EventRepository;                          
+use Nucleos\DompdfBundle\Wrapper\DompdfWrapperInterface;
+use Doctrine\Persistence\ManagerRegistry;
+use Knp\Bundle\SnappyBundle\Snappy\Response\PdfResponse; // Si tu utilises KnpSnappy
+use Dompdf\Dompdf; // ou si tu utilises Dompdf directement
+use Dompdf\Options;
+
+
+
+
+
 final class FrontController extends AbstractController
 {
     #[Route('/front', name: 'app_controller')]
@@ -421,15 +439,79 @@ final class FrontController extends AbstractController
     }
 
     //oussema
-    #[Route('/front/afficher_event', name: 'afficher_event')]
-    public function afficherEvent(EntityManagerInterface $entityManager): Response
+    #[Route('/events', name: 'afficher_event')]
+    public function afficherEvents(Request $request, EvenmentRepository $evenmentRepository, PaginatorInterface $paginator): Response
     {
-        $events = $entityManager->getRepository(Evenment::class)->findAll();
+        $query = $evenmentRepository->createQueryBuilder('e')
+            ->orderBy('e.date', 'DESC')
+            ->getQuery();
+    
+        $events = $paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1),
+            8
+        );
+    
         return $this->render('front/afficher_event.html.twig', [
             'events' => $events,
         ]);
-
     }
+    
+
+    
+
+    #[Route('/search-events', name: 'search_events')]
+    public function searchEvents(Request $request, EvenmentRepository $evenmentRepository): JsonResponse
+    {
+        $query = $request->query->get('query', '');
+        $sort = $request->query->get('sort', 'date_desc');
+        
+        $events = $evenmentRepository->searchAndSortEvents($query, $sort);
+        
+        $eventsData = [];
+        foreach ($events as $event) {
+            $eventsData[] = [
+                'id' => $event->getIdEvent(),
+                'nom' => $event->getNom(),
+                'date' => $event->getDate()->format('Y-m-d'),
+                'location' => $event->getLieu(),
+            ];
+        }
+        
+        return new JsonResponse(['events' => $eventsData]);
+    }
+    
+    
+
+
+    
+    #[Route('/api/events', name: 'get_events', methods: ['GET'])]
+    public function getEvents(EvenmentRepository $evenmentRepository): JsonResponse
+    {
+        // Récupérer tous les événements depuis la base de données
+        $events = $evenmentRepository->findAll();
+    
+        // Si la liste des événements est vide, retourner un tableau vide
+        if (empty($events)) {
+            return new JsonResponse([], 200);  // Retourne un tableau vide avec un code 200
+        }
+    
+        // Formatage des événements pour les renvoyer dans la réponse
+        $eventsData = [];
+        foreach ($events as $event) {
+            $eventsData[] = [
+                'id' => $event->getId(),
+                'nom' => $event->getNom(),
+                'date' => $event->getDate()->format('Y-m-d'),
+                'lieu' => $event->getLieu(),
+            ];
+        }
+    
+        // Retourner les événements sous forme de JSON
+        return new JsonResponse($eventsData, 200);
+    }
+    
+
 
     
 #[Route('/front/ajouter_fedback/{id}', name: 'ajouter_fedback')]
@@ -570,9 +652,57 @@ public function afficherFedback(EntityManagerInterface $entityManager, ?int $id)
         // Redirection après succès
         return $this->redirectToRoute('afficher_fedback', ['id' => $fedback->getIdEvent()->getIdEvent()]);
     }
+    #[Route('/events/pdf', name: 'afficherevent_pdf')]
+public function eventsPdf(EvenmentRepository $repo): Response
+{
+    $events = $repo->findAll();
 
-    
-    
+    $html = $this->renderView('pdf/afficherevent_pdf.html.twig', [
+        'events' => $events,
+    ]);
+
+    // Configure Dompdf
+    $options = new Options();
+    $options->set('defaultFont', 'Arial');
+    $dompdf = new Dompdf($options);
+
+    // Charge ton HTML
+    $dompdf->loadHtml($html);
+    $dompdf->setPaper('A4', 'portrait');
+    $dompdf->render();
+
+    // Génère le PDF
+    $pdfContent = $dompdf->output();
+
+    return new Response($pdfContent, 200, [
+        'Content-Type' => 'application/pdf',
+        'Content-Disposition' => 'attachment; filename="evenements.pdf"',
+    ]);
+}
 
 
+
+#[Route('/front/event/{id_event}/qr_image', name: 'front_event_qr_image')]
+public function generateQrImage(int $id_event, EntityManagerInterface $em, QrCodeService $qrCodeService): Response
+{
+    $event = $em->getRepository(Evenment::class)->find($id_event);
+
+    if (!$event) {
+        throw $this->createNotFoundException('Événement introuvable.');
+    }
+
+    $data = sprintf(
+        "Événement : %s\nDate : %s\nLieu : %s",
+        $event->getNom(),
+        $event->getDate()->format('d/m/Y'),
+        $event->getLieu()
+    );
+
+    $qrImage = $qrCodeService->generateQrCodeBinary($data);
+
+    return new Response($qrImage, 200, [
+        'Content-Type' => 'image/png',
+        'Cache-Control' => 'no-cache, must-revalidate'
+    ]);
+}
 }

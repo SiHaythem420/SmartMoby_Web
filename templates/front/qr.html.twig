@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}QR Code - {{ event.nom }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">QR Code pour l'événement</h4>
+                </div>
+                <div class="card-body text-center">
+                    <h5 class="card-title">{{ event.nom }}</h5>
+                    <p class="card-text">
+                        <strong>Date:</strong> {{ event.date|date('d/m/Y') }}<br>
+                        <strong>Lieu:</strong> {{ event.lieu }}
+                    </p>
+                    <img src="{{ qrPath }}" alt="QR Code" class="img-fluid mb-3">
+                    <div class="mt-3">
+                        <a href="{{ path('afficher_event') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Retour aux événements
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
