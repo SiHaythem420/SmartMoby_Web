@@ -262,92 +262,115 @@ final class BackController extends AbstractController{
     #[Route('/back/export/pdf', name: 'export_users_pdf')]
     public function exportUsersPdf(EntityManagerInterface $entityManager): Response
     {
-    $spreadsheet = new Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet();
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
 
-    $sheet->fromArray([
-        ['Nom', 'Prénom', 'Nom d\'utilisateur', 'Email', 'Mot de passe', 'Role', 'Département', 'Badge', 'Permis']
-    ], null, 'A1');
-    
+        // Ajouter un titre
+        $sheet->setCellValue('A1', 'Liste des Utilisateurs');
+        $sheet->mergeCells('A1:I1');
+        $sheet->getStyle('A1')->getFont()->setSize(16)->setBold(true);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('4F81BD');
+        $sheet->getStyle('A1')->getFont()->getColor()->setRGB('FFFFFF');
 
-    $users = $entityManager->getRepository(Utilisateur::class)->findAll();
-    $admins = $entityManager->getRepository(Admin::class)->findAll();
-    $organisateurs = $entityManager->getRepository(Organisateur::class)->findAll();
-    $clients = $entityManager->getRepository(Client::class)->findAll();
-    $conducteurs = $entityManager->getRepository(Conducteur::class)->findAll();
+        // Ajouter les en-têtes
+        $headers = ['Nom', 'Prénom', 'Nom d\'utilisateur', 'Email', 'Mot de passe', 'Role', 'Département', 'Badge', 'Permis'];
+        $sheet->fromArray($headers, null, 'A3');
 
+        // Style des en-têtes
+        $headerStyle = $sheet->getStyle('A3:I3');
+        $headerStyle->getFont()->setBold(true)->setSize(12);
+        $headerStyle->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('DCE6F1');
+        $headerStyle->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $headerStyle->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
 
-    $row = 2;
-    foreach ($users as $user) {
-        // Déterminer le département avant de créer le tableau
-        $departement = 'N/A';
-        if ($user->getRole() === 'ADMIN') {
-            foreach ($admins as $admin) {
-                if ( $admin->getId() ===  $user) {
-                    $departement = $admin->getDepartement();
-                    break;
+        $users = $entityManager->getRepository(Utilisateur::class)->findAll();
+        $admins = $entityManager->getRepository(Admin::class)->findAll();
+        $organisateurs = $entityManager->getRepository(Organisateur::class)->findAll();
+        $clients = $entityManager->getRepository(Client::class)->findAll();
+        $conducteurs = $entityManager->getRepository(Conducteur::class)->findAll();
+
+        $row = 4;
+        foreach ($users as $user) {
+            // Déterminer le département avant de créer le tableau
+            $departement = 'N/A';
+            if ($user->getRole() === 'ADMIN') {
+                foreach ($admins as $admin) {
+                    if ($admin->getId() === $user) {
+                        $departement = $admin->getDepartement();
+                        break;
+                    }
                 }
             }
-        }
 
-        $badge = 'N/A';
-        if ($user->getRole() === 'ORGANISATEUR') {
-            foreach ($organisateurs as $organisateur) {
-                if ($organisateur->getId() === $user) {
-                    $badge = $organisateur->getNumBadge();
-                    break;
+            $badge = 'N/A';
+            if ($user->getRole() === 'ORGANISATEUR') {
+                foreach ($organisateurs as $organisateur) {
+                    if ($organisateur->getId() === $user) {
+                        $badge = $organisateur->getNumBadge();
+                        break;
+                    }
                 }
             }
-        }
 
-        $permis = 'N/A';
-        if ($user->getRole() === 'CONDUCTEUR') {
-            foreach ($conducteurs as $conducteur) {
-                if ($conducteur->getId() === $user) {
-                    $permis = $conducteur->getNumeroPermis();
-                    break;
+            $permis = 'N/A';
+            if ($user->getRole() === 'CONDUCTEUR') {
+                foreach ($conducteurs as $conducteur) {
+                    if ($conducteur->getId() === $user) {
+                        $permis = $conducteur->getNumeroPermis();
+                        break;
+                    }
                 }
             }
+
+            // Créer le tableau avec les valeurs
+            $sheet->fromArray([
+                $user->getNom(),
+                $user->getPrenom(),
+                $user->getNomUtilisateur(),
+                $user->getEmail(),
+                $user->getMotDePasse(),
+                $user->getRole(),
+                $departement,
+                $badge,
+                $permis
+            ], null, 'A' . $row);
+
+            // Style alterné des lignes
+            $rowStyle = $sheet->getStyle('A' . $row . ':I' . $row);
+            if ($row % 2 == 0) {
+                $rowStyle->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('F2F2F2');
+            }
+            $rowStyle->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+            $rowStyle->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $rowStyle->getFont()->setSize(11);
+
+            $row++;
         }
 
-        // Créer le tableau avec les valeurs
-        $sheet->fromArray([
-            $user->getNom(),
-            $user->getPrenom(),
-            $user->getNomUtilisateur(),
-            $user->getEmail(),
-            $user->getMotDePasse(),
-            $user->getRole(),
-            $departement,
-            $badge,
-            $permis
-        ], null, 'A' . $row);
-        $row++;
-        $sheet->getStyle('A1:I1')->getFont()->setBold(true);
-        $sheet->getStyle('A1:I1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A1:I' . ($row - 1))->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+        // Ajuster la largeur des colonnes
         foreach (range('A', 'I') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
-        $sheet->getStyle('A1:I' . ($row - 1))->getFont()->setSize(14);
 
+        // Ajouter un espacement entre les cellules
+        $sheet->getStyle('A1:I' . ($row - 1))->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A1:I' . ($row - 1))->getAlignment()->setWrapText(true);
 
-    }
+        $writer = new Mpdf($spreadsheet);
+        $filename = 'liste_utilisateurs.pdf';
 
-    $writer = new Mpdf($spreadsheet);
-    $filename = 'liste_utilisateurs.pdf';
+        ob_start();
+        $writer->save('php://output');
+        $pdfContent = ob_get_clean();
 
-    ob_start();
-    $writer->save('php://output');
-    $pdfContent = ob_get_clean();
-
-    return new Response($pdfContent, 200, [
-        'Content-Type' => 'application/pdf',
-        'Content-Disposition' => (new ResponseHeaderBag())->makeDisposition(
-            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-            $filename
-        ),
-    ]);
+        return new Response($pdfContent, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => (new ResponseHeaderBag())->makeDisposition(
+                ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+                $filename
+            ),
+        ]);
     }
 
 }
