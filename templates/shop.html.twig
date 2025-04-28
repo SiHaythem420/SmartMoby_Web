@@ -1050,20 +1050,20 @@ body {
                     </a>
                     <ul class="collapse show list-unstyled pl-3">
                         <li>
-                            <a class="text-decoration-none {% if vehicleType == 'Bus' %}text-success{% endif %}" 
-                               href="{{ path('app_shop', app.request.query.all|merge({'vehicle_type': 'Bus', 'page': 1})) }}">
+                            <a class="text-decoration-none filter-link {% if vehicleType == 'Bus' %}text-success{% endif %}" 
+                               href="#" data-filter="vehicle_type" data-value="Bus">
                                 Bus
                             </a>
                         </li>
                         <li>
-                            <a class="text-decoration-none {% if vehicleType == 'Métro' %}text-success{% endif %}" 
-                               href="{{ path('app_shop', app.request.query.all|merge({'vehicle_type': 'Métro', 'page': 1})) }}">
+                            <a class="text-decoration-none filter-link {% if vehicleType == 'Métro' %}text-success{% endif %}" 
+                               href="#" data-filter="vehicle_type" data-value="Métro">
                                 Métro
                             </a>
                         </li>
                         <li>
-                            <a class="text-decoration-none {% if vehicleType == 'Taxi' %}text-success{% endif %}" 
-                               href="{{ path('app_shop', app.request.query.all|merge({'vehicle_type': 'Taxi', 'page': 1})) }}">
+                            <a class="text-decoration-none filter-link {% if vehicleType == 'Taxi' %}text-success{% endif %}" 
+                               href="#" data-filter="vehicle_type" data-value="Taxi">
                                 Taxi
                             </a>
                         </li>
@@ -1071,52 +1071,52 @@ body {
                 </li>
                 <li class="pb-3">
                     <a class="collapsed d-flex justify-content-between h3 text-decoration-none" href="#">
-                        Time
+                        {{ 'app.shop.filters.time'|trans }}
                         <i class="pull-right fa fa-fw fa-chevron-circle-down mt-1"></i>
                     </a>
                     <ul id="collapseTwo" class="collapse list-unstyled pl-3">
                         <li>
-                            <a class="text-decoration-none {% if timeFilter == 'all' %}text-success{% endif %}" 
-                               href="{{ path('app_shop', app.request.query.all|merge({'time': 'all', 'page': 1})) }}">
-                                All
+                            <a class="text-decoration-none filter-link {% if timeFilter == 'all' %}text-success{% endif %}" 
+                               href="#" data-filter="time" data-value="all">
+                                {{ 'app.shop.filters.all'|trans }}
                             </a>
                         </li>
                         <li>
-                            <a class="text-decoration-none {% if timeFilter == 'today' %}text-success{% endif %}" 
-                               href="{{ path('app_shop', app.request.query.all|merge({'time': 'today', 'page': 1})) }}">
-                                Today
+                            <a class="text-decoration-none filter-link {% if timeFilter == 'today' %}text-success{% endif %}" 
+                               href="#" data-filter="time" data-value="today">
+                                {{ 'app.shop.filters.today'|trans }}
                             </a>
                         </li>
                         <li>
-                            <a class="text-decoration-none {% if timeFilter == 'tomorrow' %}text-success{% endif %}" 
-                               href="{{ path('app_shop', app.request.query.all|merge({'time': 'tomorrow', 'page': 1})) }}">
-                                Tomorrow
+                            <a class="text-decoration-none filter-link {% if timeFilter == 'tomorrow' %}text-success{% endif %}" 
+                               href="#" data-filter="time" data-value="tomorrow">
+                                {{ 'app.shop.filters.tomorrow'|trans }}
                             </a>
                         </li>
                     </ul>
                 </li>
                 <li class="pb-3">
                     <a class="collapsed d-flex justify-content-between h3 text-decoration-none" href="#">
-                        Price Range
+                        {{ 'app.shop.filters.price_range'|trans }}
                         <i class="pull-right fa fa-fw fa-chevron-circle-down mt-1"></i>
                     </a>
                     <ul id="collapseThree" class="collapse list-unstyled pl-3">
                         <li>
-                            <a class="text-decoration-none {% if priceRange == 'under_10' %}text-success{% endif %}" 
-                               href="{{ path('app_shop', app.request.query.all|merge({'price_range': 'under_10', 'page': 1})) }}">
-                                Under 10 TND
+                            <a class="text-decoration-none filter-link {% if priceRange == 'under_10' %}text-success{% endif %}" 
+                               href="#" data-filter="price_range" data-value="under_10">
+                                {{ 'app.shop.filters.under_10'|trans }}
                             </a>
                         </li>
                         <li>
-                            <a class="text-decoration-none {% if priceRange == '10_15' %}text-success{% endif %}" 
-                               href="{{ path('app_shop', app.request.query.all|merge({'price_range': '10_15', 'page': 1})) }}">
-                                10-15 TND
+                            <a class="text-decoration-none filter-link {% if priceRange == '10_15' %}text-success{% endif %}" 
+                               href="#" data-filter="price_range" data-value="10_15">
+                                {{ 'app.shop.filters.between_10_15'|trans }}
                             </a>
                         </li>
                         <li>
-                            <a class="text-decoration-none {% if priceRange == 'over_20' %}text-success{% endif %}" 
-                               href="{{ path('app_shop', app.request.query.all|merge({'price_range': 'over_20', 'page': 1})) }}">
-                                Over 20 TND
+                            <a class="text-decoration-none filter-link {% if priceRange == 'over_20' %}text-success{% endif %}" 
+                               href="#" data-filter="price_range" data-value="over_20">
+                                {{ 'app.shop.filters.over_20'|trans }}
                             </a>
                         </li>
                     </ul>
@@ -1138,24 +1138,21 @@ body {
                 </div>
                 <div class="col-md-6 pb-4">
                     <div class="d-flex">
-                        <select class="form-control" onchange="window.location.href=this.value">
-                            <option value="{{ path('app_shop', app.request.query.all|merge({'sort_by': 'time', 'page': 1})) }}" 
-                                    {% if sortBy == 'time' %}selected{% endif %}>
+                        <select class="form-control" id="sort-select">
+                            <option value="time" {% if sortBy == 'time' %}selected{% endif %}>
                                 {{ 'app.shop.sort.time'|trans }}
                             </option>
-                            <option value="{{ path('app_shop', app.request.query.all|merge({'sort_by': 'price', 'page': 1})) }}" 
-                                    {% if sortBy == 'price' %}selected{% endif %}>
+                            <option value="price" {% if sortBy == 'price' %}selected{% endif %}>
                                 {{ 'app.shop.sort.price'|trans }}
                             </option>
-                            <option value="{{ path('app_shop', app.request.query.all|merge({'sort_by': 'distance', 'page': 1})) }}" 
-                                    {% if sortBy == 'distance' %}selected{% endif %}>
+                            <option value="distance" {% if sortBy == 'distance' %}selected{% endif %}>
                                 {{ 'app.shop.sort.distance'|trans }}
                             </option>
                         </select>
                     </div>
                 </div>
             </div>
-            <div class="row">
+            <div class="row" id="trips-container">
                 {% if trajets is defined and trajets|length > 0 %}
                     {% for trajet in trajets %}
                     <div class="col-md-4">
@@ -1192,7 +1189,7 @@ body {
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center mt-3">
                                     <a href="{{ path('app_trip_details', {'id': trajet.id}) }}" class="btn btn-outline-primary">
-                                        <i class="fa fa-eye"></i> View Trip
+                                        <i class="fa fa-eye"></i> {{ 'app.shop.view_trip'|trans }}
                                     </a>
                                     <button type="button" class="btn btn-success" onclick="showBookingModal(this)" 
                                             data-departure="{{ trajet.pointDepart }}"
@@ -1200,7 +1197,7 @@ body {
                                             data-date="{{ trajet.dateDepart|date('Y-m-d') }}"
                                             data-time="{{ trajet.dateDepart|date('H:i') }}"
                                             data-price="{{ trajet.prix }}">
-                                        <i class="fa fa-ticket-alt"></i> Book Now
+                                        <i class="fa fa-ticket-alt"></i> {{ 'app.shop.book_now'|trans }}
                                     </button>
                                 </div>
                             </div>
@@ -1215,7 +1212,7 @@ body {
             </div>
             
             <!-- Pagination -->
-            <div class="row mt-4">
+            <div class="row mt-4" id="pagination-container">
                 <div class="col-12">
                     {{ knp_pagination_render(trajets, 'pagination/custom_pagination.html.twig') }}
                 </div>
@@ -1404,6 +1401,13 @@ body {
     let arrivalMarker;
     let currentRoute;
     let weatherSearchTimeout;
+    let currentFilters = {
+        vehicle_type: '{{ vehicleType|default('') }}',
+        time: '{{ timeFilter|default('all') }}',
+        price_range: '{{ priceRange|default('') }}',
+        sort_by: '{{ sortBy|default('time') }}',
+        page: 1
+    };
 
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize map centered on Tunis capital
@@ -1597,8 +1601,8 @@ body {
         }).addTo(map);
 
         // Add event listeners for input fields
-            const departureInput = document.getElementById('departure-input');
-            const arrivalInput = document.getElementById('arrival-input');
+        const departureInput = document.getElementById('departure-input');
+        const arrivalInput = document.getElementById('arrival-input');
 
         function searchLocation(query, isDeparture) {
             if (query.length < 3) return;
@@ -1683,14 +1687,14 @@ body {
         });
 
         document.getElementById('clear-markers').addEventListener('click', function() {
-                    if (departureMarker) {
+            if (departureMarker) {
                 map.removeLayer(departureMarker);
-                        departureMarker = null;
-                    }
-                    if (arrivalMarker) {
+                departureMarker = null;
+            }
+            if (arrivalMarker) {
                 map.removeLayer(arrivalMarker);
-                        arrivalMarker = null;
-                    }
+                arrivalMarker = null;
+            }
             routingControl.setWaypoints([]);
             departureInput.value = '';
             arrivalInput.value = '';
@@ -1711,11 +1715,122 @@ body {
                 }
             });
         }
+
+        // Add event listeners for filter links
+        document.querySelectorAll('.filter-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remove active class from all links in the same filter group
+                const filterType = this.getAttribute('data-filter');
+                document.querySelectorAll(`.filter-link[data-filter="${filterType}"]`).forEach(el => {
+                    el.classList.remove('text-success');
+                });
+                
+                // Add active class to clicked link
+                this.classList.add('text-success');
+                
+                // Update current filters
+                const filterValue = this.getAttribute('data-value');
+                currentFilters[filterType] = filterValue;
+                currentFilters.page = 1; // Reset to first page when filter changes
+                
+                // Apply filters
+                applyFilters();
+            });
+        });
+
+        // Add event listener for sort select
+        document.getElementById('sort-select').addEventListener('change', function() {
+            currentFilters.sort_by = this.value;
+            currentFilters.page = 1; // Reset to first page when sort changes
+            applyFilters();
+        });
+
+        // Function to apply filters via AJAX
+        function applyFilters() {
+            // Show loading indicator
+            document.getElementById('trips-container').innerHTML = '<div class="col-12 text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+            
+            // Build query string
+            const queryParams = new URLSearchParams();
+            for (const [key, value] of Object.entries(currentFilters)) {
+                if (value) {
+                    queryParams.append(key, value);
+                }
+            }
+            
+            // Make AJAX request
+            fetch(`{{ path('app_shop') }}?${queryParams.toString()}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                // Create a temporary container to parse the HTML
+                const tempContainer = document.createElement('div');
+                tempContainer.innerHTML = html;
+                
+                // Extract trips container and pagination
+                const newTripsContainer = tempContainer.querySelector('#trips-container');
+                const newPaginationContainer = tempContainer.querySelector('#pagination-container');
+                
+                // Update the DOM
+                if (newTripsContainer) {
+                    document.getElementById('trips-container').innerHTML = newTripsContainer.innerHTML;
+                }
+                
+                if (newPaginationContainer) {
+                    document.getElementById('pagination-container').innerHTML = newPaginationContainer.innerHTML;
+                }
+                
+                // Update URL without reloading the page
+                const newUrl = `${window.location.pathname}?${queryParams.toString()}`;
+                window.history.pushState({ path: newUrl }, '', newUrl);
+                
+                // Reinitialize event listeners for the new content
+                initializeTripCardListeners();
+            })
+            .catch(error => {
+                console.error('Error applying filters:', error);
+                document.getElementById('trips-container').innerHTML = '<div class="col-12 text-center"><p class="text-danger">Error loading trips. Please try again.</p></div>';
+            });
+        }
+
+        // Function to initialize event listeners for trip cards
+        function initializeTripCardListeners() {
+            // Add event listeners for booking buttons
+            document.querySelectorAll('.btn-success[onclick="showBookingModal(this)"]').forEach(button => {
+                button.addEventListener('click', function() {
+                    showBookingModal(this);
+                });
+            });
+            
+            // Add event listeners for heart icons
+            document.querySelectorAll('.fa-heart').forEach(icon => {
+                icon.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    this.classList.toggle('text-danger');
+                    const tripId = this.closest('.product-wap').getAttribute('data-trip-id');
+                    addToFavorites(tripId, {
+                        departure: this.closest('.product-wap').dataset.departure,
+                        arrival: this.closest('.product-wap').dataset.arrival,
+                        date: this.closest('.product-wap').dataset.date,
+                        time: this.closest('.product-wap').dataset.time,
+                        price: this.closest('.product-wap').dataset.price
+                    });
+                });
+            });
+        }
+
+        // Initialize event listeners for trip cards
+        initializeTripCardListeners();
     });
 
     function updateRoute() {
         if (!departureMarker || !arrivalMarker) {
-                    document.getElementById('route-info').style.display = 'none';
+            document.getElementById('route-info').style.display = 'none';
             return;
         }
 
@@ -1744,8 +1859,8 @@ body {
         document.getElementById('route-traffic').textContent = traffic;
         
         // Show route info panel
-                        document.getElementById('route-info').style.display = 'block';
-                    }
+        document.getElementById('route-info').style.display = 'block';
+    }
 
     function showAlternativeRoutes(routes) {
         const alternativesContainer = document.getElementById('route-alternatives');
@@ -1997,8 +2112,8 @@ body {
             weatherDisplay.innerHTML = `
                 <div class="col-12 text-center">
                     <p class="text-danger">{{ 'app.shop.weather.error'|trans }}</p>
-                        </div>
-                    `;
+                </div>
+            `;
         }
     }
 </script>
