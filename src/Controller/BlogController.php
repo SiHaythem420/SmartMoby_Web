@@ -15,30 +15,42 @@ use App\Service\ImageUploader;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Avis;
 use App\Form\AvisType;
+use App\Service\TranslationService;
+use App\Service\TextToSpeechService;
 
 
 
 
 class BlogController extends AbstractController
 {
-    #[Route('/blog/{id}', name: 'blog_show', methods: ['GET'])]
-public function show(Blog $blog): Response
-{
-    // Create a new Avis (comment) instance
-    $avis = new Avis();
-    $avis->setBlog($blog);
-    $avis->setDate(new \DateTime());
-    
-    // Create the form
-    $commentForm = $this->createForm(AvisType::class, $avis, [
-        'action' => $this->generateUrl('avis_new', ['id' => $blog->getId()]),
-    ]);
 
-    return $this->render('blog/show.html.twig', [
-        'blog' => $blog,
-        'commentForm' => $commentForm->createView(), // Pass the form to the template
-    ]);
-}
+    private $textToSpeechService;
+    private $blogRepository;
+
+    public function __construct(TextToSpeechService $textToSpeechService, BlogRepository $blogRepository)
+    {
+        $this->textToSpeechService = $textToSpeechService;
+        $this->blogRepository = $blogRepository;
+    }
+
+    #[Route('/blog/{id}', name: 'blog_show', methods: ['GET'])]
+    public function show(Blog $blog): Response
+    {
+        // Create a new Avis (comment) instance
+        $avis = new Avis();
+        $avis->setBlog($blog);
+        $avis->setDate(new \DateTime());
+        
+        // Create the form
+        $commentForm = $this->createForm(AvisType::class, $avis, [
+            'action' => $this->generateUrl('avis_new', ['id' => $blog->getId()]),
+        ]);
+
+        return $this->render('blog/show.html.twig', [
+            'blog' => $blog,
+            'commentForm' => $commentForm->createView(), // Pass the form to the template
+        ]);
+    }
 
 
 
@@ -84,11 +96,17 @@ public function show(Blog $blog): Response
     #[Route('/list-blog', name: 'list-blog')]
     public function list_blog(BlogRepository $repo): Response
     {
-        $blogs = $repo->findAll();
+        $blogs = $repo->createQueryBuilder('b')
+            ->orderBy('b.isFeatured', 'DESC') // first featured blogs
+            ->addOrderBy('b.date', 'DESC')    // then sort by date inside each group
+            ->getQuery()
+            ->getResult();
+
         return $this->render('blog/list.html.twig', [
-            'blogs' => $blogs
+            'blogs' => $blogs,
         ]);
     }
+
 
     #[Route('/delete-blog/{id}', name: 'delete-blog')]
     public function delete_blog($id, ManagerRegistry $doctrine): Response
@@ -151,4 +169,42 @@ public function show(Blog $blog): Response
             'blogs' => $blogRepository->findBy([], ['date' => 'DESC'], 9)
         ]);
     }
+
+    #[Route('/blog/translate/{id}/{lang}', name: 'blog_translate')]
+    public function translateBlog(int $id, string $lang,BlogRepository $blogRepository, TranslationService $translator): Response
+    {
+        
+        $blog = $blogRepository->find($id);
+
+        $translatedContent = $translator->translate($blog->getContent(), 'en', $lang);
+
+        return $this->render('blog/show_translated.html.twig', [
+            'blog' => $blog,
+            'translatedContent' => $translatedContent,
+        ]);
+    }
+    /*
+    #[Route('/blog/{id}/listen', name: 'blog_listen')]
+    public function listen(int $id): Response
+    {
+        $blog = $this->blogRepository->find($id);
+
+        if (!$blog) {
+            throw $this->createNotFoundException('No blog found for id ' . $id);
+        }
+
+        try {
+            // Convert blog content to speech
+            $audioUrl = $this->textToSpeechService->getAudioContent($blog->getContent());
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Failed to convert text to speech.');
+            return $this->redirectToRoute('blog_show', ['id' => $id]);
+        }
+
+        return $this->render('blog/listen.html.twig', [
+            'blog' => $blog,
+            'audioUrl' => $audioUrl,
+        ]);
+    }
+        */
 }

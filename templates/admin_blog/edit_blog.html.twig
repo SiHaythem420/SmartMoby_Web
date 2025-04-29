@@ -1,0 +1,51 @@
+{% extends 'admin_blog/back.html.twig' %}
+
+{% block title %}Edit Blog Post{% endblock %}
+{% block page_title %}Edit Blog Post{% endblock %}
+
+{% block main_content %}
+<div class="container mt-5">
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            
+            <div class="mb-3">
+                {{ form_label(form.title, 'Title', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.title, {'attr': {'class': 'form-control', 'placeholder': 'Enter blog title'}}) }}
+                {{ form_errors(form.title) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.content, 'Content', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.content, {'attr': {'class': 'form-control', 'rows': 10, 'placeholder': 'Write the blog content here...'}}) }}
+                {{ form_errors(form.content) }}
+            </div>
+
+            {% if form.imageFile is defined %}
+            <div class="mb-3">
+                {{ form_label(form.imageFile, 'Image (optional)', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.imageFile, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.imageFile) }}
+            </div>
+            {% endif %}
+
+            <div class="form-check mb-4">
+                {{ form_widget(form.isFeatured, {'attr': {'class': 'form-check-input'}}) }}
+                {{ form_label(form.isFeatured, 'Feature this blog?', {'label_attr': {'class': 'form-check-label'}}) }}
+                {{ form_errors(form.isFeatured) }}
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+                <a href="{{ path('admin_blogs') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Cancel
+                </a>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

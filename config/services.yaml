@@ -9,6 +9,10 @@ services:
         autowire: true      # Automatically injects dependencies
         autoconfigure: true # Automatically registers services
 
+    
+        
+    
+
     # Makes classes in src/ available as services
     App\:
         resource: '../src/'
@@ -26,6 +30,12 @@ services:
         arguments:
             $targetDirectory: '%blog_image_directory%'
             $slugger: '@Symfony\Component\String\Slugger\SluggerInterface'
+
+
+
+
+
+  
 
 
 

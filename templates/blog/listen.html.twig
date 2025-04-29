@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ blog.title }} - Listen{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-1">{{ blog.title }}</h2>
+            <small class="text-white-50">Posted on {{ blog.date|date('F j, Y') }}</small>
+        </div>
+        <div class="card-body">
+            <div class="blog-content mb-4">
+                {{ blog.content|nl2br }}
+            </div>
+
+            <div class="action-buttons mt-4">
+                <a href="{{ path('blog_show', {'id': blog.id}) }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Back to Blog
+                </a>
+            </div>
+
+            <div class="mt-5 pt-4 border-top">
+                <h3>Listen to the Blog:</h3>
+                <audio controls>
+                    <source src="{{ audioUrl }}" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

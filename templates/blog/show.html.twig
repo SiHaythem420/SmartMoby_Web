@@ -27,6 +27,54 @@
                         <i class="fas fa-trash me-1"></i> Delete
                     </button>
                 </form>
+                <a href="{{ path('blog_translate', {id: blog.id, lang: 'fr'}) }}" class="btn btn-primary">
+                Translate to French
+                </a>
+                {#listen button#}
+                <button id="playBtn" class="btn btn-primary">
+                    <i class="fas fa-headphones"></i> Listen to Blog
+                </button>
+
+                <script>
+                document.getElementById('playBtn').addEventListener('click', async function() {
+                    const btn = this;
+                    const icon = btn.querySelector('i');
+                    
+                    // Show loading state
+                    btn.disabled = true;
+                    icon.className = 'fas fa-spinner fa-spin';
+                    
+                    try {
+                        const response = await fetch('{{ path('listen_blog', {'id': blog.id}) }}');
+                        
+                        if (!response.ok) {
+                            throw new Error(await response.text());
+                        }
+                        
+                        const audioBlob = await response.blob();
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        const audio = new Audio(audioUrl);
+                        
+                        audio.addEventListener('error', () => {
+                            throw new Error('Audio playback failed');
+                        });
+                        
+                        audio.addEventListener('ended', () => {
+                            btn.disabled = false;
+                            icon.className = 'fas fa-headphones';
+                            URL.revokeObjectURL(audioUrl);
+                        });
+                        
+                        await audio.play();
+                        
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert(error.message);
+                        btn.disabled = false;
+                        icon.className = 'fas fa-headphones';
+                    }
+                });
+                </script>
             </div>
             
             {# Comment Section #}
