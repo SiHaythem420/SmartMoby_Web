@@ -17,6 +17,7 @@ use App\Entity\Avis;
 use App\Form\AvisType;
 use App\Service\TranslationService;
 use App\Service\TextToSpeechService;
+use App\Form\SearchBlogType;
 
 
 
@@ -207,4 +208,18 @@ class BlogController extends AbstractController
         ]);
     }
         */
+
+        #[Route('/blog/search/ajax', name: 'blog_search_ajax', methods: ['GET'])]
+    public function ajaxSearch(Request $request, BlogRepository $blogRepository): Response
+    {
+        $query = $request->query->get('q', '');
+        $featuredOnly = $request->query->getBoolean('featured', false);
+        $recentFirst = $request->query->getBoolean('recent', true);
+        
+        $blogs = $blogRepository->searchBlogs($query, $featuredOnly, $recentFirst);
+        
+        return $this->render('blog/_blog_items.html.twig', [
+            'blogs' => $blogs
+        ]);
+    }
 }

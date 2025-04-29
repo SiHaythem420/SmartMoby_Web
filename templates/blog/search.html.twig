@@ -1,0 +1,58 @@
+{# templates/blog/search.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Blog Search{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Search Blog Posts</h1>
+    
+    {{ form_start(searchForm) }}
+        <div class="row g-3">
+            <div class="col-md-6">
+                {{ form_row(searchForm.query) }}
+            </div>
+            <div class="col-md-3">
+                {{ form_row(searchForm.dateFrom) }}
+            </div>
+            <div class="col-md-3">
+                {{ form_row(searchForm.dateTo) }}
+            </div>
+            <div class="col-md-3">
+                {{ form_row(searchForm.isFeatured) }}
+            </div>
+            <div class="col-12">
+                {{ form_row(searchForm.search) }}
+            </div>
+        </div>
+    {{ form_end(searchForm) }}
+    
+    {% if blogs is not empty %}
+        <h2 class="mt-5">Search Results ({{ blogs|length }})</h2>
+        <div class="row mt-4">
+            {% for blog in blogs %}
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        {% if blog.imageName %}
+                            <img src="{{ asset('uploads/blogs/' ~ blog.imageName) }}" class="card-img-top" alt="{{ blog.title }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ blog.title }}</h5>
+                            <p class="card-text">{{ blog.content|u.truncate(150, '...') }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">{{ blog.date|date('Y-m-d') }}</small>
+                                {% if blog.isFeatured %}
+                                    <span class="badge bg-primary">Featured</span>
+                                {% endif %}
+                            </div>
+                            <a href="{{ path('blog_show', {'id': blog.id}) }}" class="btn btn-sm btn-outline-primary mt-2">Read more</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% elseif blogs is defined and blogs is empty %}
+        <div class="alert alert-info mt-4">No results found for your search criteria.</div>
+    {% endif %}
+</div>
+{% endblock %}
