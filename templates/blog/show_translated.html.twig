@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ blog.title }} (Translated){% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h2 class="mb-1">{{ blog.title }} (Translated)</h2>
+            <small class="text-white-50">Posted on {{ blog.date|date('F j, Y') }}</small>
+        </div>
+        <div class="card-body">
+            
+            {# ORIGINAL Content (optional) #}
+           {# <div class="blog-content mb-4">
+                <h5>Original Content:</h5>
+                <p class="text-muted">{{ blog.content|nl2br }}</p>
+            </div>
+
+            <hr>
+            #}
+
+            {# TRANSLATED Content #}
+            <div class="blog-content mb-4">
+                <h5>Translated Content:</h5>
+                {% if translatedContent %}
+                    <p>{{ translatedContent|nl2br }}</p>
+                {% else %}
+                    <p class="text-danger">Translation failed or not available.</p>
+                {% endif %}
+            </div>
+
+            <div class="action-buttons mt-4 d-flex flex-wrap gap-2">
+                <a href="{{ path('list-blog') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Back to List
+                </a>
+                <a href="{{ path('edit-blog', {'id': blog.id}) }}" class="btn btn-warning">
+                    <i class="fas fa-edit me-1"></i> Edit
+                </a>
+                <a href="{{ path('blog_translate', {id: blog.id, lang: 'fr'}) }}" class="btn btn-primary">
+                    <i class="fas fa-language me-1"></i> Translate Again
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    .blog-content {
+        line-height: 1.8;
+        font-size: 1.1rem;
+    }
+    
+    .action-buttons .btn {
+        min-width: 100px;
+    }
+</style>
+{% endblock %}

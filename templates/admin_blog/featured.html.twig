@@ -1,0 +1,51 @@
+{% extends 'admin_blog/back.html.twig' %}
+
+{% block title %}Featured Blog Posts{% endblock %}
+
+{% block page_title %}Featured Blog Posts{% endblock %}
+
+{% block main_content %}
+<div class="mt-4 mb-4 p-3 bg-white border shadow-sm lh-sm">
+    <div class="product-list">
+        <div class="row border-bottom mb-4">
+            <div class="col-sm-8 pt-2"><h6 class="mb-4 bc-header">Featured Posts</h6></div>
+        </div>
+        
+        <div class="table-responsive product-list">
+            <table class="table table-bordered table-striped mt-0">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Date</th>
+                        <th>Comments</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for blog in blogs %}
+                    <tr>
+                        <td>{{ blog.title }}</td>
+                        <td>{{ blog.date|date('Y-m-d') }}</td>
+                        <td>{{ blog.avis|length }}</td>
+                        <td>
+                            <a href="{{ path('admin_toggle_featured', {'id': blog.id}) }}" 
+                               class="btn btn-sm {{ blog.isFeatured ? 'btn-warning' : 'btn-success' }}">
+                                {% if blog.isFeatured %}
+                                    <i class="fa fa-star"></i> Unfeature
+                                {% else %}
+                                    <i class="fa fa-star"></i> Feature
+                                {% endif %}
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center">No featured blog posts yet</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
