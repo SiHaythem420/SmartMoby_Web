@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}SmartMoby - Home{% endblock %}
+
+{% block content %}
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <h5 class="mb-0"><strong>Dashboard</strong></h5>
+    <span class="text-secondary">Welcome to SmartMoby</span>
+
+    <div class="row mt-3">
+        <div class="col-lg-4 col-md-4 col-sm-6 col-12 mb-3">
+            <div class="bg-white border shadow">
+                <div class="media p-4">
+                    <div class="align-self-center mr-3 rounded-circle notify-icon bg-theme">
+                        <i class="fa fa-car"></i>
+                    </div>
+                    <div class="media-body pl-2">
+                        <h3 class="mt-0 mb-0"><strong>{{ vehicules is defined ? vehicules|length : 0 }}</strong></h3>
+                        <p><small class="text-muted bc-description">Total Vehicles</small></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-4 col-sm-6 col-12 mb-3">
+            <div class="bg-white border shadow">
+                <div class="media p-4">
+                    <div class="align-self-center mr-3 rounded-circle notify-icon bg-theme">
+                        <i class="fa fa-route"></i>
+                    </div>
+                    <div class="media-body pl-2">
+                        <h3 class="mt-0 mb-0"><strong>{{ trajets is defined ? trajets|length : 0 }}</strong></h3>
+                        <p><small class="text-muted bc-description">Total Trips</small></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-4 col-sm-6 col-12 mb-3">
+            <div class="bg-white border shadow">
+                <div class="media p-4">
+                    <div class="align-self-center mr-3 rounded-circle notify-icon bg-theme">
+                        <i class="fa fa-map"></i>
+                    </div>
+                    <div class="media-body pl-2">
+                        <h3 class="mt-0 mb-0"><strong>{{ available_vehicles is defined ? available_vehicles|length : 0 }}</strong></h3>
+                        <p><small class="text-muted bc-description">Available Vehicles</small></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %} 

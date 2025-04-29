@@ -38,6 +38,24 @@
     <![endif]-->
 
     <title>Sleek Admin</title>
+    <style>
+        .sortable {
+            cursor: pointer;
+        }
+        .sortable:hover {
+            background-color: #f5f5f5;
+        }
+        .sort-icon::after {
+            content: '↕️';
+            margin-left: 5px;
+        }
+        .sort-asc::after {
+            content: '↑';
+        }
+        .sort-desc::after {
+            content: '↓';
+        }
+    </style>
   </head>
   <body>
     <!--Page loader-->
@@ -58,6 +76,7 @@
             <!--Logo-->
             <div class="col-sm-3 pl-0 text-center header-logo">
                <div class="bg-theme mr-3 pt-3 pb-2 mb-0">
+                    <h3 class="logo"><a href="#" class="text-secondary logo"><i class="fa fa-rocket"></i> SmartMoby<span class="small">admin</span></a></h3>
                     <h3 class="logo"><a href="#" class="text-secondary logo"><i class="fa fa-rocket"></i> SmartMoby<span class="small">admin</span></a></h3>
                </div>
             </div>
@@ -116,6 +135,20 @@
                     
 
                     <!--Sidebar Navigation Menu-->
+                    <div class="sidebar-menu-container">
+                        <ul class="sidebar-menu mt-4 mb-4">
+                            <li class="parent">
+                                <a href="#" onclick="toggle_menu('dashboard'); return false" class=""><i class="fa fa-dashboard mr-3"> </i>
+                                    <span class="none">Dashboard <i class="fa fa-angle-down pull-right align-bottom"></i></span>
+                                </a>
+                                <ul class="children" id="dashboard">
+                                    <li class="child"><a href="index.html" class="ml-4"><i class="fa fa-angle-right mr-2"></i> Utilisateurs </a></li>
+                                </ul>
+                            </li>
+                            </li>
+                            
+                        </ul>
+                    </div>
 <div class="sidebar-menu-container">
     <ul class="sidebar-menu mt-4 mb-4">
         <li class="parent">
@@ -150,6 +183,7 @@
                         
                         <div class="row border-bottom mb-4">
                             <div class="col-sm-8 pt-2"><h6 class="mb-4 bc-header">Liste Des Utilisateurs</h6></div>
+                            <div class="col-sm-8 pt-2"><h6 class="mb-4 bc-header">Liste Des Utilisateurs</h6></div>
                             <div class="col-sm-4 text-right pb-3">
                                 <button type="button" class="btn btn-danger icon-round shadow pull-right">
                                     <i class="fas fa-trash"></i>
@@ -170,6 +204,10 @@
                         
                         <div class="table-responsive product-list">
                             
+                            <div class="mb-3">
+                                <input type="text" id="searchInput" class="form-control" placeholder="Rechercher...">
+                            </div>
+
                             <table class="table table-bordered table-striped mt-0" id="productList">
                                 <thead>
                                     <tr>
@@ -181,15 +219,15 @@
                                                 </span>
                                             </div>
                                         </th>
-                                        <th>Nom</th>
-                                        <th>Prénom</th>
-                                        <th>Nom D'utilisateur</th>
-                                        <th>Email</th>
-                                        <th>Mot De Passe</th>
-                                        <th>Role</th>
-                                        <th>Département</th>
-                                        <th>Numéro De Badge</th>
-                                        <th>Numéro De Permis</th>
+                                        <th class="sortable" data-sort="nom">Nom</th>
+                                        <th class="sortable" data-sort="prenom">Prénom</th>
+                                        <th class="sortable" data-sort="nomUtilisateur">Nom D'utilisateur</th>
+                                        <th class="sortable" data-sort="email">Email</th>
+                                        <th class="sortable" data-sort="motDePasse">Mot De Passe</th>
+                                        <th class="sortable" data-sort="role">Role</th>
+                                        <th class="sortable" data-sort="departement">Département</th>
+                                        <th class="sortable" data-sort="numBadge">Numéro De Badge</th>
+                                        <th class="sortable" data-sort="numeroPermis">Numéro De Permis</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -260,12 +298,24 @@
                     {% endif %}
                 </td>
 
+                <td class="align-middle">
+                    {% if user.getBan() == true %}
+                        Banni
+                    {% else %}
+                        Non banni
+                    {% endif %}
+                </td>
+
                 <td class="align-middle text-center">
+                    <a href="{{ path('user_ban', { id: user.id }) }}" class="btn btn-danger">
                     <a href="{{ path('user_ban', { id: user.id }) }}" class="btn btn-danger">
                         <i class="fas fa-ban"></i> Bannir
                     </a>
                     <a href="{{ path('user_unban', { id: user.id }) }}" class="btn btn-success">
+                    </a>
+                    <a href="{{ path('user_unban', { id: user.id }) }}" class="btn btn-success">
                         <i class="fas fa-check"></i> Débannir
+                    </a>
                     </a>
                 </td>
             </tr>
@@ -274,7 +324,9 @@
                             </table>
 
                             <div class="text-right">
-                                <button class="btn btn-outline-theme"><i class="fa fa-eye"></i> View full orders</button>
+                                <a href="{{ path('export_users_pdf') }}" class="btn btn-danger pdf-button">
+                                    <i class="fas fa-file-pdf"></i> Exporter PDF
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -466,6 +518,121 @@
     <script>
         //Nice select
         $('.bulk-actions').niceSelect();
+    </script>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const tableBody = document.querySelector('#productList tbody');
+    const sortableHeaders = document.querySelectorAll('.sortable');
+    let users = [];
+    let currentSort = {
+        column: '',
+        direction: 'asc'
+    };
+
+    // Fonction pour trier les données
+    function sortUsers(column) {
+        const direction = currentSort.column === column && currentSort.direction === 'asc' ? 'desc' : 'asc';
+        
+        users.sort((a, b) => {
+            let valueA = (a[column] || '').toString().toLowerCase();
+            let valueB = (b[column] || '').toString().toLowerCase();
+            
+            if (valueA === 'n/a') valueA = '';
+            if (valueB === 'n/a') valueB = '';
+            
+            if (direction === 'asc') {
+                return valueA.localeCompare(valueB);
+            } else {
+                return valueB.localeCompare(valueA);
+            }
+        });
+
+        currentSort.column = column;
+        currentSort.direction = direction;
+
+        // Mise à jour des icônes de tri
+        sortableHeaders.forEach(header => {
+            header.classList.remove('sort-asc', 'sort-desc');
+            if (header.dataset.sort === column) {
+                header.classList.add(direction === 'asc' ? 'sort-asc' : 'sort-desc');
+            }
+        });
+
+        displayUsers();
+    }
+
+    // Fonction pour afficher les utilisateurs
+    function displayUsers() {
+        tableBody.innerHTML = users.map(user => `
+            <tr>
+                <td style="width: 10px;" class="p-0 pr-1 align-middle">
+                    <div class="form-check-box cta">
+                        <span class="color1">
+                            <input type="checkbox" id="order${user.id}">
+                            <label for="order${user.id}"></label>
+                        </span>
+                    </div>
+                </td>
+                <td class="align-middle">${user.nom || ''}</td>
+                <td class="align-middle">${user.prenom || ''}</td>
+                <td class="align-middle">${user.nomUtilisateur || ''}</td>
+                <td class="align-middle">${user.email || ''}</td>
+                <td class="align-middle">${user.motDePasse || ''}</td>
+                <td class="align-middle">${user.role || ''}</td>
+                <td class="align-middle">${user.role === 'ADMIN' ? (user.departement || 'N/A') : 'N/A'}</td>
+                <td class="align-middle">${user.role === 'ORGANISATEUR' ? (user.numBadge || 'N/A') : 'N/A'}</td>
+                <td class="align-middle">${user.role === 'CONDUCTEUR' ? (user.numeroPermis || 'N/A') : 'N/A'}</td>
+                <td class="align-middle">${user.ban ? 'Banni' : 'Non banni'}</td>
+                <td class="align-middle text-center">
+                    <a href="/back/user/ban/${user.id}" class="btn btn-danger">
+                        <i class="fas fa-ban"></i> Bannir
+                    </a>
+                    <a href="/back/user/unban/${user.id}" class="btn btn-success">
+                        <i class="fas fa-check"></i> Débannir
+                    </a>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // Gestionnaire d'événements pour le tri
+    sortableHeaders.forEach(header => {
+        header.addEventListener('click', () => {
+            sortUsers(header.dataset.sort);
+        });
+    });
+
+    // Gestionnaire d'événements pour la recherche
+    let timeoutId;
+    searchInput.addEventListener('keyup', function() {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            const searchTerm = this.value;
+            
+            fetch(`/api/search-users?term=${encodeURIComponent(searchTerm)}`)
+                .then(response => response.json())
+                .then(data => {
+                    users = data;
+                    if (currentSort.column) {
+                        sortUsers(currentSort.column);
+                    } else {
+                        displayUsers();
+                    }
+                })
+                .catch(error => console.error('Erreur:', error));
+        }, 300);
+    });
+
+    // Charger les données initiales
+    fetch('/api/search-users?term=')
+        .then(response => response.json())
+        .then(data => {
+            users = data;
+            displayUsers();
+        })
+        .catch(error => console.error('Erreur:', error));
+});
     </script>
   </body>
 </html>

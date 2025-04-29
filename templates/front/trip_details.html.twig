@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Trip Details - Smart Moby{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Trip Details</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h5>From: {{ trip.lieuDepart }}</h5>
+                            <p class="text-muted">Date: {{ trip.dateDepart|date('Y-m-d') }}</p>
+                            <p class="text-muted">Time: {{ trip.dateDepart|date('H:i') }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>To: {{ trip.lieuArrive }}</h5>
+                            <p class="text-muted">Distance: {{ trip.distance }} km</p>
+                            <p class="text-muted">Price: {{ trip.prix }} DT</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <h5>Vehicle Information</h5>
+                            <p class="text-muted">Type: {{ trip.vehicule.type }}</p>
+                            <p class="text-muted">Available Seats: {{ trip.nbPlacesDispo }}</p>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <a href="{{ path('app_shop') }}" class="btn btn-secondary me-2">Back to Trips</a>
+                        <a href="#" class="btn btn-primary">Book Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

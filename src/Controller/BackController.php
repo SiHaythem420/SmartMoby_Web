@@ -15,6 +15,22 @@ use App\Entity\Evenment;
 use App\Form\EvenmentType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+
+use App\Form\UtilisateurType;
+use App\Form\AdminType;
+use App\Form\UtilisateurBackType;
+use App\Form\UpdateUtilisateurType;
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Pdf\Mpdf;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+
+
+
+
 use App\Service\InfobipSmsSender;
 use App\Service\GoogleAuthService;
 use App\Service\QrCodeService;
@@ -45,6 +61,16 @@ final class BackController extends AbstractController
 
         if ($utilisateur && $utilisateur->getBan()) {
             $session->remove('admin_id'); // Supprime la session pour éviter un accès non autorisé
+        $adminId = $session->get('admin_id');
+
+        if (!$adminId) {
+            return $this->redirectToRoute('app_back_login');
+        }
+
+        $utilisateur = $entityManager->getRepository(Utilisateur::class)->find($adminId);
+
+        if ($utilisateur && $utilisateur->getBan()) {
+            $session->remove('admin_id'); // Supprime la session pour éviter un accès non autorisé
             return $this->redirectToRoute('app_back_login');
         }
 
@@ -61,9 +87,10 @@ final class BackController extends AbstractController
             'organisateurs' => $organisateurs,
         ]);
     }
+}
 
     #[Route('/back/login', name: 'app_back_login')]
-    public function login( Request $request, EntityManagerInterface $entityManager, SessionInterface $session): Response
+    public function login(Request $request, EntityManagerInterface $entityManager, SessionInterface $session): Response
     {
         $error = null;
         if ($request->isMethod('POST')) {
@@ -84,11 +111,14 @@ final class BackController extends AbstractController
                     $error = 'Email ou mot de passe invalide, ou vous n\'êtes pas un administrateur.';
                 }
             }
+            
         }
         return $this->render('back/login.html.twig' , [
             'error' => $error,
         ]);
-    }
+        }
+    
+
 
     #[Route('/back/inscription', name: 'app_back_inscription')]
     public function inscription(Request $request, EntityManagerInterface $entityManager, SessionInterface $session): Response
@@ -144,6 +174,7 @@ final class BackController extends AbstractController
 
             $session->remove('utilisateur_data');
             $session->set('admin_id', $utilisateur->getId());
+            $session->set('admin_id', $utilisateur->getId());
 
             return $this->redirectToRoute('app_back');
         }
@@ -157,12 +188,14 @@ final class BackController extends AbstractController
     public function logout(SessionInterface $session)
     {
         $session->remove('admin_id');
+        $session->remove('admin_id');
         return $this->redirectToRoute('app_back_login');
     }
 
     #[Route('/back/account_settings', name: 'app_back_account_settings')] // Correction du slash manquant
     public function parametres_back(Request $request, SessionInterface $session, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
     {
+        $userId = $session->get('admin_id');
         $userId = $session->get('admin_id');
 
         if (!$userId) {
@@ -257,6 +290,125 @@ final class BackController extends AbstractController
         return $this->redirectToRoute('app_back');
     }
 
+
+    #[Route('/back/export/pdf', name: 'export_users_pdf')]
+    public function exportUsersPdf(EntityManagerInterface $entityManager): Response
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Ajouter un titre
+        $sheet->setCellValue('A1', 'Liste des Utilisateurs');
+        $sheet->mergeCells('A1:I1');
+        $sheet->getStyle('A1')->getFont()->setSize(16)->setBold(true);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('4F81BD');
+        $sheet->getStyle('A1')->getFont()->getColor()->setRGB('FFFFFF');
+
+        // Ajouter les en-têtes
+        $headers = ['Nom', 'Prénom', 'Nom d\'utilisateur', 'Email', 'Mot de passe', 'Role', 'Département', 'Badge', 'Permis'];
+        $sheet->fromArray($headers, null, 'A3');
+
+        // Style des en-têtes
+        $headerStyle = $sheet->getStyle('A3:I3');
+        $headerStyle->getFont()->setBold(true)->setSize(12);
+        $headerStyle->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('DCE6F1');
+        $headerStyle->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $headerStyle->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+        $users = $entityManager->getRepository(Utilisateur::class)->findAll();
+        $admins = $entityManager->getRepository(Admin::class)->findAll();
+        $organisateurs = $entityManager->getRepository(Organisateur::class)->findAll();
+        $clients = $entityManager->getRepository(Client::class)->findAll();
+        $conducteurs = $entityManager->getRepository(Conducteur::class)->findAll();
+
+        $row = 4;
+        foreach ($users as $user) {
+            // Déterminer le département avant de créer le tableau
+            $departement = 'N/A';
+            if ($user->getRole() === 'ADMIN') {
+                foreach ($admins as $admin) {
+                    if ($admin->getId() === $user) {
+                        $departement = $admin->getDepartement();
+                        break;
+                    }
+                }
+            }
+
+            $badge = 'N/A';
+            if ($user->getRole() === 'ORGANISATEUR') {
+                foreach ($organisateurs as $organisateur) {
+                    if ($organisateur->getId() === $user) {
+                        $badge = $organisateur->getNumBadge();
+                        break;
+                    }
+                }
+            }
+
+            $permis = 'N/A';
+            if ($user->getRole() === 'CONDUCTEUR') {
+                foreach ($conducteurs as $conducteur) {
+                    if ($conducteur->getId() === $user) {
+                        $permis = $conducteur->getNumeroPermis();
+                        break;
+                    }
+                }
+            }
+
+            // Créer le tableau avec les valeurs
+            $sheet->fromArray([
+                $user->getNom(),
+                $user->getPrenom(),
+                $user->getNomUtilisateur(),
+                $user->getEmail(),
+                $user->getMotDePasse(),
+                $user->getRole(),
+                $departement,
+                $badge,
+                $permis
+            ], null, 'A' . $row);
+
+            // Style alterné des lignes
+            $rowStyle = $sheet->getStyle('A' . $row . ':I' . $row);
+            if ($row % 2 == 0) {
+                $rowStyle->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('F2F2F2');
+            }
+            $rowStyle->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+            $rowStyle->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $rowStyle->getFont()->setSize(11);
+
+            $row++;
+        }
+
+        // Ajuster la largeur des colonnes
+        foreach (range('A', 'I') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Ajouter un espacement entre les cellules
+        $sheet->getStyle('A1:I' . ($row - 1))->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A1:I' . ($row - 1))->getAlignment()->setWrapText(true);
+
+        $writer = new Mpdf($spreadsheet);
+        $filename = 'liste_utilisateurs.pdf';
+
+        ob_start();
+        $writer->save('php://output');
+        $pdfContent = ob_get_clean();
+
+        return new Response($pdfContent, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => (new ResponseHeaderBag())->makeDisposition(
+                ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+                $filename
+            ),
+        ]);
+    }
+
+
+
+    
+    
     //oussema
     #[Route('/back/add_event', name: 'app_back_add_event')]
     public function addEvent(
@@ -499,3 +651,4 @@ public function searchEvent(Request $request, EventRepository $eventRepo, Pagina
         }
     }
 }
+

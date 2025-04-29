@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+	{% block css %}
+	<link rel="stylesheet" href="{{ asset('css/login.css') }}">
+	{% endblock %}
+</head>
+<body>
+    
+<div class="container" id="container">
+	<div class="form-container sign-up-container">
+		<form action="{{ path('app_inscription') }}" method="post">
+    		<h1>Créer Un Compte</h1>
+    		
+		</form>
+	</div>
+	<div class="form-container sign-in-container">
+		<form method="POST">
+        {{ form_start(form) }}
+            {{ form_widget(form.mot_de_passe, {'attr': {'class': 'form-input', 'placeholder': 'Mot De Passe'}}) }}
+            <div class="form-error">
+                {{ form_errors(form.mot_de_passe) }}
+            </div>
+			{{ form_widget(form.role, {'attr': {'class': 'form-input', 'placeholder': 'Mot De Passe', 'style': 'display: none;'}}) }}
+			{{ form_widget(form.nom, {'attr': {'class': 'form-input', 'placeholder': 'Nom', 'style': 'display: none;'}}) }}
+			{{ form_widget(form.prenom, {'attr': {'class': 'form-input', 'placeholder': 'Prénom', 'style': 'display: none;'}}) }}
+			{{ form_widget(form.nom_utilisateur, {'attr': {'class': 'form-input', 'placeholder': "Nom d'utilisateur", 'style': 'display: none;'}}) }}
+			{{ form_widget(form.email, {'attr': {'class': 'form-input', 'placeholder': 'Email', 'style': 'display: none;'}}) }}
+            <button type="submit" style="margin-top: 20px;">Valider</button>
+        {{ form_end(form) }}
+		
+        </form>
+	</div>
+	<div class="overlay-container">
+		<div class="overlay">
+			<div class="overlay-panel overlay-left">
+				<h1>Bonjour !</h1>
+				<p>Entrez vos informations personnelles et commencez l'aventure ! </p>
+				<button class="ghost" id="signIn">Se Connecter ?</button>
+			</div>
+			<div class="overlay-panel overlay-right">
+				<h1> Mot de passe oublié </h1>
+				<p>Entrez votre nouveau mot de passe</p>
+				
+			</div>
+		</div>
+	</div>
+</div>
+
+{% block js %}
+<script src="{{ asset('js/login.js') }}"></script>
+{% endblock %}
+</body>
+</html>

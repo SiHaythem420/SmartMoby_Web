@@ -1,0 +1,483 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Trip Details - Smart Moby{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow-lg">
+                <div class="card-header bg-gradient-primary text-white py-3">
+                    <h4 class="mb-0">
+                        <i class="fas fa-route me-2"></i>
+                        Trip Details
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Trip Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-map-marker-alt me-2"></i>
+                                    Departure
+                                </h5>
+                                <p class="mb-2">
+                                    <strong>Location:</strong> {{ trip.pointDepart }}
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Date:</strong> {{ trip.dateDepart|date('Y-m-d') }}
+                                </p>
+                                <p class="mb-0">
+                                    <strong>Time:</strong> {{ trip.dateDepart|date('H:i') }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-map-marker-alt me-2"></i>
+                                    Arrival
+                                </h5>
+                                <p class="mb-2">
+                                    <strong>Location:</strong> {{ trip.pointArrivee }}
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Distance:</strong> {{ trip.distance }} km
+                                </p>
+                                <p class="mb-0">
+                                    <strong>Price:</strong> <span class="text-success">{{ trip.prix }} DT</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vehicle Information -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="p-3 bg-light rounded">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-bus me-2"></i>
+                                    Vehicle Information
+                                </h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p class="mb-2">
+                                            <strong>Type:</strong> {{ trip.vehicule.type }}
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-2">
+                                            <strong>Remaining Seats:</strong> 
+                                            {{ trip.vehicule.capacite }} seats
+                                            {% if trip.vehicule.capacite > 0 %}
+                                                <span class="badge bg-success rounded-pill ms-2">
+                                                    <i class="fas fa-check me-1"></i>Available
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-danger rounded-pill ms-2">
+                                                    <i class="fas fa-times me-1"></i>Not Available
+                                                </span>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Driver Information -->
+                    {% if trip.vehicule.conducteur is not null %}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="p-3 bg-light rounded">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-user-tie me-2"></i>
+                                    Driver Information
+                                </h5>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <p class="mb-2">
+                                            <i class="fas fa-user me-2 text-primary"></i>
+                                            <strong>Name:</strong> {{ trip.vehicule.conducteur.id.nom }} {{ trip.vehicule.conducteur.id.prenom }}
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p class="mb-2">
+                                            <i class="fas fa-phone me-2 text-primary"></i>
+                                            <strong>Phone:</strong> {{ trip.vehicule.conducteur.id.email }}
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p class="mb-2">
+                                            <i class="fas fa-id-card me-2 text-primary"></i>
+                                            <strong>License:</strong> {{ trip.vehicule.conducteur.numero_permis }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="p-3 bg-light rounded">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-user-tie me-2"></i>
+                                    Driver Information
+                                </h5>
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    This trip is operated by an automated system. No driver information is available.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Action Buttons -->
+                    <div class="text-center mt-4">
+                        <a href="{{ path('app_shop') }}" class="btn btn-outline-secondary me-2">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Trips
+                        </a>
+                        {% if trip.vehicule.capacite > 0 %}
+                            <a href="{{ path('app_book_trip', {'id': trip.id}) }}" class="btn btn-success">
+                                <i class="fas fa-ticket-alt me-2"></i>Book Now
+                            </a>
+                        {% else %}
+                            <button class="btn btn-danger" disabled>
+                                <i class="fas fa-ban me-2"></i>Not Available
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="booking-section mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-ticket-alt me-2"></i>Book Your Trip
+            </h5>
+        </div>
+        <div class="card-body">
+            <form id="bookingForm">
+                <div class="mb-3">
+                    <label class="form-label">Your Name</label>
+                    <input type="text" class="form-control" id="passengerName" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Phone Number</label>
+                    <input type="tel" class="form-control" id="phoneNumber" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Number of Seats</label>
+                    <input type="number" 
+                           class="form-control" 
+                           id="numberOfSeats" 
+                           min="1" 
+                           max="{{ trip.vehicule.capacite }}" 
+                           value="1" 
+                           required>
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle"></i> 
+                        Available seats: {{ trip.vehicule.capacite }}
+                    </small>
+                </div>
+                <div class="d-grid">
+                    <button type="button" class="btn btn-success" onclick="processBooking()">
+                        <i class="fas fa-check me-2"></i>Confirm Booking
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Receipt Modal -->
+<div class="modal fade" id="receiptModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-receipt me-2"></i>Booking Confirmed
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="receiptContent">
+                    <!-- Receipt content will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="printReceipt()">
+                    <i class="fas fa-print me-2"></i>Print Receipt
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function processBooking() {
+    const form = document.getElementById('bookingForm');
+    const numberOfSeats = parseInt(document.getElementById('numberOfSeats').value);
+    const maxSeats = {{ trip.vehicule.capacite }};
+
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
+    if (numberOfSeats > maxSeats) {
+        alert(`Cannot book more than ${maxSeats} seats`);
+        return;
+    }
+
+    const bookingData = {
+        booking_id: 'BOOK-' + Date.now(),
+        trip_details: '{{ trip.pointDepart }} → {{ trip.pointArrivee }}',
+        passenger_name: document.getElementById('passengerName').value,
+        phone_number: document.getElementById('phoneNumber').value,
+        number_of_seats: numberOfSeats,
+        trip_id: {{ trip.id }},
+        price: {{ trip.prix }}
+    };
+
+    // Show loading state
+    const submitButton = form.querySelector('button');
+    const originalText = submitButton.innerHTML;
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+
+    // Add validation message
+    if (numberOfSeats > maxSeats) {
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalText;
+        alert(`Cannot book more than ${maxSeats} seats`);
+        return;
+    }
+
+    // Process payment
+    fetch('/payment/process', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(bookingData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update available seats after successful booking
+            const remainingSeats = maxSeats - numberOfSeats;
+            showReceipt(data.receipt);
+        } else {
+            alert('Payment failed: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('An error occurred: ' + error.message);
+    })
+    .finally(() => {
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalText;
+    });
+}
+
+function showReceipt(receipt) {
+    const numberOfSeats = document.getElementById('numberOfSeats').value;
+    const pricePerSeat = {{ trip.prix }};
+    const totalPrice = numberOfSeats * pricePerSeat;
+    const maxSeats = {{ trip.vehicule.capacite }};
+    const remainingSeats = maxSeats - numberOfSeats;
+
+    const receiptContent = document.getElementById('receiptContent');
+    receiptContent.innerHTML = `
+        <div class="text-center mb-4">
+            <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
+            <h4 class="mt-3">Booking Confirmed!</h4>
+        </div>
+        <div class="receipt-details">
+            <div class="d-flex justify-content-between mb-2">
+                <span>Receipt ID:</span>
+                <strong>${receipt.receipt_id}</strong>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+                <span>Booking Reference:</span>
+                <strong>${receipt.details.booking_reference}</strong>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+                <span>Passenger:</span>
+                <strong>${receipt.details.passenger}</strong>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+                <span>Trip:</span>
+                <strong>${receipt.details.trip}</strong>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+                <span>Date:</span>
+                <strong>${receipt.date}</strong>
+            </div>
+                <!-- Vehicle Information -->
+            <div class="vehicle-info mb-3 p-3 bg-light rounded">
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Vehicle Type:</span>
+                    <strong>{{ trip.vehicule.type }}</strong>
+                </div>
+            </div>        
+            
+            <!-- Driver Information Section -->
+            <div class="driver-info mt-3 mb-3 p-3 bg-light rounded">
+                <h6 class="text-primary mb-3">
+                    <i class="fas fa-user-tie me-2"></i>Driver Information
+                </h6>
+                {% if trip.vehicule.conducteur is not null %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Driver Name:</span>
+                        <strong>{{ trip.vehicule.conducteur.id.nom }} {{ trip.vehicule.conducteur.id.prenom }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Contact:</span>
+                        <strong>{{ trip.vehicule.conducteur.id.email }}</strong>
+                    </div>
+
+                {% else %}
+                    <div class="alert alert-info mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        This trip is operated by an automated system.
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Seat Information -->
+            <div class="seat-info mb-3 p-3 bg-light rounded">
+                <h6 class="text-primary mb-3">
+                    <i class="fas fa-chair me-2"></i>Seat Information
+                </h6>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Booked Seats:</span>
+                    <strong>${numberOfSeats}</strong>
+                </div>
+
+            <!-- Price Breakdown -->
+            <div class="price-breakdown mt-3 p-3 bg-light rounded">
+                <h6 class="text-primary mb-3">
+                    <i class="fas fa-receipt me-2"></i>Price Details
+                </h6>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Price per Seat:</span>
+                    <strong>${pricePerSeat} TND</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Number of Seats:</span>
+                    <strong>${numberOfSeats}</strong>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between">
+                    <span class="fw-bold">Total Amount:</span>
+                    <strong class="text-success">${totalPrice} TND</strong>
+                </div>
+            </div>
+
+            <div class="mt-3 pt-3 border-top">
+                <div class="d-flex justify-content-between">
+                    <span>Status:</span>
+                    <strong class="text-success">${receipt.status}</strong>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const receiptModal = new bootstrap.Modal(document.getElementById('receiptModal'));
+    receiptModal.show();
+}
+
+function printReceipt() {
+    const receiptContent = document.getElementById('receiptContent').innerHTML;
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>Booking Receipt</title>
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+                <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+                <style>
+                    body { padding: 20px; }
+                    @media print {
+                        .no-print { display: none; }
+                    }
+                </style>
+            </head>
+            <body>
+                ${receiptContent}
+                <div class="text-center mt-4 no-print">
+                    <button onclick="window.print()" class="btn btn-primary">
+                        <i class="fas fa-print me-2"></i>Print
+                    </button>
+                </div>
+            </body>
+        </html>
+    `);
+    printWindow.document.close();
+}
+
+// Add this to your existing JavaScript
+document.getElementById('numberOfSeats').addEventListener('input', function(e) {
+    const maxSeats = {{ trip.vehicule.capacite }};
+    const selectedSeats = parseInt(this.value);
+    
+    if (selectedSeats > maxSeats) {
+        this.value = maxSeats;
+        alert(`Maximum available seats is ${maxSeats}`);
+    }
+});
+</script>
+
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(45deg, #0d6efd, #0dcaf0);
+    }
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+    }
+    .btn {
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+    .btn-success {
+        background: linear-gradient(45deg, #198754, #20c997);
+        border: none;
+    }
+    .btn-danger {
+        background: linear-gradient(45deg, #dc3545, #fd7e14);
+        border: none;
+    }
+    .bg-light {
+        background-color: #f8f9fa !important;
+    }
+    .seat-info {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    input[type="number"]:invalid {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+
+    .text-muted {
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %} 

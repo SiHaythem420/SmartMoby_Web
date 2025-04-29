@@ -46,6 +46,7 @@ class UtilisateurType extends AbstractType
             'placeholder' => 'Sélectionnez un rôle', 
             'required' => false,
         ]);
+        
     }
 
     public function configureOptions(OptionsResolver $resolver): void

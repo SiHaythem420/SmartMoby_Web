@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app.request.locale }}">
 
 <head>
+    <title>{% block title %}{{ 'app.shop.banner.title'|trans }}{% endblock %}</title>
 <style>
 .page-link {
     color: #0d6efd;
@@ -24,6 +25,8 @@
     <title>{% block title %} Zay Shop eCommerce HTML CSS Template {% endblock %} </title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="{{ 'app.shop.banner.description'|trans }}">
+    <meta name="author" content="Smart Moby">
 
     {% block css %}
     <link rel="apple-touch-icon" href="{{asset('img/apple-icon.png')}}">
@@ -48,6 +51,29 @@ TemplateMo 559 Zay Shop
 https://templatemo.com/tm-559-zay-shop
 
 -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text></svg>">
+    {# Run `composer require symfony/webpack-encore-bundle` to start using Symfony UX #}
+    {% block stylesheets %}
+        {{ encore_entry_link_tags('app') }}
+        <!-- Leaflet CSS -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+              integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+              crossorigin=""/>
+    {% endblock %}
+
+    {% block javascripts %}
+        {{ encore_entry_script_tags('app') }}
+        <!-- Leaflet JavaScript -->
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+                integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+                crossorigin=""></script>
+        <!-- Leaflet Routing Machine for directions -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+        <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+        <!-- Leaflet Search for location search -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+        <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    {% endblock %}
 </head>
 
 <body>
@@ -68,15 +94,15 @@ https://templatemo.com/tm-559-zay-shop
 
             <div class="align-self-center collapse navbar-collapse flex-fill  d-lg-flex justify-content-lg-between" id="templatemo_main_nav">
                 <div class="flex-fill">
-                    <ul class="nav navbar-nav d-flex justify-content-between mx-lg-auto">
+                    <ul class="nav navbar-nav d-flex justify-content-evenly align-items-center w-100">
                         <li class="nav-item">
-                            <a class="nav-link" href="">Acceuil</a>
+                            <a class="nav-link" href="">Accueil</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="about.html">Services </a>
+                            <a class="nav-link" href="about.html">Services</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="shop.html">Trajet Du Trafic </a>
+                            <a class="nav-link" href="shop.html">Trajet Du Trafic</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{path ('afficher_event')}}">Evenements</a>
@@ -84,16 +110,28 @@ https://templatemo.com/tm-559-zay-shop
                         <li class="nav-item">
                             <a class="nav-link" href="contact.html">Blog</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href={{path('app_ai')}}>SmartMoby AI</a>
+                        </li>
                     </ul>
                 </div>
                 <div class="navbar align-self-center d-flex">
                     <div class="d-lg-none flex-sm-fill mt-3 mb-4 col-7 col-sm-auto pr-3">
                         <div class="input-group">
-                            <input type="text" class="form-control" id="inputMobileSearch" placeholder="Search ...">
+                            <input type="text" class="form-control" id="inputMobileSearch" placeholder="{{ 'app.shop.search.placeholder'|trans }}">
                             <div class="input-group-text">
                                 <i class="fa fa-fw fa-search"></i>
                             </div>
                         </div>
+                    </div>
+                    <div class="dropdown me-3">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ app.request.locale|upper }}
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="languageDropdown">
+                            <li><a class="dropdown-item" href="{{ path('app_language', {'locale': 'en'}) }}">English</a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_language', {'locale': 'fr'}) }}">Français</a></li>
+                        </ul>
                     </div>
                     <a class="nav-icon d-none d-lg-inline" href="#" data-bs-toggle="modal" data-bs-target="#templatemo_search">
                         <i class="fa fa-fw fa-search text-dark mr-2"></i>
@@ -101,8 +139,7 @@ https://templatemo.com/tm-559-zay-shop
                     
                     <div class="dropdown">
                         <a class="nav-icon position-relative text-decoration-none dropdown-toggle" href="#" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fa fa-fw fa-user text-dark mr-3"></i>
-                                
+                            <i class="fa fa-fw fa-user text-dark mr-3"></i>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                             <li><a class="dropdown-item" href="{{path ('app_account_settings')}}">Paramètres</a></li>
@@ -126,7 +163,7 @@ https://templatemo.com/tm-559-zay-shop
             </div>
             <form action="" method="get" class="modal-content modal-body border-0 p-0">
                 <div class="input-group mb-2">
-                    <input type="text" class="form-control" id="inputModalSearch" name="q" placeholder="Search ...">
+                    <input type="text" class="form-control" id="inputModalSearch" name="q" placeholder="{{ 'app.shop.search.placeholder'|trans }}">
                     <button type="submit" class="input-group-text bg-success text-light">
                         <i class="fa fa-fw fa-search text-white"></i>
                     </button>
@@ -149,12 +186,9 @@ https://templatemo.com/tm-559-zay-shop
                         </div>
                         <div class="col-lg-6 mb-0 d-flex align-items-center">
                             <div class="text-align-left align-self-center">
-                                <h1 class="h1 text-success"><b>Smart Moby</b> La Mobilité Intelligente</h1>
-                                <h3 class="h2">Réinventer la mobilité pour un avenir plus intelligent !</h3>
-                                <p>
-                                    Bienvenue sur Smart Moby, votre partenaire pour une mobilité moderne, connectée et durable. Simplifiez vos déplacements dès aujourd'hui ! 
-                                    
-                                </p>
+                                <h1 class="h1 text-success"><b>Smart Moby</b> {{ 'app.shop.banner.title'|trans }}</h1>
+                                <h3 class="h2">{{ 'app.shop.banner.subtitle'|trans }}</h3>
+                                <p>{{ 'app.shop.banner.description'|trans }}</p>
                             </div>
                         </div>
                     </div>
@@ -172,6 +206,8 @@ https://templatemo.com/tm-559-zay-shop
     <section class="container py-5" data-aos="fade-left">
         <div class="row text-center pt-3">
             <div class="col-lg-6 m-auto">
+                <h1 class="h1">{{ 'app.shop.events.title'|trans }}</h1>
+                <p>{{ 'app.shop.events.description'|trans }}</p>
                 <h1 class="h1">Evenements Du Mois</h1>
                 <p>
                     Oussema 
@@ -196,10 +232,8 @@ https://templatemo.com/tm-559-zay-shop
         <div class="container py-5">
             <div class="row text-center py-3">
                 <div class="col-lg-6 m-auto">
-                    <h1 class="h1">Services En Vedettte</h1>
-                    <p>
-                        Fares houni shy7ot shwaya servicet 
-                    </p>
+                    <h1 class="h1">{{ 'app.shop.services.title'|trans }}</h1>
+                    <p>{{ 'app.shop.services.description'|trans }}</p>
                 </div>
             </div>
             <div class="row">
@@ -280,95 +314,118 @@ https://templatemo.com/tm-559-zay-shop
     </section>
     <!-- End Fares -->
 
-    <!-- Start Hedi Feed -->
-    <section style="background-color: #f8f9fa;" data-aos="fade-left">
+    <!-- Start Featured Trips Section -->
+    <section id="trips" style="background-color: #f8f9fa;" data-aos="fade-left">
         <div class="container py-5">
             <div class="row text-center py-3">
                 <div class="col-lg-6 m-auto">
-                    <h1 class="h1">Trajets En Vedettte</h1>
+                    <h1 class="h1">{{ 'app.shop.title'|trans }}</h1>
                     <p>
-                        Hedi houni shy7ot shwaya trajeyet 
+                        {{ 'app.shop.trip.discover'|trans }}
                     </p>
                 </div>
             </div>
             <div class="row">
-                <div class="col-12 col-md-4 mb-4">
-                    <div class="card h-100">
-                        <a href="shop-single.html">
-                            <img src="{{asset('img/feature_prod_01.jpg')}}" class="card-img-top" alt="...">
-                        </a>
-                        <div class="card-body">
-                            <ul class="list-unstyled d-flex justify-content-between">
-                                <li>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-muted fa fa-star"></i>
-                                    <i class="text-muted fa fa-star"></i>
-                                </li>
-                                <li class="text-muted text-right">$240.00</li>
-                            </ul>
-                            <a href="shop-single.html" class="h2 text-decoration-none text-dark">Gym Weight</a>
-                            <p class="card-text">
-                                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sunt in culpa qui officia deserunt.
-                            </p>
-                            <p class="text-muted">Reviews (24)</p>
+                {% if trajets is defined and trajets|length > 0 %}
+                    {% set itemsPerPage = 3 %}
+                    {% set totalPages = (trajets|length / itemsPerPage)|round(0, 'ceil') %}
+                    {% set currentPage = app.request.query.getInt('page', 1) %}
+                    {% set start = (currentPage - 1) * itemsPerPage %}
+                    
+                    {% for trajet in trajets|slice(start, itemsPerPage) %}
+                    <div class="col-12 col-md-4 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">{{ trajet.pointDepart }} → {{ trajet.pointArrivee }}</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span class="badge bg-info">
+                                        <i class="fa fa-calendar"></i> {{ trajet.dateDepart|date('Y-m-d') }}
+                                    </span>
+                                    <span class="badge bg-success">
+                                        <i class="fa fa-clock"></i> {{ trajet.dateDepart|date('H:i') }}
+                                    </span>
+                                </div>
+                                <div class="mb-3">
+                                    <p class="mb-1"><i class="fa fa-car text-primary"></i> {{ 'app.shop.trip.details.vehicle'|trans }}: {{ trajet.vehicule.type }}</p>
+                                    <p class="mb-1"><i class="fa fa-road text-primary"></i> {{ 'app.shop.trip.details.distance'|trans }}: {{ trajet.distance }} km</p>
+                                    <p class="mb-1"><i class="fa fa-tag text-primary"></i> {{ 'app.shop.trip.details.price'|trans }}: {{ trajet.prix }} TND</p>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-sm btn-outline-primary">
+                                            <i class="fa fa-map-marker-alt"></i> {{ 'app.shop.trip.details.view_route'|trans }}
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-success">
+                                            <i class="fa fa-ticket-alt"></i> {{ 'app.shop.trip.details.book_now'|trans }}
+                                        </button>
+                                    </div>
+                                    <small class="text-muted">
+                                        <i class="fa fa-users"></i> {{ random(5, 20) }} {{ 'app.shop.trip.details.seats_left'|trans }}
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-light">
+                                <div class="d-flex justify-content-between">
+                                    <span>
+                                        <i class="fa fa-star text-warning"></i>
+                                        <i class="fa fa-star text-warning"></i>
+                                        <i class="fa fa-star text-warning"></i>
+                                        <i class="fa fa-star text-warning"></i>
+                                        <i class="fa fa-star-half-alt text-warning"></i>
+                                    </span>
+                                    <span class="text-muted">({{ random(10, 50) }} {{ 'app.shop.trip.details.reviews'|trans }})</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-12 col-md-4 mb-4">
-                    <div class="card h-100">
-                        <a href="shop-single.html">
-                            <img src="{{asset('img/feature_prod_02.jpg')}}" class="card-img-top" alt="...">
-                        </a>
-                        <div class="card-body">
-                            <ul class="list-unstyled d-flex justify-content-between">
-                                <li>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-muted fa fa-star"></i>
-                                    <i class="text-muted fa fa-star"></i>
-                                </li>
-                                <li class="text-muted text-right">$480.00</li>
-                            </ul>
-                            <a href="shop-single.html" class="h2 text-decoration-none text-dark">Cloud Nike Shoes</a>
-                            <p class="card-text">
-                                Aenean gravida dignissim finibus. Nullam ipsum diam, posuere vitae pharetra sed, commodo ullamcorper.
-                            </p>
-                            <p class="text-muted">Reviews (48)</p>
-                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12 text-center">
+                        <p class="text-muted">{{ 'app.shop.pagination.no_trips'|trans }}</p>
                     </div>
-                </div>
-                <div class="col-12 col-md-4 mb-4">
-                    <div class="card h-100">
-                        <a href="shop-single.html">
-                            <img src="{{asset('img/feature_prod_03.jpg')}}" class="card-img-top" alt="...">
-                        </a>
-                        <div class="card-body">
-                            <ul class="list-unstyled d-flex justify-content-between">
-                                <li>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-warning fa fa-star"></i>
-                                </li>
-                                <li class="text-muted text-right">$360.00</li>
-                            </ul>
-                            <a href="shop-single.html" class="h2 text-decoration-none text-dark">Summer Addides Shoes</a>
-                            <p class="card-text">
-                                Curabitur ac mi sit amet diam luctus porta. Phasellus pulvinar sagittis diam, et scelerisque ipsum lobortis nec.
-                            </p>
-                            <p class="text-muted">Reviews (74)</p>
-                        </div>
-                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- View All Trips Button -->
+            <div class="row mt-4">
+                <div class="col-12 text-center">
+                    <a href="/front/shop" class="btn btn-success btn-lg">
+                        <i class="fa fa-list"></i> {{ 'app.shop.pagination.view_all'|trans }}
+                    </a>
                 </div>
             </div>
+            
+            <!-- Pagination -->
+            {% if trajets is defined and trajets|length > 3 %}
+            <div class="row mt-4">
+                <div class="col-12">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item {% if currentPage == 1 %}disabled{% endif %}">
+                                <a class="page-link" href="{{ path('app_home', {'page': currentPage - 1}) }}#trips" aria-label="{{ 'app.shop.pagination.previous'|trans }}">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            {% for i in 1..totalPages %}
+                                <li class="page-item {% if currentPage == i %}active{% endif %}">
+                                    <a class="page-link" href="{{ path('app_home', {'page': i}) }}#trips">{{ i }}</a>
+                                </li>
+                            {% endfor %}
+                            <li class="page-item {% if currentPage == totalPages %}disabled{% endif %}">
+                                <a class="page-link" href="{{ path('app_home', {'page': currentPage + 1}) }}#trips" aria-label="{{ 'app.shop.pagination.next'|trans }}">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </section>
-
-    <!-- End Hedi Feed -->
+    <!-- End Featured Trips Section -->
 
     <!-- Start Hazem -->
     <div id="template-mo-zay-hero-carousel" class="carousel slide" data-bs-ride="carousel" data-aos="fade-right">
@@ -411,15 +468,15 @@ https://templatemo.com/tm-559-zay-shop
                     <ul class="list-unstyled text-light footer-link-list">
                         <li>
                             <i class="fas fa-map-marker-alt fa-fw"></i>
-                            Cité El Ghazela, Ariana, Tunis
+                            {{ 'app.shop.footer.address'|trans }}
                         </li>
                         <li>
                             <i class="fa fa-phone fa-fw"></i>
-                            <a class="text-decoration-none" >+216 98 444 555</a>
+                            <a class="text-decoration-none">{{ 'app.shop.footer.phone'|trans }}</a>
                         </li>
                         <li>
                             <i class="fa fa-envelope fa-fw"></i>
-                            <a class="text-decoration-none" >info@smart_moby.com</a>
+                            <a class="text-decoration-none">{{ 'app.shop.footer.email'|trans }}</a>
                         </li>
                     </ul>
                 </div>
@@ -437,8 +494,7 @@ https://templatemo.com/tm-559-zay-shop
                 <div class="row pt-2">
                     <div class="col-12">
                         <p class="text-left text-light">
-                            Copyright &copy; 2025 Smart Moby Co., Ltd.
-                            
+                            {{ 'app.shop.footer.copyright'|trans }}
                         </p>
                     </div>
                 </div>

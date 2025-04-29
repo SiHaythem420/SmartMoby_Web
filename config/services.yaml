@@ -4,6 +4,8 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    app.google_maps.api_key: '%env(GOOGLE_MAPS_API_KEY)%'
+    app.weather.api_key: '%env(OPENWEATHER_API_KEY)%'
     infobip.api_url: '%env(INFOBIP_API_URL)%'
     infobip.api_key: '%env(INFOBIP_API_KEY)%'
     infobip.sms_sender: '%env(INFOBIP_SENDER)%'
@@ -46,3 +48,14 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    # Google Maps Service
+    App\Service\GoogleMapsService:
+        public: true
+        arguments:
+            $apiKey: '%app.google_maps.api_key%'
+
+    App\Service\WeatherService:
+        arguments:
+            $apiKey: '%env(WEATHER_API_KEY)%'
+

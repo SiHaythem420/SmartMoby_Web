@@ -10,10 +10,14 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Doctrine\Common\Collections\ArrayCollection;
+use Scheb\TwoFactorBundle\Model\Google\TwoFactorInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
+
+
 #[ORM\Entity]
 #[UniqueEntity(fields: ['email'], message: 'Cet email est déjà utilisé.')]
 #[UniqueEntity(fields: ['nom_utilisateur'], message: 'Ce nom d\'utilisateur est déjà pris.')]
-class Utilisateur implements PasswordAuthenticatedUserInterface
+class Utilisateur implements PasswordAuthenticatedUserInterface, UserInterface, TwoFactorInterface
 {
 
     #[ORM\Id]
@@ -76,6 +80,13 @@ class Utilisateur implements PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'boolean')]
     private bool $ban = false;
 
+<<<<<<< HEAD
+=======
+    #[ORM\Column(type: 'string', nullable: true)]
+
+    private ?string $googleAuthenticatorSecret;
+
+>>>>>>> 2bbb1cd508c09daef7ff0e404e25083f9f501b0c
     public function getId()
     {
         return $this->id;
@@ -180,6 +191,19 @@ class Utilisateur implements PasswordAuthenticatedUserInterface
         return $this;
     }
 
+<<<<<<< HEAD
+=======
+    public function getGoogleAuthenticatorSecret(): ?string
+    {
+        return $this->googleAuthenticatorSecret;
+    }
+
+    public function setGoogleAuthenticatorSecret(?string $googleAuthenticatorSecret): void
+    {
+        $this->googleAuthenticatorSecret = $googleAuthenticatorSecret;
+    }
+
+>>>>>>> 2bbb1cd508c09daef7ff0e404e25083f9f501b0c
     #[ORM\OneToMany(mappedBy: "id", targetEntity: Admin::class)]
     private Collection $admins;
     public function __construct()
@@ -290,5 +314,36 @@ class Utilisateur implements PasswordAuthenticatedUserInterface
         return $this;
 
     
+    }
+
+    public function isGoogleAuthenticatorEnabled(): bool
+    {
+        return null !== $this->googleAuthenticatorSecret;
+    }
+
+    public function getGoogleAuthenticatorUsername(): string
+    {
+        return $this->nom_utilisateur;
+    }
+
+    
+
+    public function getRoles(): array
+    {
+        // Retourne les rôles de l'utilisateur
+        $roles = [$this->role];
+        $roles[] = 'ROLE_USER'; // Ajoute un rôle par défaut
+        return array_unique($roles);
+    }
+
+    public function getUserIdentifier(): string
+    {
+        // Utilise l'email comme identifiant unique
+        return $this->email;
+    }
+
+    public function eraseCredentials(): void
+    {
+        // Si vous stockez des données sensibles temporaires, nettoyez-les ici
     }
 }

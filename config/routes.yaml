@@ -3,3 +3,5 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+scheb_two_factor_google_check:
+    path: /2fa_check

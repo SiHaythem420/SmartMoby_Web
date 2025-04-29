@@ -22,6 +22,38 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Form\UpdateUtilisateurType;
 use App\Entity\Client;
+
+use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Google\GoogleAuthenticatorInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Builder\BuilderInterface;
+use Endroid\QrCode\Builder\QrCodeBuilderInterface;
+
+use Endroid\QrCode\Builder\BuilderRegistryInterface;
+
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
+
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+
+use App\Form\MotDePasseOublie1Type;
+use App\Form\MotDePasseOublie2Type;
+use App\Form\MotDePasseOublie3Type;
+
+use \Mailjet\Resources;
+
+
+
+
+
+
 use App\Entity\Evenment;
 use App\Form\FedbackType;
 use App\Entity\Fedback;
@@ -47,10 +79,18 @@ final class FrontController extends AbstractController
     public function index(SessionInterface $session , EntityManagerInterface $entityManager): Response
     {
         $userId = $session->get('user_id');
+        
+        $userId = $session->get('user_id');
         $events = $entityManager->getRepository(Evenment::class)->findAll();
         
         if (!$session->get('user_id')) {
             // Redirige vers la page de connexion si l'utilisateur n'est pas connecté
+            return $this->redirectToRoute('app_inscription');
+        }
+        $utilisateur = $entityManager->getRepository(Utilisateur::class)->find($userId);
+
+        if ($utilisateur && $utilisateur->getBan()) {
+            $session->remove('user_id'); // Supprime la session pour éviter un accès non autorisé
             return $this->redirectToRoute('app_inscription');
         }
         $utilisateur = $entityManager->getRepository(Utilisateur::class)->find($userId);
@@ -66,7 +106,7 @@ final class FrontController extends AbstractController
     }
 
     #[Route('/front/login', name: 'app_inscription')]
-    public function inscription(Request $request, EntityManagerInterface $entityManager, SessionInterface $session): Response
+    public function inscription(Request $request, EntityManagerInterface $entityManager, SessionInterface $session,   #[Autowire(service: 'scheb_two_factor.security.google_authenticator')] GoogleAuthenticatorInterface $googleAuthenticator, HttpClientInterface $httpClient): Response
     {
         $error=null;
         $utilisateur = new Utilisateur();
@@ -75,6 +115,30 @@ final class FrontController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $recaptchaResponse = $request->request->get('g-recaptcha-response');
+            $recaptchaSecret = '6LcJ1yUrAAAAAALNLPF50_KxSl-pE0uutguYzu8i';
+            $recaptchaUrl = 'https://www.google.com/recaptcha/api/siteverify';
+
+            // Modification de la requête à l'API reCAPTCHA
+            $response = $httpClient->request('POST', $recaptchaUrl, [
+                'body' => [
+                    'secret' => $recaptchaSecret,
+                    'response' => $recaptchaResponse
+                ]
+            ]);
+
+            $data = $response->toArray();
+            
+            if (!$data['success']) {
+                $error = "Veuillez vérifier le reCAPTCHA.";
+                return $this->render('front/login.html.twig', [
+                    'form' => $form->createView(),
+                    'error' => $error,
+                ]);
+            }
+
+            // Si le captcha est validé, continuez avec le reste du code
+            if (!$error) {
             $role = $form->get('role')->getData();
             if ($role === 'admin') {
                 $utilisateur = $form->getData();
@@ -106,6 +170,7 @@ final class FrontController extends AbstractController
 
             return $this->redirectToRoute('app_controller'); // Redirige après l'inscription
         }
+        }
 
         if ($request->isMethod('POST')) {
             $email = $request->request->get('email');
@@ -113,6 +178,22 @@ final class FrontController extends AbstractController
     
             $utilisateur = $entityManager->getRepository(Utilisateur::class)->findOneBy(['email' => $email]);
     
+            if ($utilisateur) {
+                if ($utilisateur->getBan()) {
+                    $error = "Votre compte est banni, veuillez contacter l'administrateur.";
+                } elseif (password_verify($motDePasse, $utilisateur->getMotDePasse())) {
+                    
+                    $secret = $googleAuthenticator->generateSecret();
+                    $utilisateur->setGoogleAuthenticatorSecret($secret);
+                    $entityManager->flush();
+                        
+                    
+                    $session->set('temp_user_id', $utilisateur->getId());
+                    return $this->redirectToRoute('2fa_login');
+
+                } else {
+                    $error = 'Email ou mot de passe invalide';
+                }
             if ($utilisateur) {
                 if ($utilisateur->getBan()) {
                     $error = "Votre compte est banni, veuillez contacter l'administrateur.";
@@ -132,6 +213,75 @@ final class FrontController extends AbstractController
             'error' => $error,
         ]);
     }
+}
+
+
+    #[Route('/front/2fa', name: '2fa_login')]
+    public function twoFactorLogin(
+        Request $request, 
+        SessionInterface $session, 
+        EntityManagerInterface $entityManager, 
+        #[Autowire(service: 'scheb_two_factor.security.google_authenticator')] GoogleAuthenticatorInterface $googleAuthenticator
+    ): Response {
+        $userId = $session->get('temp_user_id');
+
+        if (!$userId) {
+            return $this->redirectToRoute('app_inscription');
+        }
+
+        $utilisateur = $entityManager->getRepository(Utilisateur::class)->find($userId);
+
+        if (!$utilisateur) {
+            throw $this->createNotFoundException('Utilisateur introuvable');
+        }
+
+        if (!$utilisateur->getGoogleAuthenticatorSecret()) {
+            $secret = $googleAuthenticator->generateSecret();
+            $qrCodeContent = $googleAuthenticator->getQRContent($utilisateur);
+            $renderer = new ImageRenderer(
+                new RendererStyle(200),
+                new SvgImageBackEnd()
+            );
+            $writer = new Writer($renderer);
+            $dataUri = 'data:image/svg+xml;base64,' . base64_encode($writer->writeString($qrCodeContent));
+
+            $utilisateur->setGoogleAuthenticatorSecret($secret);
+            $entityManager->flush();
+        } else {
+            $secret = $utilisateur->getGoogleAuthenticatorSecret();
+            $qrCodeContent = $googleAuthenticator->getQRContent($utilisateur);
+            $renderer = new ImageRenderer(
+                new RendererStyle(400),
+                new SvgImageBackEnd()
+            );
+            $writer = new Writer($renderer);
+            $dataUri = 'data:image/svg+xml;base64,' . base64_encode($writer->writeString($qrCodeContent));
+        }
+
+        if ($request->isMethod('POST')) {
+            $code = $request->request->get('code');
+        
+            if ($googleAuthenticator->checkCode($utilisateur, $code)) {
+                $session->remove('temp_user_id');
+                $session->set('user_id', $utilisateur->getId());
+                return $this->redirectToRoute('app_controller');
+            } else {
+                return $this->render('security/2fa_form.html.twig', [
+                    'secret' => $secret, 
+                    'error' => 'Code incorrect. Veuillez réessayer.',
+                    'dataUri' => $dataUri
+                ]);
+            }
+        }
+
+        return $this->render('security/2fa_form.html.twig', [
+            'secret' => $secret,
+            'dataUri' => $dataUri
+        ]);
+    }
+
+
+
 
     #[Route('/front/inscription_admin', name: 'inscription_admin')]
     public function inscriptionAdmin(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
@@ -293,6 +443,7 @@ final class FrontController extends AbstractController
     public function logout(SessionInterface $session)
     {
         $session->remove('user_id');
+        $session->remove('user_id');
         return $this->redirectToRoute('app_inscription');
     }
 
@@ -437,6 +588,240 @@ final class FrontController extends AbstractController
             'form4' => $form4 ? $form4->createView() : null,
         ]);
     }
+
+    #[Route('/front/ai', name: 'app_ai')]
+    public function ai(SessionInterface $session): Response
+    {
+        $userId = $session->get('user_id');
+        
+        if (!$session->get('user_id')) {
+            return $this->redirectToRoute('app_inscription');
+        }
+        return $this->render('front/index_ai.html.twig', [
+            'controller_name' => 'FrontController',
+        ]);
+    }
+
+    #[Route('/front/test' , name: 'app_test')]
+    public function test(): Response
+    {
+        return $this->render('front/test.html.twig', [
+            'controller_name' => 'FrontController',
+        ]);
+    }
+
+    #[Route('/front/mot_de_passe_oublie', name: 'mot_de_passe_oublie')]
+    public function motDePasseOublie(Request $request, SessionInterface $session, EntityManagerInterface $entityManager): Response
+    {
+        if ($request->isMethod('POST')) {
+            $email = $request->request->get('email');
+            
+            // Rechercher l'utilisateur dans la base de données
+            $utilisateur = $entityManager->getRepository(Utilisateur::class)->findOneBy(['email' => $email]);
+            
+            if (!$utilisateur) {
+                $this->addFlash('error', 'Aucun compte associé à cet email');
+                return $this->redirectToRoute('mot_de_passe_oublie');
+            }
+            
+            // Générer le code de réinitialisation
+            $resetCode = sprintf('%06d', random_int(0, 999999));
+            
+            // Sauvegarder le code dans la base de données
+            $utilisateur->setResetCode($resetCode);
+            $entityManager->persist($utilisateur);
+            $entityManager->flush();
+            
+            // Sauvegarder l'email dans la session
+            $session->set('reset_email', $email);
+
+            try {
+                $apiKey = $_ENV['MAILJET_API_KEY'];
+                $apiSecret = $_ENV['MAILJET_API_SECRET'];
+    
+                if (!$apiKey || !$apiSecret) {
+                    $this->addFlash('error', 'Configuration email manquante');
+                    return $this->redirectToRoute('mot_de_passe_oublie');
+                }
+    
+                $mj = new \Mailjet\Client($apiKey, $apiSecret, true, ['version' => 'v3.1']);
+    
+                $body = [
+                    'Messages' => [
+                        [
+                            'From' => [
+                                'Email' => "sihaythemabdellaoui@gmail.com",
+                                'Name' => "Smart Moby"
+                            ],
+                            'To' => [
+                                [
+                                    'Email' => $email
+                                ]
+                            ],
+                            'Subject' => "Code de réinitialisation de mot de passe",
+                            'TextPart' => "Votre code de réinitialisation est : " . $resetCode,
+                            'HTMLPart' => "<h3>Réinitialisation de mot de passe</h3><br />Votre code de réinitialisation est : " . $resetCode
+                        ]
+                    ]
+                ];
+    
+                $response = $mj->post(Resources::$Email, ['body' => $body]);
+    
+                if ($response->success()) {
+                    return $this->redirectToRoute('app_mot_de_passe_oublie2');
+                }
+    
+                $this->addFlash('error', 'Erreur lors de l\'envoi de l\'email');
+                return $this->redirectToRoute('mot_de_passe_oublie');
+    
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Service email indisponible');
+                return $this->redirectToRoute('mot_de_passe_oublie');
+            }
+        }
+
+        return $this->render('front/mot_de_passe_oublie1.html.twig');
+    }
+
+    #[Route('/front/mot_de_passe_oublie2', name: 'app_mot_de_passe_oublie2')]
+    public function motDePasseOublie2(Request $request, SessionInterface $session, EntityManagerInterface $entityManager): Response
+    {
+        $email = $session->get('reset_email');
+        if(!$email){
+            return $this->redirectToRoute('mot_de_passe_oublie');
+        }
+
+        if ($request->isMethod('POST')) {
+            $resetCode = $request->request->get('reset_code');
+            $utilisateur = $entityManager->getRepository(Utilisateur::class)->findOneBy([
+                'email' => $email,
+                'reset_code' => $resetCode
+            ]);
+
+            if (!$utilisateur) {
+                $this->addFlash('error', 'Code de réinitialisation invalide');
+                return $this->redirectToRoute('app_mot_de_passe_oublie2');
+            }
+
+            // Si le code est valide, on stocke l'ID de l'utilisateur en session
+            $session->set('reset_user_id', $utilisateur->getId());
+            return $this->redirectToRoute('app_mot_de_passe_oublie3');
+        }
+
+        return $this->render('front/mot_de_passe_oublie2.html.twig', [
+            'FrontController' => 'FrontController'
+        ]);
+    }
+
+    #[Route('/front/mot_de_passe_oublie3', name: 'app_mot_de_passe_oublie3')]
+    public function motDePasseOublie3(Request $request, SessionInterface $session, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
+    {
+        $userId = $session->get('reset_user_id');
+        if (!$userId) {
+            return $this->redirectToRoute('mot_de_passe_oublie');
+        }
+
+        $utilisateur = $entityManager->getRepository(Utilisateur::class)->find($userId);
+        if (!$utilisateur) {
+            return $this->redirectToRoute('mot_de_passe_oublie');
+        }
+
+        $form = $this->createForm(MotDePasseOublie3Type::class, $utilisateur);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Hasher le nouveau mot de passe
+            $hashedPassword = $passwordHasher->hashPassword(
+                $utilisateur,
+                $form->get('mot_de_passe')->getData()
+            );
+            
+            // Mettre à jour le mot de passe
+            $utilisateur->setMotDePasse($hashedPassword);
+            // Effacer le code de réinitialisation
+            $utilisateur->setResetCode("");
+            
+            $entityManager->persist($utilisateur);
+            $entityManager->flush();
+
+            // Nettoyer la session
+            $session->remove('reset_user_id');
+            $session->remove('reset_email');
+
+            $this->addFlash('success', 'Votre mot de passe a été modifié avec succès');
+            return $this->redirectToRoute('app_inscription');
+        }
+
+        return $this->render('front/mot_de_passe_oublie3.html.twig', [
+            'FrontController' => 'FrontController',
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('front/send_email', name: 'send_email')]
+    public function sendEmail(Request $request, EntityManagerInterface $entityManager, SessionInterface $session)   
+    {
+        try {
+            $apiKey = $_ENV['MAILJET_API_KEY'];
+            $apiSecret = $_ENV['MAILJET_API_SECRET'];
+
+            if (!$apiKey || !$apiSecret) {
+                throw new \RuntimeException('Mailjet API credentials are not configured');
+            }
+
+            // Create Mailjet client
+            $mj = new \Mailjet\Client($apiKey, $apiSecret, true, ['version' => 'v3.1']);
+
+            // Prepare message
+            $body = [
+                'Messages' => [
+                    [
+                        'From' => [
+                            'Email' => "sihaythemabdellaoui@gmail.com",
+                            'Name' => "Smart Moby"
+                        ],
+                        'To' => [
+                            [
+                                'Email' => "haythemabdellaoui007@gmail.com"
+                            ]
+                        ],
+                        'Subject' => "Password Reset Request",
+                        'TextPart' => "Your password reset code is: XXXXX",
+                        'HTMLPart' => "<h3>Password Reset Request</h3><br />Your password reset code is: XXXXX"
+                    ]
+                ]
+            ];
+
+            // Send email
+            $response = $mj->post(Resources::$Email, ['body' => $body]);
+
+            if ($response->success()) {
+                return $this->json([
+                    'status' => 'success',
+                    'message' => 'Email sent successfully'
+                ]);
+            }
+
+            // Log the error details
+            $errorDetails = $response->getData();
+            
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Failed to send email',
+                'details' => $errorDetails
+            ], 500);
+
+        } catch (\Exception $e) {
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Email service error',
+                'details' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+
 
     //oussema
     #[Route('/events', name: 'afficher_event')]
