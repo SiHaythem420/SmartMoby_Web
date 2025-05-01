@@ -1,11 +1,20 @@
 {
+    "doctrine/annotations": {
+        "version": "2.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "1.10",
+            "ref": "64d8583af5ea57b7afa4aba4b159907f3a148b05"
+        }
+    },
     "doctrine/doctrine-bundle": {
         "version": "2.14",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",
             "version": "2.10",
-            "ref": "c170ded8fc587d6bd670550c43dafcf093762245"
+            "ref": "d1778a69711a9b06bb4e202977ca6c4a0d16933d"
         },
         "files": [
             "./config/packages/doctrine.yaml",
@@ -26,9 +35,6 @@
             "./migrations/.gitignore"
         ]
     },
-    "knplabs/knp-paginator-bundle": {
-        "version": "v6.8.0"
-    },
     "google/apiclient": {
         "version": "2.18",
         "recipe": {
@@ -40,6 +46,19 @@
     },
     "knplabs/knp-paginator-bundle": {
         "version": "v6.8.0"
+    },
+    "liip/imagine-bundle": {
+        "version": "2.13",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "1.8",
+            "ref": "d1227d002b70d1a1f941d91845fcd7ac7fbfc929"
+        },
+        "files": [
+            "./config/packages/liip_imagine.yaml",
+            "./config/routes/liip_imagine.yaml"
+        ]
     },
     "nucleos/dompdf-bundle": {
         "version": "4.3",
@@ -334,5 +353,17 @@
     },
     "twig/extra-bundle": {
         "version": "v3.20.0"
+    },
+    "vich/uploader-bundle": {
+        "version": "2.6",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "1.13",
+            "ref": "1b3064c2f6b255c2bc2f56461aaeb76b11e07e36"
+        },
+        "files": [
+            "./config/packages/vich_uploader.yaml"
+        ]
     }
 }

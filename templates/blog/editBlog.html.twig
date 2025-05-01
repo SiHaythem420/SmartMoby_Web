@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Blog Post{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Edit Blog Post</h1>
+    
+    <div class="card">
+        <div class="card-body">
+            {{ form_start(blog_form) }}
+                <div class="mb-3">
+                    {{ form_row(blog_form.title, {
+                        'attr': {'class': 'form-control'},
+                        'label_attr': {'class': 'form-label'}
+                    }) }}
+                </div>
+                
+                <div class="mb-3">
+                    {{ form_row(blog_form.content, {
+                        'attr': {'class': 'form-control', 'rows': 10},
+                        'label_attr': {'class': 'form-label'}
+                    }) }}
+                </div>
+                
+                <div class="mb-3">
+                    {{ form_row(blog_form.date, {
+                        'attr': {'class': 'form-control'},
+                        'label_attr': {'class': 'form-label'}
+                    }) }}
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Update Post</button>
+                <a href="{{ path('list-blog') }}" class="btn btn-secondary">Cancel</a>
+            {{ form_end(blog_form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

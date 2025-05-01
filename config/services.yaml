@@ -1,9 +1,7 @@
-# This file is the entry point to configure your own services.
-# Files in the packages/ subdirectory configure your dependencies.
-
-# Put parameters here that don't need to change on each machine where the app is deployed
-# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+# config/services.yaml
 parameters:
+    # Define your parameters here
+    blog_image_directory: '%kernel.project_dir%/public/uploads/blogs'
     app.google_maps.api_key: '%env(GOOGLE_MAPS_API_KEY)%'
     app.weather.api_key: '%env(OPENWEATHER_API_KEY)%'
     infobip.api_url: '%env(INFOBIP_API_URL)%'
@@ -13,10 +11,16 @@ parameters:
     infobip.whatsapp_language: '%env(INFOBIP_WHATSAPP_LANGUAGE)%'
 
 services:
-    Symfony\Component\Finder\Finder: ~
-    
-    # default configuration for services in *this* file
+    # Default configuration for all services
     _defaults:
+        
+
+
+        
+
+    
+        
+    
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
         bind:
@@ -36,14 +40,34 @@ services:
             $template: '%infobip.whatsapp_template%'
             $language: '%infobip.whatsapp_language%'
 
-    # makes classes in src/ available to be used as services
-    # this creates a service per class whose id is the fully-qualified class name
+    # Makes classes in src/ available as services
     App\:
         resource: '../src/'
         exclude:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+            - '../src/Tests/'
+
+    # Explicit service definitions
+    Symfony\Component\Finder\Finder: ~
+
+    # Image uploader service with parameter injection
+    App\Service\ImageUploader:
+        arguments:
+            $targetDirectory: '%blog_image_directory%'
+            $slugger: '@Symfony\Component\String\Slugger\SluggerInterface'
+
+
+
+
+
+  
+
+
+
+
+ 
     
 
     # add more service definitions when explicit configuration is needed

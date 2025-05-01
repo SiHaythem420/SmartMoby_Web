@@ -80,13 +80,12 @@ class Utilisateur implements PasswordAuthenticatedUserInterface, UserInterface, 
     #[ORM\Column(type: 'boolean')]
     private bool $ban = false;
 
-<<<<<<< HEAD
-=======
+
     #[ORM\Column(type: 'string', nullable: true)]
 
     private ?string $googleAuthenticatorSecret;
 
->>>>>>> 2bbb1cd508c09daef7ff0e404e25083f9f501b0c
+
     public function getId()
     {
         return $this->id;
@@ -191,8 +190,7 @@ class Utilisateur implements PasswordAuthenticatedUserInterface, UserInterface, 
         return $this;
     }
 
-<<<<<<< HEAD
-=======
+
     public function getGoogleAuthenticatorSecret(): ?string
     {
         return $this->googleAuthenticatorSecret;
@@ -203,7 +201,6 @@ class Utilisateur implements PasswordAuthenticatedUserInterface, UserInterface, 
         $this->googleAuthenticatorSecret = $googleAuthenticatorSecret;
     }
 
->>>>>>> 2bbb1cd508c09daef7ff0e404e25083f9f501b0c
     #[ORM\OneToMany(mappedBy: "id", targetEntity: Admin::class)]
     private Collection $admins;
     public function __construct()

@@ -47,32 +47,44 @@ https://templatemo.com/tm-559-zay-shop
 
             <div class="align-self-center collapse navbar-collapse flex-fill  d-lg-flex justify-content-lg-between" id="templatemo_main_nav">
                 <div class="flex-fill">
-                    <ul class="nav navbar-nav d-flex justify-content-between mx-lg-auto">
+                    <ul class="nav navbar-nav d-flex justify-content-evenly align-items-center w-100">
                         <li class="nav-item">
-                            <a class="nav-link" href="">Acceuil</a>
+                            <a class="nav-link" href={{path('app_controller')}}>Accueil</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="about.html">Services </a>
+                            <a class="nav-link" href="about.html">Services</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="shop.html">Trajet Du Trafic </a>
+                            <a class="nav-link" href="{{path ('app_shop')}}">Trajet Du Trafic</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{path ('afficher_event')}}">Evenements</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="contact.html">Blog</a>
+                            <a class="nav-link" href="{{path('list-blog')}}">Blog</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href={{path('app_ai')}}>SmartMoby AI</a>
                         </li>
                     </ul>
                 </div>
                 <div class="navbar align-self-center d-flex">
                     <div class="d-lg-none flex-sm-fill mt-3 mb-4 col-7 col-sm-auto pr-3">
                         <div class="input-group">
-                            <input type="text" class="form-control" id="inputMobileSearch" placeholder="Search ...">
+                            <input type="text" class="form-control" id="inputMobileSearch" placeholder="{{ 'app.shop.search.placeholder'|trans }}">
                             <div class="input-group-text">
                                 <i class="fa fa-fw fa-search"></i>
                             </div>
                         </div>
+                    </div>
+                    <div class="dropdown me-3">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ app.request.locale|upper }}
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="languageDropdown">
+                            <li><a class="dropdown-item" href="{{ path('app_language', {'locale': 'en'}) }}">English</a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_language', {'locale': 'fr'}) }}">Français</a></li>
+                        </ul>
                     </div>
                     <a class="nav-icon d-none d-lg-inline" href="#" data-bs-toggle="modal" data-bs-target="#templatemo_search">
                         <i class="fa fa-fw fa-search text-dark mr-2"></i>
@@ -80,8 +92,7 @@ https://templatemo.com/tm-559-zay-shop
                     
                     <div class="dropdown">
                         <a class="nav-icon position-relative text-decoration-none dropdown-toggle" href="#" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fa fa-fw fa-user text-dark mr-3"></i>
-                                
+                            <i class="fa fa-fw fa-user text-dark mr-3"></i>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                             <li><a class="dropdown-item" href="{{path ('app_account_settings')}}">Paramètres</a></li>

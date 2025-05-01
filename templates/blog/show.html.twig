@@ -1,0 +1,164 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ blog.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-1">{{ blog.title }}</h2>
+            <small class="text-white-50">Posted on {{ blog.date|date('F j, Y') }}</small>
+        </div>
+        <div class="card-body">
+            <div class="blog-content mb-4">
+                {{ blog.content|nl2br }}
+            </div>
+            
+            <div class="action-buttons mt-4 d-flex flex-wrap gap-2">
+                <a href="{{ path('list-blog') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Back to List
+                </a>
+                <a href="{{ path('edit-blog', {'id': blog.id}) }}" class="btn btn-warning">
+                    <i class="fas fa-edit me-1"></i> Edit
+                </a>
+                <form method="post" action="{{ path('delete-blog', {'id': blog.id}) }}" class="d-inline">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ blog.id) }}">
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this post?')">
+                        <i class="fas fa-trash me-1"></i> Delete
+                    </button>
+                </form>
+                <a href="{{ path('blog_translate', {id: blog.id, lang: 'fr'}) }}" class="btn btn-primary">
+                Translate to French
+                </a>
+                {#listen button#}
+                <button id="playBtn" class="btn btn-primary">
+                    <i class="fas fa-headphones"></i> Listen to Blog
+                </button>
+
+                <script>
+                document.getElementById('playBtn').addEventListener('click', async function() {
+                    const btn = this;
+                    const icon = btn.querySelector('i');
+                    
+                    // Show loading state
+                    btn.disabled = true;
+                    icon.className = 'fas fa-spinner fa-spin';
+                    
+                    try {
+                        const response = await fetch('{{ path('listen_blog', {'id': blog.id}) }}');
+                        
+                        if (!response.ok) {
+                            throw new Error(await response.text());
+                        }
+                        
+                        const audioBlob = await response.blob();
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        const audio = new Audio(audioUrl);
+                        
+                        audio.addEventListener('error', () => {
+                            throw new Error('Audio playback failed');
+                        });
+                        
+                        audio.addEventListener('ended', () => {
+                            btn.disabled = false;
+                            icon.className = 'fas fa-headphones';
+                            URL.revokeObjectURL(audioUrl);
+                        });
+                        
+                        await audio.play();
+                        
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert(error.message);
+                        btn.disabled = false;
+                        icon.className = 'fas fa-headphones';
+                    }
+                });
+                </script>
+            </div>
+            
+            {# Comment Section #}
+            <div class="mt-5 pt-4 border-top">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="mb-0">
+                        <i class="far fa-comments me-2"></i>
+                        Comments <span class="badge bg-primary rounded-pill">{{ blog.avis|length }}</span>
+                    </h3>
+                    <a href="{{ path('avis_new', {'id': blog.id}) }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i> Add Comment
+                    </a>
+                </div>
+
+                {% if blog.avis|length > 0 %}
+                    <div class="comments">
+                        {% for avi in blog.avis %}
+                            <div class="card mb-3 shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h5 class="card-title mb-1">
+                                                <i class="far fa-user-circle me-2"></i>{{ avi.name }}
+                                            </h5>
+                                            <small class="text-muted">
+                                                <i class="far fa-clock me-1"></i>
+                                                {{ avi.date|date('M j, Y \\a\\t g:i a') }}
+                                            </small>
+                                        </div>
+                                        {% if is_granted('ROLE_ADMIN') %}
+                                        <form method="post" action="{{ path('avis_delete', {'id': avi.id}) }}" 
+                                              onsubmit="return confirm('Delete this comment?')">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ avi.id) }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </div>
+                                    <p class="card-text mt-3">{{ avi.comment }}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4 bg-light rounded">
+                        <i class="far fa-comment-dots fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">No comments yet</h4>
+                        <p class="text-muted">Be the first to share your thoughts!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .blog-content {
+        line-height: 1.8;
+        font-size: 1.1rem;
+    }
+    
+    .comments .card {
+        transition: transform 0.2s;
+        border-left: 4px solid var(--bs-primary);
+    }
+    
+    .comments .card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .action-buttons .btn {
+        min-width: 100px;
+    }
+    
+    .comment-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+    }
+</style>
+{% endblock %}

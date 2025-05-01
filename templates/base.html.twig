@@ -22,7 +22,7 @@
 }
 </style>
 
-    <title>{% block title %} Zay Shop eCommerce HTML CSS Template {% endblock %} </title>
+    <title> Zay Shop eCommerce HTML CSS Template  </title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="{{ 'app.shop.banner.description'|trans }}">
@@ -96,19 +96,19 @@ https://templatemo.com/tm-559-zay-shop
                 <div class="flex-fill">
                     <ul class="nav navbar-nav d-flex justify-content-evenly align-items-center w-100">
                         <li class="nav-item">
-                            <a class="nav-link" href="">Accueil</a>
+                            <a class="nav-link" href={{path('app_controller')}}>Accueil</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="about.html">Services</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="shop.html">Trajet Du Trafic</a>
+                            <a class="nav-link" href="{{path ('app_shop')}}">Trajet Du Trafic</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{path ('afficher_event')}}">Evenements</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="contact.html">Blog</a>
+                            <a class="nav-link" href="{{path('list-blog')}}">Blog</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href={{path('app_ai')}}>SmartMoby AI</a>
@@ -428,32 +428,28 @@ https://templatemo.com/tm-559-zay-shop
     <!-- End Featured Trips Section -->
 
     <!-- Start Hazem -->
-    <div id="template-mo-zay-hero-carousel" class="carousel slide" data-bs-ride="carousel" data-aos="fade-right">
-        
-        <div class="carousel-inner">
-            <div class="carousel-item active">
-                <div class="container">
-                    <div class="row p-5">
-                        <div class="mx-auto col-md-8 col-lg-6 order-lg-last">
-                            <img class="img-fluid" src="{{asset('img/avis.png')}}" alt="">
-                        </div>
-                        <div class="col-lg-6 mb-0 d-flex align-items-center justify-content-center">
-                            <div class="text-center">
-                                <a class="nav-link" href="" style="color: inherit;" onmouseover="this.children[0].style.color='#28a745';" onmouseout="this.children[0].style.color='#808080';">
-                                    <h1 ><b>Laissez Un Avis ?</b></h1>
-                                </a>
-                                <h3 class="h2">Accédez au blog et partagez vos avis !</h3>
-                            </div>
+<div id="template-mo-zay-hero-carousel" class="carousel slide" data-bs-ride="carousel" data-aos="fade-right">
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <div class="container">
+                <div class="row p-5">
+                    <div class="mx-auto col-md-8 col-lg-6 order-lg-last">
+                        <img class="img-fluid" src="{{asset('img/avis.png')}}" alt="">
+                    </div>
+                    <div class="col-lg-6 mb-0 d-flex align-items-center justify-content-center">
+                        <div class="text-center">
+                            <a class="nav-link" href="{{ path('list-blog') }}" style="color: inherit;" onmouseover="this.children[0].style.color='#28a745';" onmouseout="this.children[0].style.color='#808080';">
+                                <h1><b>Laissez Un Avis ?</b></h1>
+                            </a>
+                            <h3 class="h2">Accédez au blog et partagez vos avis !</h3>
                         </div>
                     </div>
                 </div>
             </div>
-           
         </div>
-        
-        
     </div>
-    <!-- End Hazem -->
+</div>
+<!-- End Hazem -->
     {% endblock %}
 
 

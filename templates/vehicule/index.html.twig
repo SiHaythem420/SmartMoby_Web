@@ -93,7 +93,11 @@
                             <a class="" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <img src="assets/img/blue.jpg" alt="Adam" class="rounded-circle" width="40px" height="40px">
                             </a>
-                            
+                            <div class="dropdown-menu dropdown-menu-right mt-13" aria-labelledby="dropdownMenuLink">
+                                <a class="dropdown-item" href="{{ path ('app_back_account_settings')}}"><i class="fa fa-user pr-2"></i> Profile</a>                                                                
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{{path ('back_logout')}}"><i class="fa fa-power-off pr-2"></i> Logout</a>
+                            </div>
                         </div>
                     </div>
                     <!--Search box and avatar-->
@@ -119,7 +123,28 @@
                                     <span class="none">Dashboard <i class="fa fa-angle-down pull-right align-bottom"></i></span>
                                 </a>
                                 <ul class="children" id="dashboard">
-                                    <li class="child"><a href="index.html" class="ml-4"><i class="fa fa-angle-right mr-2"></i> Transports </a></li>
+                                    <li class="child"><a href="{{path('app_back')}}" class="ml-4"><i class="fa fa-angle-right mr-2"></i> Utilisateurs </a></li>
+                                    <li class="child"><a href="{{path('admin_dashboard')}}" class="ml-4"><i class="fa fa-angle-right mr-2"></i> Blogs </a></li>
+                                    <li class="child"><a href="{{path('trajet_index')}}" class="ml-4"><i class="fa fa-angle-right mr-2"></i> Trajets </a></li>
+                                    <li class="child"><a href="{{path('vehicule_index')}}" class="ml-4"><i class="fa fa-angle-right mr-2"></i> Vehicules </a></li>
+                                    <li class="parent">
+                                        <a href="#" onclick="toggleEvenementMenu(); return false" class="ml-4">
+                                            <i class="fa fa-angle-right mr-2"></i> Evenement
+                                        </a>
+                                        <ul class="children" id="evenement" style="display: none;">
+                                            <!-- Sous-menu "Liste des événements" -->
+                                            <li class="child">
+                                                <a href="{{ path('app_back_add_event') }}" class="ml-4">
+                                                    <i class="fa fa-angle-right mr-2"></i> Ajouter des événements
+                                                </a>
+                                            </li>
+                                            <li class="child">
+                                                <a href="{{path('app_back_afficher_event')}}" class="ml-4">
+                                                    <i class="fa fa-angle-right mr-2"></i> Liste Des événements
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
                                 </ul>
                             </li>
                             </li>
@@ -275,6 +300,19 @@
     <script>
         //Nice select
         $('.bulk-actions').niceSelect();
+    </script>
+    <script>
+        // Fonction dédiée pour ouvrir/fermer le sous-menu "evenement"
+        function toggleEvenementMenu() {
+            var menu = document.getElementById('evenement');
+            if (menu) {
+                if (menu.style.display === 'none' || menu.style.display === '') {
+                    menu.style.display = 'block';
+                } else {
+                    menu.style.display = 'none';
+                }
+            }
+        }
     </script>
   </body>
 </html>

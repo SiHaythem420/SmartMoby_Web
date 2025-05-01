@@ -139,37 +139,36 @@ final class FrontController extends AbstractController
 
             // Si le captcha est validé, continuez avec le reste du code
             if (!$error) {
-            $role = $form->get('role')->getData();
-            if ($role === 'admin') {
-                $utilisateur = $form->getData();
-                $request->getSession()->set('utilisateur_data', $utilisateur);
+                $role = $form->get('role')->getData();
+                if ($role === 'admin') {
+                    $utilisateur = $form->getData();
+                    $request->getSession()->set('utilisateur_data', $utilisateur);
 
-                return $this->redirectToRoute('inscription_admin');
-            
-            } if ($role === 'organisateur') {
-                $utilisateur = $form->getData();
-                $request->getSession()->set('utilisateur_data', $utilisateur);
+                    return $this->redirectToRoute('inscription_admin');
+                
+                } if ($role === 'organisateur') {
+                    $utilisateur = $form->getData();
+                    $request->getSession()->set('utilisateur_data', $utilisateur);
 
-                return $this->redirectToRoute('inscription_organisateur');
-            
-            } if ($role === 'conducteur') {
-                $utilisateur = $form->getData();
-                $request->getSession()->set('utilisateur_data', $utilisateur);
+                    return $this->redirectToRoute('inscription_organisateur');
+                
+                } if ($role === 'conducteur') {
+                    $utilisateur = $form->getData();
+                    $request->getSession()->set('utilisateur_data', $utilisateur);
 
-                return $this->redirectToRoute('inscription_conducteur');
-            
-            } if ($role === 'client'){
-                $utilisateur = $form->getData();
-                $request->getSession()->set('utilisateur_data', $utilisateur);
+                    return $this->redirectToRoute('inscription_conducteur');
+                
+                } if ($role === 'client'){
+                    $utilisateur = $form->getData();
+                    $request->getSession()->set('utilisateur_data', $utilisateur);
 
-                return $this->redirectToRoute('inscription_client');
+                    return $this->redirectToRoute('inscription_client');
+                }
+                $entityManager->persist($utilisateur);
+                $entityManager->flush();
 
+                return $this->redirectToRoute('app_controller'); // Redirige après l'inscription
             }
-            $entityManager->persist($utilisateur);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_controller'); // Redirige après l'inscription
-        }
         }
 
         if ($request->isMethod('POST')) {
@@ -194,7 +193,7 @@ final class FrontController extends AbstractController
                 } else {
                     $error = 'Email ou mot de passe invalide';
                 }
-            if ($utilisateur) {
+            
                 if ($utilisateur->getBan()) {
                     $error = "Votre compte est banni, veuillez contacter l'administrateur.";
                 } elseif (password_verify($motDePasse, $utilisateur->getMotDePasse())) {
@@ -213,7 +212,8 @@ final class FrontController extends AbstractController
             'error' => $error,
         ]);
     }
-}
+
+
 
 
     #[Route('/front/2fa', name: '2fa_login')]

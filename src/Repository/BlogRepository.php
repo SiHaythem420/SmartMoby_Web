@@ -13,5 +13,27 @@ class BlogRepository extends ServiceEntityRepository
         parent::__construct($registry, Blog::class);
     }
 
+    public function searchBlogs(?string $query = null, bool $featuredOnly = false, bool $recentFirst = true)
+{
+    $qb = $this->createQueryBuilder('b');
+    
+    if (!empty($query)) {
+        $qb->andWhere('b.title LIKE :query OR b.content LIKE :query')
+           ->setParameter('query', '%'.$query.'%');
+    }
+    
+    if ($featuredOnly) {
+        $qb->andWhere('b.isFeatured = :isFeatured')
+           ->setParameter('isFeatured', true);
+    }
+    
+    $order = $recentFirst ? 'DESC' : 'ASC';
+    
+    return $qb->orderBy('b.date', $order)
+              ->addOrderBy('b.isFeatured', 'DESC')
+              ->getQuery()
+              ->getResult();
+}
+
     // Add custom methods as needed
 }

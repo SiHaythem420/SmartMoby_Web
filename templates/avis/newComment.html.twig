@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Comment{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>Add new comment for "{{ blog.title }}"</h1>
+
+        {# Flash messages container #}
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+
+        {{ form_start(form) }}
+            {{ form_widget(form) }}
+            <button class="btn btn-primary">{{ button_label|default('Save') }}</button>
+        {{ form_end(form) }}
+
+        <a href="{{ path('avis_index', {'id': blog.id}) }}" class="btn btn-secondary mt-3">Back to comments</a>
+    </div>
+{% endblock %}

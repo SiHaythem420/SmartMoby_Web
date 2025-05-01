@@ -60,8 +60,12 @@ final class BackController extends AbstractController
         $utilisateur = $entityManager->getRepository(Utilisateur::class)->find($adminId);
 
         if ($utilisateur && $utilisateur->getBan()) {
-            $session->remove('admin_id'); // Supprime la session pour éviter un accès non autorisé
+            $session->remove('admin_id');
+            return $this->redirectToRoute('app_back_login');
+        }
+
         $adminId = $session->get('admin_id');
+
 
         if (!$adminId) {
             return $this->redirectToRoute('app_back_login');
@@ -86,8 +90,8 @@ final class BackController extends AbstractController
             'clients' => $clients,
             'organisateurs' => $organisateurs,
         ]);
-    }
-}
+        }   
+    
 
     #[Route('/back/login', name: 'app_back_login')]
     public function login(Request $request, EntityManagerInterface $entityManager, SessionInterface $session): Response
