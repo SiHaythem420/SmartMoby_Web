@@ -1,0 +1,42 @@
+{# templates/produit/pdf.html.twig #}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Liste des produits</title>
+    <style>
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #333; padding: 4px; }
+        th { background: #eee; }
+    </style>
+</head>
+<body>
+    <h1>Liste des produits</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th><th>Nom</th><th>Type</th><th>Prix</th><th>Services</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for p in produits %}
+            <tr>
+                <td>{{ p.idproduit }}</td>
+                <td>{{ p.nom }}</td>
+                <td>{{ p.type }}</td>
+                <td>{{ p.prix }} €</td>
+                <td>
+                    {% for s in p.services %}
+                        {{ s.nom }}{% if not loop.last %}, {% endif %}
+                    {% else %}
+                        —
+                    {% endfor %}
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="5">Aucun produit</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

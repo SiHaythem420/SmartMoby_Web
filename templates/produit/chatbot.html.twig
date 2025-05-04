@@ -1,0 +1,40 @@
+{# templates/produit/chatbot.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Chatbot{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h1>Assistant Chatbot</h1>
+
+  <p>
+    <a href="{{ path('produit_index') }}" class="btn btn-sm btn-secondary mb-3">
+      <i class="fas fa-arrow-left"></i> Retour
+    </a>
+  </p>
+
+  {% if error %}
+    <div class="alert alert-danger">
+      <strong>Erreur API :</strong> {{ error }}
+    </div>
+  {% endif %}
+
+  {% if response %}
+    <div class="alert alert-info">
+      <strong>Bot :</strong> {{ response }}
+    </div>
+  {% endif %}
+
+  <form method="post">
+    <div class="mb-3">
+      <textarea name="message"
+                class="form-control"
+                rows="4"
+                placeholder="Posez votre question…">{{ message }}</textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">
+      <i class="fas fa-paper-plane"></i> Envoyer
+    </button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,152 @@
+{# templates/service/index.html.twig #}
+{% extends 'back_base.html.twig' %}
+
+{% block title %}Liste des Services{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <h1>Liste des Services</h1>
+
+    {# -- barre de recherche -- #}
+    <form method="get" action="{{ path('app_service_index') }}" class="mb-3 row g-2">
+        <div class="col-auto">
+            <input
+                type="text"
+                name="search"
+                value="{{ app.request.query.get('search') }}"
+                class="form-control"
+                placeholder="Rechercher un service…"
+            >
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-outline-primary">
+                <i class="fas fa-search"></i> Rechercher
+            </button>
+        </div>
+        {% if app.request.query.get('search') %}
+            <div class="col-auto">
+                <a href="{{ path('app_service_index') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-times"></i> Effacer
+                </a>
+            </div>
+        {% endif %}
+    </form>
+
+    {# -- sélecteur de langue -- #}
+    <div class="mb-3">
+        <label for="language-select">Traduire en :</label>
+        <select id="language-select" class="form-select d-inline-block w-auto">
+            <option value="en">Anglais</option>
+            <option value="ar">Arabe</option>
+            <option value="de">Allemand</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <a href="{{ path('app_service_new') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Créer un nouveau service
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Nom</th>
+                        <th>Description</th>
+                        <th>Tarif</th>
+                        <th>Catégorie</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for service in services %}
+                    <tr>
+                        <td>{{ service.id_service }}</td>
+                        <td>{{ service.nom }}</td>
+                        <td>
+                            <span id="desc-{{ service.id_service }}">{{ service.description|slice(0, 50) }}…</span>
+                            <button class="btn btn-sm btn-outline-secondary translate-btn" data-id="{{ service.id_service }}" title="Traduire">
+                                <i class="fas fa-language"></i>
+                            </button>
+                        </td>
+                        <td>{{ service.tarif|number_format(2, ',', ' ') }} €</td>
+                        <td>{{ service.categorie.nom ?? '' }}</td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="{{ path('app_service_show', {'id_service': service.id_service}) }}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ path('app_service_edit', {'id_service': service.id_service}) }}" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {{ include('service/_delete_form.html.twig') }}
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center">Aucun service trouvé</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const langSelect = document.getElementById('language-select');
+
+        document.querySelectorAll('.translate-btn').forEach(btn => {
+            btn.addEventListener('click', async function () {
+                const id = this.dataset.id;
+                const lang = langSelect.value;
+                const descElement = document.getElementById(`desc-${id}`);
+                const originalText = descElement.innerText;
+
+                // Affiche un état de chargement temporaire
+                descElement.innerText = 'Traduction...';
+
+                try {
+                    const response = await fetch('/service/translate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            text: originalText,
+                            targetLang: lang,
+                            sourceLang: 'fr'
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Erreur HTTP ${response.status}`);
+                    }
+
+                    const data = await response.json();
+
+                    if (data.translated) {
+                        descElement.innerText = data.translated;
+                    } else {
+                        alert("Erreur lors de la traduction : réponse vide.");
+                        descElement.innerText = originalText; // rétablit le texte original
+                    }
+                } catch (error) {
+                    console.error('Erreur traduction:', error);
+                    alert("Erreur lors de la traduction : " + error.message);
+                    descElement.innerText = originalText;
+                }
+            });
+        });
+    });
+</script>
+
+
+{% endblock %}

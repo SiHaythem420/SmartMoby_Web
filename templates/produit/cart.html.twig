@@ -1,0 +1,43 @@
+{# templates/produit/cart.html.twig #}
+{% extends 'base.html.twig' %}
+{% block title %}Panier{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h1>Votre panier</h1>
+
+  {# messages #}
+  {% for type, messages in app.flashes %}
+    {% for msg in messages %}
+      <div class="alert alert-{{ type == 'success' ? 'success' : 'danger' }}">
+        {{ msg }}
+      </div>
+    {% endfor %}
+  {% endfor %}
+
+  <table class="table">
+    <thead><tr><th>Nom</th><th>Type</th><th>Prix (€)</th></tr></thead>
+    <tbody>
+      {% if produits %}
+        {% for p in produits %}
+          <tr>
+            <td>{{ p.nom }}</td>
+            <td>{{ p.type }}</td>
+            <td>{{ p.prix|number_format(2, ',', ' ') }}</td>
+          </tr>
+        {% endfor %}
+      {% else %}
+        <tr><td colspan="3">Votre panier est vide</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+
+  {% if produits %}
+    <form method="post">
+      <button class="btn btn-primary">
+        <i class="fas fa-credit-card"></i> Payer (envoyer SMS)
+      </button>
+    </form>
+  {% endif %}
+</div>
+{% endblock %}
