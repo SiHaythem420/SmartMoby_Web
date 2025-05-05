@@ -32,7 +32,6 @@ Smart Moby est une application web développée avec **Symfony 6.4** et une base
 ### Other Tools
 - GitHub
 - Composer
-- Postman (pour tester les APIs)
 
 ## Directory Structure
 /smart-moby
