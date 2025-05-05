@@ -78,3 +78,8 @@ Ce projet a été réalisé sous la supervision de l'équipe pédagogique de **E
 - smart-mobility
 - esprit
 - php
+
+## Hébergement
+Ce projet est hébergé sur **GitHub Education for Students** via un dépôt public.  
+Il est accessible et consultable par tous pour démonstration et évaluation.
+
