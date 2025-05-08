@@ -69,6 +69,8 @@ use Knp\Bundle\SnappyBundle\Snappy\Response\PdfResponse; // Si tu utilises KnpSn
 use Dompdf\Dompdf; // ou si tu utilises Dompdf directement
 use Dompdf\Options;
 
+use App\Entity\Trajet;
+
 
 
 
@@ -82,6 +84,7 @@ final class FrontController extends AbstractController
         
         $userId = $session->get('user_id');
         $events = $entityManager->getRepository(Evenment::class)->findAll();
+        $trajets = $entityManager->getRepository(Trajet::class)->findAll();
         
         if (!$session->get('user_id')) {
             // Redirige vers la page de connexion si l'utilisateur n'est pas connecté
@@ -102,6 +105,7 @@ final class FrontController extends AbstractController
         return $this->render('front/index.html.twig', [
             'controller_name' => 'FrontController',
             'events' => $events,
+            'trajets' => $trajets,
         ]);
     }
 

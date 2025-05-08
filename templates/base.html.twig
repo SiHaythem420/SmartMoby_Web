@@ -208,18 +208,15 @@ https://templatemo.com/tm-559-zay-shop
             <div class="col-lg-6 m-auto">
                 <h1 class="h1">{{ 'app.shop.events.title'|trans }}</h1>
                 <p>{{ 'app.shop.events.description'|trans }}</p>
-                <h1 class="h1">Evenements Du Mois</h1>
-                <p>
-                    Oussema 
-                </p>
+                
             </div>
         </div>
         <div class="row">
             {% for event in events|slice(0, 3) %}
             <div class="col-12 col-md-4 p-5 mt-3">
-                <a href="#"><img src="{{ asset('img/category_img_01.jpg') }}" class="rounded-circle img-fluid border"></a>
+                <a href="#"><img src="{{ asset('img/evenements.jpg') }}" class="rounded-circle img-fluid border"></a>
                 <h5 class="text-center mt-3 mb-3">{{ event.getNom() }}</h5>
-                <p class="text-center"><a class="btn btn-success">Go Shop</a></p>
+                <p class="text-center"><a class="btn btn-success" href="{{path ('afficher_event')}}" >Accéder à l'événement</a></p>
             </div>
             {% endfor %}
         </div>
@@ -227,92 +224,7 @@ https://templatemo.com/tm-559-zay-shop
     <!-- End Oussema -->
 
 
-    <!-- Start Fares -->
-    <section class="bg-light" data-aos="fade-right">
-        <div class="container py-5">
-            <div class="row text-center py-3">
-                <div class="col-lg-6 m-auto">
-                    <h1 class="h1">{{ 'app.shop.services.title'|trans }}</h1>
-                    <p>{{ 'app.shop.services.description'|trans }}</p>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-12 col-md-4 mb-4">
-                    <div class="card h-100">
-                        <a href="shop-single.html">
-                            <img src="{{asset('img/feature_prod_01.jpg')}}" class="card-img-top" alt="...">
-                        </a>
-                        <div class="card-body">
-                            <ul class="list-unstyled d-flex justify-content-between">
-                                <li>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-muted fa fa-star"></i>
-                                    <i class="text-muted fa fa-star"></i>
-                                </li>
-                                <li class="text-muted text-right">$240.00</li>
-                            </ul>
-                            <a href="shop-single.html" class="h2 text-decoration-none text-dark">Gym Weight</a>
-                            <p class="card-text">
-                                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sunt in culpa qui officia deserunt.
-                            </p>
-                            <p class="text-muted">Reviews (24)</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-4 mb-4">
-                    <div class="card h-100">
-                        <a href="shop-single.html">
-                            <img src="{{asset('img/feature_prod_02.jpg')}}" class="card-img-top" alt="...">
-                        </a>
-                        <div class="card-body">
-                            <ul class="list-unstyled d-flex justify-content-between">
-                                <li>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-muted fa fa-star"></i>
-                                    <i class="text-muted fa fa-star"></i>
-                                </li>
-                                <li class="text-muted text-right">$480.00</li>
-                            </ul>
-                            <a href="shop-single.html" class="h2 text-decoration-none text-dark">Cloud Nike Shoes</a>
-                            <p class="card-text">
-                                Aenean gravida dignissim finibus. Nullam ipsum diam, posuere vitae pharetra sed, commodo ullamcorper.
-                            </p>
-                            <p class="text-muted">Reviews (48)</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-4 mb-4">
-                    <div class="card h-100">
-                        <a href="shop-single.html">
-                            <img src="{{asset('img/feature_prod_03.jpg')}}" class="card-img-top" alt="...">
-                        </a>
-                        <div class="card-body">
-                            <ul class="list-unstyled d-flex justify-content-between">
-                                <li>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-warning fa fa-star"></i>
-                                </li>
-                                <li class="text-muted text-right">$360.00</li>
-                            </ul>
-                            <a href="shop-single.html" class="h2 text-decoration-none text-dark">Summer Addides Shoes</a>
-                            <p class="card-text">
-                                Curabitur ac mi sit amet diam luctus porta. Phasellus pulvinar sagittis diam, et scelerisque ipsum lobortis nec.
-                            </p>
-                            <p class="text-muted">Reviews (74)</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- End Fares -->
+    
 
     <!-- Start Featured Trips Section -->
     <section id="trips" style="background-color: #f8f9fa;" data-aos="fade-left">
@@ -326,6 +238,7 @@ https://templatemo.com/tm-559-zay-shop
                 </div>
             </div>
             <div class="row">
+                
                 {% if trajets is defined and trajets|length > 0 %}
                     {% set itemsPerPage = 3 %}
                     {% set totalPages = (trajets|length / itemsPerPage)|round(0, 'ceil') %}
@@ -354,12 +267,10 @@ https://templatemo.com/tm-559-zay-shop
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="btn-group">
-                                        <button type="button" class="btn btn-sm btn-outline-primary">
+                                        <a href="/front/shop" class="btn btn-sm btn-outline-primary">
                                             <i class="fa fa-map-marker-alt"></i> {{ 'app.shop.trip.details.view_route'|trans }}
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-outline-success">
-                                            <i class="fa fa-ticket-alt"></i> {{ 'app.shop.trip.details.book_now'|trans }}
-                                        </button>
+                                        </a>
+                                        
                                     </div>
                                     <small class="text-muted">
                                         <i class="fa fa-users"></i> {{ random(5, 20) }} {{ 'app.shop.trip.details.seats_left'|trans }}

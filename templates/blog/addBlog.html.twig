@@ -17,38 +17,44 @@
 
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
-                    {{ form_start(blog_form) }}
+                    {{ form_start(blog_form, {'attr': {'id': 'blog-form', 'novalidate': 'novalidate'}}) }}
                     
-                        {# Title Field - Minimal #}
+                        {# Title Field #}
                         <div class="mb-4">
                             {{ form_label(blog_form.title, null, {'label_attr': {'class': 'form-label'}}) }}
                             {{ form_widget(blog_form.title, {
                                 'attr': {
                                     'class': 'form-control',
-                                    'placeholder': 'Enter post title'
+                                    'placeholder': 'Enter post title (3-100 characters)'
                                 }
                             }) }}
+                            <div id="title-error" class="invalid-feedback"></div>
+                            <small class="form-text text-muted">Title must be between 3-100 characters</small>
                         </div>
 
-                        {# Content Field - Clean #}
+                        {# Content Field #}
                         <div class="mb-4">
                             {{ form_label(blog_form.content, null, {'label_attr': {'class': 'form-label'}}) }}
                             {{ form_widget(blog_form.content, {
                                 'attr': {
                                     'class': 'form-control',
                                     'rows': 10,
-                                    'placeholder': 'Write your content here...'
+                                    'placeholder': 'Write your content here... (minimum 50 characters)'
                                 }
                             }) }}
+                            <div id="content-error" class="invalid-feedback"></div>
+                            <small class="form-text text-muted">Content must be at least 50 characters</small>
                         </div>
 
-                        {# Date and Featured - Compact #}
+                        {# Date and Featured #}
                         <div class="row mb-4 g-3">
                             <div class="col-md-6">
                                 {{ form_label(blog_form.date, null, {'label_attr': {'class': 'form-label'}}) }}
                                 {{ form_widget(blog_form.date, {
                                     'attr': {'class': 'form-control'}
                                 }) }}
+                                <div id="date-error" class="invalid-feedback"></div>
+                                <small class="form-text text-muted">Select a date up to today</small>
                             </div>
                             <div class="col-md-6 d-flex align-items-end">
                                 <div class="form-check form-switch ps-0">
@@ -62,15 +68,17 @@
                             </div>
                         </div>
 
-                        {# Image Upload - Simplified #}
+                        {# Image Upload #}
                         <div class="mb-4">
                             {{ form_label(blog_form.imageFile, null, {'label_attr': {'class': 'form-label'}}) }}
                             {{ form_widget(blog_form.imageFile, {
                                 'attr': {'class': 'form-control'}
                             }) }}
+                            <div id="image-error" class="invalid-feedback"></div>
+                            <small class="form-text text-muted">Upload JPG or PNG image (max 2MB)</small>
                         </div>
 
-                        {# Single Submit Button - Centered #}
+                        {# Submit Button #}
                         <div class="text-center mt-4 pt-3 border-top">
                             <button type="submit" class="btn btn-primary px-4 py-2">
                                 <i class="fas fa-paper-plane me-2"></i> Publish Post
@@ -81,7 +89,6 @@
             </div>
         </div>
     </div>
-    
 </div>
 
 <style>
@@ -99,5 +106,125 @@
         font-weight: 500;
         color: #495057;
     }
+    .is-invalid {
+        border-color: #dc3545;
+    }
+    .invalid-feedback {
+        display: block;
+        color: #dc3545;
+    }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('blog-form');
+    const titleInput = document.getElementById('{{ blog_form.title.vars.id }}');
+    const contentInput = document.getElementById('{{ blog_form.content.vars.id }}');
+    const dateInput = document.getElementById('{{ blog_form.date.vars.id }}');
+    const imageInput = document.getElementById('{{ blog_form.imageFile.vars.id }}');
+
+    // Real-time validation
+    titleInput.addEventListener('input', validateTitle);
+    contentInput.addEventListener('input', validateContent);
+    dateInput.addEventListener('input', validateDate);
+    imageInput.addEventListener('change', validateImage);
+
+    // Form submission handler
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const isTitleValid = validateTitle();
+        const isContentValid = validateContent();
+        const isDateValid = validateDate();
+        const isImageValid = validateImage(true);
+
+        if (isTitleValid && isContentValid && isDateValid && isImageValid) {
+            form.submit();
+        }
+    });
+
+    // Validation functions
+    function validateTitle() {
+        const value = titleInput.value.trim();
+        const errorElement = document.getElementById('title-error');
+        
+        if (value.length < 3 || value.length > 100) {
+            titleInput.classList.add('is-invalid');
+            errorElement.textContent = 'Title must be between 3-100 characters';
+            return false;
+        } else {
+            titleInput.classList.remove('is-invalid');
+            errorElement.textContent = '';
+            return true;
+        }
+    }
+
+    function validateContent() {
+        const value = contentInput.value.trim();
+        const errorElement = document.getElementById('content-error');
+        
+        if (value.length < 50) {
+            contentInput.classList.add('is-invalid');
+            errorElement.textContent = 'Content must be at least 50 characters';
+            return false;
+        } else {
+            contentInput.classList.remove('is-invalid');
+            errorElement.textContent = '';
+            return true;
+        }
+    }
+
+    function validateDate() {
+        const selectedDate = new Date(dateInput.value);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const errorElement = document.getElementById('date-error');
+        
+        if (!dateInput.value || selectedDate > today) {
+            dateInput.classList.add('is-invalid');
+            errorElement.textContent = 'Please select a valid date (not in the future)';
+            return false;
+        } else {
+            dateInput.classList.remove('is-invalid');
+            errorElement.textContent = '';
+            return true;
+        }
+    }
+
+    function validateImage(onSubmit = false) {
+        const errorElement = document.getElementById('image-error');
+        
+        // Only validate image on submit or when a file is selected
+        if (onSubmit || imageInput.files.length > 0) {
+            const file = imageInput.files[0];
+            const validTypes = ['image/jpeg', 'image/png'];
+            const maxSize = 2 * 1024 * 1024; // 2MB
+            
+            if (!file) {
+                imageInput.classList.add('is-invalid');
+                errorElement.textContent = 'Please select an image';
+                return false;
+            } else if (!validTypes.includes(file.type)) {
+                imageInput.classList.add('is-invalid');
+                errorElement.textContent = 'Only JPG and PNG files are allowed';
+                return false;
+            } else if (file.size > maxSize) {
+                imageInput.classList.add('is-invalid');
+                errorElement.textContent = 'File size must be less than 2MB';
+                return false;
+            } else {
+                imageInput.classList.remove('is-invalid');
+                errorElement.textContent = '';
+                return true;
+            }
+        }
+        return true;
+    }
+
+    // Initial validation on page load for any pre-filled values
+    validateTitle();
+    validateContent();
+    validateDate();
+});
+</script>
 {% endblock %}
