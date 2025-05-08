@@ -141,9 +141,9 @@
                             <i class="fas fa-arrow-left me-2"></i>Back to Trips
                         </a>
                         {% if trip.vehicule.capacite > 0 %}
-                            <a href="{{ path('app_book_trip', {'id': trip.id}) }}" class="btn btn-success">
+                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#bookingModal">
                                 <i class="fas fa-ticket-alt me-2"></i>Book Now
-                            </a>
+                            </button>
                         {% else %}
                             <button class="btn btn-danger" disabled>
                                 <i class="fas fa-ban me-2"></i>Not Available
@@ -156,50 +156,54 @@
     </div>
 </div>
 
-<div class="booking-section mt-4">
-    <div class="card">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">
-                <i class="fas fa-ticket-alt me-2"></i>Book Your Trip
-            </h5>
-        </div>
-        <div class="card-body">
-            <form id="bookingForm">
-                <div class="mb-3">
-                    <label class="form-label">Your Name</label>
-                    <input type="text" class="form-control" id="passengerName" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Phone Number</label>
-                    <input type="tel" class="form-control" id="phoneNumber" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Number of Seats</label>
-                    <input type="number" 
-                           class="form-control" 
-                           id="numberOfSeats" 
-                           min="1" 
-                           max="{{ trip.vehicule.capacite }}" 
-                           value="1" 
-                           required>
-                    <small class="text-muted">
-                        <i class="fas fa-info-circle"></i> 
-                        Available seats: {{ trip.vehicule.capacite }}
-                    </small>
-                </div>
-                <div class="d-grid">
-                    <button type="button" class="btn btn-success" onclick="processBooking()">
-                        <i class="fas fa-check me-2"></i>Confirm Booking
-                    </button>
-                </div>
-            </form>
+<!-- Booking Modal -->
+<div class="modal fade" id="bookingModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-ticket-alt me-2"></i>Book Your Trip
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="bookingForm">
+                    <div class="mb-3">
+                        <label class="form-label">Your Name</label>
+                        <input type="text" class="form-control" id="passengerName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" id="phoneNumber" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Number of Seats</label>
+                        <input type="number" 
+                               class="form-control" 
+                               id="numberOfSeats" 
+                               min="1" 
+                               max="{{ trip.vehicule.capacite }}" 
+                               value="1" 
+                               required>
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i> 
+                            Available seats: {{ trip.vehicule.capacite }}
+                        </small>
+                    </div>
+                    <div class="d-grid">
+                        <button type="button" class="btn btn-success" onclick="processBooking()">
+                            <i class="fas fa-check me-2"></i>Confirm Booking
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 
 <!-- Payment Receipt Modal -->
 <div class="modal fade" id="receiptModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header bg-success text-white">
                 <h5 class="modal-title">
@@ -208,7 +212,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div id="receiptContent">
+                <div id="receiptContent" class="receipt-content">
                     <!-- Receipt content will be loaded here -->
                 </div>
             </div>
@@ -254,14 +258,6 @@ function processBooking() {
     submitButton.disabled = true;
     submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
 
-    // Add validation message
-    if (numberOfSeats > maxSeats) {
-        submitButton.disabled = false;
-        submitButton.innerHTML = originalText;
-        alert(`Cannot book more than ${maxSeats} seats`);
-        return;
-    }
-
     // Process payment
     fetch('/payment/process', {
         method: 'POST',
@@ -273,8 +269,41 @@ function processBooking() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Update available seats after successful booking
-            const remainingSeats = maxSeats - numberOfSeats;
+            // Close booking modal
+            const bookingModal = bootstrap.Modal.getInstance(document.getElementById('bookingModal'));
+            bookingModal.hide();
+            
+            // Update available seats in the UI using the response from server
+            const remainingSeats = data.remaining_seats;
+            const seatsElement = document.querySelector('.badge.bg-success');
+            if (seatsElement) {
+                seatsElement.textContent = `${remainingSeats} seats`;
+            }
+            
+            // Update the seats input max value
+            const seatsInput = document.getElementById('numberOfSeats');
+            if (seatsInput) {
+                seatsInput.max = remainingSeats;
+            }
+            
+            // Update the available seats text
+            const availableSeatsText = document.querySelector('.text-muted small');
+            if (availableSeatsText) {
+                availableSeatsText.innerHTML = `<i class="fas fa-info-circle"></i> Available seats: ${remainingSeats}`;
+            }
+
+            // If no seats left, disable the Book Now button
+            if (remainingSeats <= 0) {
+                const bookNowButton = document.querySelector('.btn-success[data-bs-toggle="modal"]');
+                if (bookNowButton) {
+                    bookNowButton.disabled = true;
+                    bookNowButton.innerHTML = '<i class="fas fa-ban me-2"></i>Not Available';
+                    bookNowButton.classList.remove('btn-success');
+                    bookNowButton.classList.add('btn-danger');
+                }
+            }
+            
+            // Show receipt modal
             showReceipt(data.receipt);
         } else {
             alert('Payment failed: ' + data.error);

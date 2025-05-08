@@ -174,12 +174,30 @@
         <h5 class="mb-0"><strong>Trips</strong></h5>
         <span class="text-secondary">Dashboard <i class="fa fa-angle-right"></i> Trips</span>
 
+        <!-- Search Bar -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="m-0 font-weight-bold text-primary">Liste des Trajets</h6>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <input type="text" id="searchInput" class="form-control" placeholder="Rechercher par ID, point de départ ou d'arrivée...">
+                            <div class="input-group-append">
+                                <span class="input-group-text">
+                                    <i class="fa fa-search"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row mt-3">
             <div class="col-12">
                 <div class="card shadow-sm">
-                    <div class="card-header bg-white">
-                        <h6 class="mb-0">Trip List</h6>
-                    </div>
                     <div class="card-body">
                         <div class="table-responsive">
                             <table class="table table-hover">
@@ -311,6 +329,31 @@
                 }
             }
         }
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const table = document.querySelector('table');
+            const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+            searchInput.addEventListener('keyup', function() {
+                const searchText = this.value.toLowerCase();
+
+                for (let row of rows) {
+                    const id = row.cells[0].textContent.toLowerCase();
+                    const pointD = row.cells[1].textContent.toLowerCase();
+                    const pointA = row.cells[2].textContent.toLowerCase();
+
+                    if (id.includes(searchText) || 
+                        pointD.includes(searchText) || 
+                        pointA.includes(searchText)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+        });
     </script>
   </body>
 </html>

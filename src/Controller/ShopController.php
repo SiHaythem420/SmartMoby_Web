@@ -34,154 +34,224 @@ class ShopController extends AbstractController
         Request $request,
         TrajetRepository $trajetRepository
     ): Response {
-        // Get filter parameters
-        $vehicleType = $request->query->get('vehicle_type');
-        $timeFilter = $request->query->get('time', 'all');
-        $priceRange = $request->query->get('price_range');
-        $sortBy = $request->query->get('sort_by', 'time');
-        $page = $request->query->getInt('page', 1);
-        $departure = $request->query->get('departure');
-        $arrival = $request->query->get('arrival');
-
-        // Create query builder
-        $qb = $trajetRepository->createQueryBuilder('t')
-            ->leftJoin('t.vehicule', 'v')
-            ->orderBy('t.dateDepart', 'ASC');
-
-        // Apply filters
-        if ($vehicleType) {
-            $qb->andWhere('v.type = :vehicleType')
-                ->setParameter('vehicleType', $vehicleType);
-        }
-
-        if ($timeFilter === 'today') {
-            $today = new \DateTime();
-            $today->setTime(0, 0, 0);
-            $tomorrow = clone $today;
-            $tomorrow->modify('+1 day');
+        try {
+            // Get filter parameters
+            $vehicleType = $request->query->get('vehicle_type');
+            $timeFilter = $request->query->get('time', 'all');
+            $priceRange = $request->query->get('price_range');
+            $sortBy = $request->query->get('sort_by', 'time');
+            $page = $request->query->getInt('page', 1);
             
-            $qb->andWhere('t.dateDepart >= :today')
-                ->andWhere('t.dateDepart < :tomorrow')
-                ->setParameter('today', $today)
-                ->setParameter('tomorrow', $tomorrow);
-        } elseif ($timeFilter === 'tomorrow') {
-            $tomorrow = new \DateTime();
-            $tomorrow->setTime(0, 0, 0);
-            $tomorrow->modify('+1 day');
-            $dayAfterTomorrow = clone $tomorrow;
-            $dayAfterTomorrow->modify('+1 day');
-            
-            $qb->andWhere('t.dateDepart >= :tomorrow')
-                ->andWhere('t.dateDepart < :dayAfterTomorrow')
-                ->setParameter('tomorrow', $tomorrow)
-                ->setParameter('dayAfterTomorrow', $dayAfterTomorrow);
-        }
+            // Advanced search parameters
+            $departure = $request->query->get('departure');
+            $arrival = $request->query->get('arrival');
+            $dateFrom = $request->query->get('date_from');
+            $dateTo = $request->query->get('date_to');
+            $timeRange = $request->query->get('time_range');
+            $vehicleTypes = $request->query->all('vehicle_types');
+            $maxPrice = $request->query->get('max_price');
+            $maxStops = $request->query->get('max_stops');
 
-        if ($priceRange) {
-            switch ($priceRange) {
-                case 'under_10':
-                    $qb->andWhere('t.prix < 10');
+            // Create query builder
+            $qb = $trajetRepository->createQueryBuilder('t')
+                ->leftJoin('t.vehicule', 'v');
+
+            // Apply basic filters
+            if ($vehicleType) {
+                $qb->andWhere('v.type = :vehicleType')
+                    ->setParameter('vehicleType', $vehicleType);
+            }
+
+            // Apply advanced search filters
+            if (!empty($vehicleTypes)) {
+                $qb->andWhere('v.type IN (:vehicleTypes)')
+                    ->setParameter('vehicleTypes', $vehicleTypes);
+            }
+
+            if ($dateFrom) {
+                try {
+                    $dateFromObj = new \DateTime($dateFrom);
+                    $dateFromObj->setTime(0, 0, 0);
+                    $qb->andWhere('t.dateDepart >= :dateFrom')
+                        ->setParameter('dateFrom', $dateFromObj);
+                } catch (\Exception $e) {
+                    // Invalid date format, skip this filter
+                }
+            }
+
+            if ($dateTo) {
+                try {
+                    $dateToObj = new \DateTime($dateTo);
+                    $dateToObj->setTime(23, 59, 59);
+                    $qb->andWhere('t.dateDepart <= :dateTo')
+                        ->setParameter('dateTo', $dateToObj);
+                } catch (\Exception $e) {
+                    // Invalid date format, skip this filter
+                }
+            }
+
+            if ($timeRange) {
+                switch ($timeRange) {
+                    case 'morning':
+                        $qb->andWhere('HOUR(t.dateDepart) BETWEEN 6 AND 12');
+                        break;
+                    case 'afternoon':
+                        $qb->andWhere('HOUR(t.dateDepart) BETWEEN 12 AND 18');
+                        break;
+                    case 'evening':
+                        $qb->andWhere('HOUR(t.dateDepart) BETWEEN 18 AND 24');
+                        break;
+                    case 'night':
+                        $qb->andWhere('HOUR(t.dateDepart) BETWEEN 0 AND 6');
+                        break;
+                }
+            }
+
+            if ($maxPrice && is_numeric($maxPrice)) {
+                $qb->andWhere('t.prix <= :maxPrice')
+                    ->setParameter('maxPrice', floatval($maxPrice));
+            }
+
+            if ($maxStops !== null && $maxStops !== '' && is_numeric($maxStops)) {
+                $qb->andWhere('t.nombreArrets <= :maxStops')
+                    ->setParameter('maxStops', intval($maxStops));
+            }
+
+            // Apply location filters
+            if ($departure) {
+                $qb->andWhere('LOWER(t.pointDepart) LIKE LOWER(:departure)')
+                    ->setParameter('departure', '%' . $departure . '%');
+            }
+
+            if ($arrival) {
+                $qb->andWhere('LOWER(t.pointArrivee) LIKE LOWER(:arrival)')
+                    ->setParameter('arrival', '%' . $arrival . '%');
+            }
+
+            // Apply time filter
+            if ($timeFilter === 'today') {
+                $today = new \DateTime();
+                $today->setTime(0, 0, 0);
+                $tomorrow = clone $today;
+                $tomorrow->modify('+1 day');
+                
+                $qb->andWhere('t.dateDepart >= :today')
+                    ->andWhere('t.dateDepart < :tomorrow')
+                    ->setParameter('today', $today)
+                    ->setParameter('tomorrow', $tomorrow);
+            } elseif ($timeFilter === 'tomorrow') {
+                $tomorrow = new \DateTime();
+                $tomorrow->setTime(0, 0, 0);
+                $tomorrow->modify('+1 day');
+                $dayAfterTomorrow = clone $tomorrow;
+                $dayAfterTomorrow->modify('+1 day');
+                
+                $qb->andWhere('t.dateDepart >= :tomorrow')
+                    ->andWhere('t.dateDepart < :dayAfterTomorrow')
+                    ->setParameter('tomorrow', $tomorrow)
+                    ->setParameter('dayAfterTomorrow', $dayAfterTomorrow);
+            }
+
+            // Apply price range filter
+            if ($priceRange) {
+                switch ($priceRange) {
+                    case 'under_10':
+                        $qb->andWhere('t.prix < 10');
+                        break;
+                    case '10_15':
+                        $qb->andWhere('t.prix >= 10 AND t.prix <= 15');
+                        break;
+                    case 'over_20':
+                        $qb->andWhere('t.prix > 20');
+                        break;
+                }
+            }
+
+            // Apply sorting
+            switch ($sortBy) {
+                case 'price':
+                    $qb->orderBy('t.prix', 'ASC');
                     break;
-                case '10_15':
-                    $qb->andWhere('t.prix >= 10 AND t.prix <= 15');
+                case 'distance':
+                    $qb->orderBy('t.distance', 'ASC');
                     break;
-                case 'over_20':
-                    $qb->andWhere('t.prix > 20');
+                default: // time
+                    $qb->orderBy('t.dateDepart', 'ASC');
                     break;
             }
-        }
 
-        if ($departure) {
-            $qb->andWhere('t.pointDepart LIKE :departure')
-                ->setParameter('departure', '%' . $departure . '%');
-        }
+            // Get paginated results
+            $pagination = $this->paginator->paginate(
+                $qb,
+                $page,
+                9 // items per page
+            );
 
-        if ($arrival) {
-            $qb->andWhere('t.pointArrivee LIKE :arrival')
-                ->setParameter('arrival', '%' . $arrival . '%');
-        }
+            // Get statistics for dashboard
+            $stats = $this->getStatistics($trajetRepository);
 
-        // Apply sorting
-        switch ($sortBy) {
-            case 'price':
-                $qb->orderBy('t.prix', 'ASC');
-                break;
-            case 'distance':
-                $qb->orderBy('t.distance', 'ASC');
-                break;
-            default: // time
-                $qb->orderBy('t.dateDepart', 'ASC');
-                break;
-        }
+            // Check if this is an AJAX request
+            if ($request->headers->get('X-Requested-With') === 'XMLHttpRequest') {
+                return $this->render('shop/_trips_container.html.twig', [
+                    'trajets' => $pagination,
+                    'vehicleType' => $vehicleType,
+                    'timeFilter' => $timeFilter,
+                    'priceRange' => $priceRange,
+                    'sortBy' => $sortBy,
+                ]);
+            }
 
-        // Get paginated results
-        $pagination = $this->paginator->paginate(
-            $qb,
-            $page,
-            9 // items per page
-        );
-
-        // Get statistics for dashboard
-        $stats = $this->getStatistics($trajetRepository);
-
-        // Check if this is an AJAX request
-        if ($request->headers->get('X-Requested-With') === 'XMLHttpRequest') {
-            // Return only the trips container and pagination
-            return $this->render('shop/_trips_container.html.twig', [
+            // Return full page for non-AJAX requests
+            return $this->render('shop.html.twig', [
                 'trajets' => $pagination,
                 'vehicleType' => $vehicleType,
                 'timeFilter' => $timeFilter,
                 'priceRange' => $priceRange,
                 'sortBy' => $sortBy,
+                'stats' => $stats,
             ]);
+        } catch (\Exception $e) {
+            // Log the error
+            $this->logger->error('Error in shop index: ' . $e->getMessage());
+            
+            if ($request->headers->get('X-Requested-With') === 'XMLHttpRequest') {
+                return new Response('Error loading trips: ' . $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+            
+            $this->addFlash('error', 'An error occurred while loading trips. Please try again.');
+            return $this->redirectToRoute('app_shop');
         }
-
-        // Return full page for non-AJAX requests
-        return $this->render('shop.html.twig', [
-            'trajets' => $pagination,
-            'vehicleType' => $vehicleType,
-            'timeFilter' => $timeFilter,
-            'priceRange' => $priceRange,
-            'sortBy' => $sortBy,
-            'stats' => $stats,
-        ]);
     }
 
     private function getTripStatistics(TrajetRepository $trajetRepository): array
     {
-        // Get most popular routes
+        // Get most popular routes with more detailed statistics
         $popularRoutes = $trajetRepository->createQueryBuilder('t')
-            ->select('t.pointDepart, t.pointArrivee, COUNT(t.id) as tripCount')
+            ->select('t.pointDepart, t.pointArrivee, COUNT(t.id) as tripCount, AVG(t.distance) as avgDistance')
             ->groupBy('t.pointDepart, t.pointArrivee')
+            ->having('tripCount > 0')
             ->orderBy('tripCount', 'DESC')
-            ->setMaxResults(3)
+            ->setMaxResults(5)
             ->getQuery()
             ->getResult();
 
-        // Get best value trips (price per km)
-        $bestValueTrips = $trajetRepository->createQueryBuilder('t')
-            ->select('t.pointDepart, t.pointArrivee, t.prix, t.distance, (t.prix/t.distance) as pricePerKm')
-            ->orderBy('pricePerKm', 'ASC')
-            ->setMaxResults(3)
+        // Get vehicle distribution with percentage
+        $totalTrips = $trajetRepository->createQueryBuilder('t')
+            ->select('COUNT(t.id)')
             ->getQuery()
-            ->getResult();
+            ->getSingleScalarResult();
 
-        // Get most frequent vehicle types
         $vehicleStats = $trajetRepository->createQueryBuilder('t')
             ->select('v.type, COUNT(t.id) as count')
             ->leftJoin('t.vehicule', 'v')
             ->groupBy('v.type')
-            ->orderBy('count', 'DESC')
             ->getQuery()
             ->getResult();
 
-        // Get average prices by vehicle type
-        $priceStats = $trajetRepository->createQueryBuilder('t')
-            ->select('v.type, AVG(t.prix) as avgPrice')
-            ->leftJoin('t.vehicule', 'v')
-            ->groupBy('v.type')
-            ->getQuery()
-            ->getResult();
+        // Calculate percentages for vehicle stats
+        foreach ($vehicleStats as &$stat) {
+            $stat['percentage'] = ($stat['count'] / $totalTrips) * 100;
+        }
 
         // Get weather data for major cities
         $weatherData = [];
@@ -196,44 +266,22 @@ class ShopController extends AbstractController
 
         return [
             'popularRoutes' => $popularRoutes,
-            'bestValueTrips' => $bestValueTrips,
             'vehicleStats' => $vehicleStats,
-            'priceStats' => $priceStats,
-            'weatherData' => $weatherData
+            'weatherData' => $weatherData,
+            'totalTrips' => $totalTrips
         ];
     }
 
     private function getStatistics(TrajetRepository $trajetRepository): array
     {
-        // Get statistics for the dashboard
+        // Get all statistics
         $stats = $this->getTripStatistics($trajetRepository);
-
-        // Get most frequent vehicle types
-        $vehicleStats = $trajetRepository->createQueryBuilder('t')
-            ->select('v.type, COUNT(t.id) as count')
-            ->leftJoin('t.vehicule', 'v')
-            ->groupBy('v.type')
-            ->orderBy('count', 'DESC')
-            ->getQuery()
-            ->getResult();
-
-        // Get weather data for major cities
-        $weatherData = [];
-        $majorCities = ['Tunis', 'Sfax', 'Sousse'];
-        foreach ($majorCities as $city) {
-            try {
-                $weatherData[$city] = $this->weatherService->getWeatherByCity($city);
-            } catch (\Exception $e) {
-                $weatherData[$city] = ['error' => 'Weather data unavailable'];
-            }
-        }
 
         return [
             'popularRoutes' => $stats['popularRoutes'],
-            'bestValueTrips' => $stats['bestValueTrips'],
-            'vehicleStats' => $vehicleStats,
-            'priceStats' => $stats['priceStats'],
-            'weatherData' => $weatherData
+            'vehicleStats' => $stats['vehicleStats'],
+            'weatherData' => $stats['weatherData'],
+            'totalTrips' => $stats['totalTrips']
         ];
     }
 }

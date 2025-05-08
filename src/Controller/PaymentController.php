@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Service\PaymentService;
+use App\Entity\Trajet;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -11,10 +13,12 @@ use Symfony\Component\Routing\Annotation\Route;
 class PaymentController extends AbstractController
 {
     private PaymentService $paymentService;
+    private EntityManagerInterface $entityManager;
 
-    public function __construct(PaymentService $paymentService)
+    public function __construct(PaymentService $paymentService, EntityManagerInterface $entityManager)
     {
         $this->paymentService = $paymentService;
+        $this->entityManager = $entityManager;
     }
 
     #[Route('/payment/process', name: 'app_payment_process', methods: ['POST'])]
@@ -23,10 +27,28 @@ class PaymentController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         // Validate required data
-        if (!isset($data['booking_id']) || !isset($data['trip_details'])) {
+        if (!isset($data['booking_id']) || !isset($data['trip_details']) || !isset($data['trip_id']) || !isset($data['number_of_seats'])) {
             return new JsonResponse([
                 'success' => false,
                 'error' => 'Missing required booking information'
+            ], 400);
+        }
+
+        // Get the trip and update seats
+        $trip = $this->entityManager->getRepository(Trajet::class)->find($data['trip_id']);
+        if (!$trip) {
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Trip not found'
+            ], 404);
+        }
+
+        // Check if enough seats are available
+        $vehicule = $trip->getVehicule();
+        if ($vehicule->getCapacite() < $data['number_of_seats']) {
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Not enough seats available'
             ], 400);
         }
 
@@ -36,6 +58,11 @@ class PaymentController extends AbstractController
         if (!$paymentResult['success']) {
             return new JsonResponse($paymentResult, 400);
         }
+
+        // Update vehicle capacity
+        $vehicule->setCapacite($vehicule->getCapacite() - $data['number_of_seats']);
+        $this->entityManager->persist($vehicule);
+        $this->entityManager->flush();
 
         // Generate receipt
         $receipt = $this->paymentService->generatePaymentReceipt([
@@ -48,7 +75,8 @@ class PaymentController extends AbstractController
         return new JsonResponse([
             'success' => true,
             'payment' => $paymentResult,
-            'receipt' => $receipt
+            'receipt' => $receipt,
+            'remaining_seats' => $vehicule->getCapacite()
         ]);
     }
 

@@ -13,7 +13,7 @@ class PaymentService
     public function __construct(HttpClientInterface $client)
     {
         $this->client = $client;
-        $this->mockPaymentApiUrl = 'https://run.mocky.io/v3/bace96b8-7301-4275-bfa6-8a8737b3a636'; // Replace this with your new Mocky URL
+        $this->mockPaymentApiUrl = 'https://run.mocky.io/v3/30b57285-1c8e-4c0b-a5e1-08142bbd7aa2'; // Updated mock payment API URL
     }
 
     public function processFreePayment(array $bookingData): array

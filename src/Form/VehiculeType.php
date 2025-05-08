@@ -33,8 +33,8 @@ class VehiculeType extends AbstractType
                 'required' => true,
                 'choices' => [
                     'Available' => 'available',
-                    'In Use' => 'in_use',
-                    'Under Maintenance' => 'under_maintenance',
+                    'In_Use' => 'in use',
+                    'Under_Maintenance' => 'under maintenance',
                 ],
             ])
             ->add('dispo', ChoiceType::class, [
