@@ -1,4 +1,3 @@
-
 {% extends 'base.html.twig' %}
 
 {% block content %}
@@ -18,14 +17,23 @@
             </select>
         </div>
     </div>
-    <div class="col-md-4 d-flex justify-content-start mb-3">
-    <a href="/events/pdf" class="btn btn-danger btn-lg shadow rounded-pill">
-        <i class="fa fa-file-pdf me-2"></i> Télécharger le PDF
-    </a>
-</div>
-
-                            
-                        
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <a href="{{ path('app_shop') }}" class="btn btn-primary btn-lg shadow rounded-pill">
+                <i class="fa fa-bus me-2"></i> Découvrir trajets
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="/events/pdf" class="btn btn-danger btn-lg shadow rounded-pill">
+                <i class="fa fa-file-pdf me-2"></i> Télécharger le PDF
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{{ path('list-blog') }}" class="btn btn-info btn-lg shadow rounded-pill">
+                <i class="fa fa-star me-2"></i> Notez-nous
+            </a>
+        </div>
+    </div>
 
     <div class="row g-4" id="eventList">
         {% for event in events %}
@@ -45,18 +53,31 @@
                     </p>
                     <div class="container">
                         <div class="row">
-                            <div class="col-md-4">
-                                <a href="{{ path('afficher_fedback', {'id': event.getIdEvent()}) }}" class="btn btn-primary">Voir</a>
+                            <div class="col-md-3">
+                                <a href="{{ path('afficher_fedback', {'id': event.getIdEvent()}) }}" class="btn btn-primary">
+                                    <i class="fa fa-eye"></i>
+                                </a>
                             </div>
-                            <div class="col-md-4">
-                                <a href="{{ path('ajouter_fedback', {'id': event.getIdEvent()}) }}" class="btn btn-secondary">Feedback</a>
+                            <div class="col-md-3">
+                                <a href="{{ path('ajouter_fedback', {'id': event.getIdEvent()}) }}" class="btn btn-secondary">
+                                    <i class="fa fa-comment"></i>
+                                </a>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <button class="btn btn-info" onclick="showQRCode('{{ path('event_qr_image', {'id_event': event.getIdEvent()}) }}')">
-                                    <i class="fa fa-qrcode"></i> QR
+                                    <i class="fa fa-qrcode"></i>
                                 </button>
                             </div>
-                            
+                            <div class="col-md-3">
+                                <a href="{{ path('afficherevent_pdf') }}" class="btn btn-danger">
+                                    <i class="fa fa-file-pdf"></i>
+                                </a>
+                            </div>
+                            <div class="col-md-12 mt-2">
+                                <button class="btn btn-success w-100" onclick="showAvailableTrips('{{ event.getLieu() }}', '{{ event.getDate()|date('Y-m-d') }}')">
+                                    <i class="fa fa-bus me-2"></i>Réserver un trajet
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -75,6 +96,42 @@
                 </div>
                 <div class="modal-body text-center">
                     <img id="qrCodeImage" src="" alt="QR Code" style="max-width: 100%; height: auto;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour afficher les trajets disponibles -->
+    <div class="modal fade" id="tripsModal" tabindex="-1" aria-labelledby="tripsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="tripsModalLabel">
+                        <i class="fa fa-bus me-2"></i>Trajets disponibles
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Type de trajet</label>
+                                <select class="form-select" id="tripType">
+                                    <option value="to">Vers l'événement</option>
+                                    <option value="from">Depuis l'événement</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Date</label>
+                                <input type="date" class="form-control" id="tripDate">
+                            </div>
+                        </div>
+                    </div>
+                    <div id="availableTrips" class="list-group">
+                        <!-- Les trajets seront chargés ici dynamiquement -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -107,12 +164,111 @@ let currentQuery = '';
 let currentSort = 'date_desc';
 
 function showQRCode(url) {
-    // Vider d'abord la source de l'image
     document.getElementById('qrCodeImage').src = '';
-    // Puis définir la nouvelle source
     document.getElementById('qrCodeImage').src = url;
     const modal = new bootstrap.Modal(document.getElementById('qrCodeModal'));
     modal.show();
+}
+
+function showAvailableTrips(location, eventDate) {
+    const tripDate = document.getElementById('tripDate');
+    tripDate.value = eventDate;
+    
+    const modal = document.getElementById('tripsModal');
+    modal.dataset.location = location;
+    
+    const modalInstance = new bootstrap.Modal(modal);
+    modalInstance.show();
+    
+    // Add event listener for trip type change
+    document.getElementById('tripType').addEventListener('change', function() {
+        loadAvailableTrips(location, eventDate, this.value);
+    });
+    
+    // Initial load with default 'to' type
+    loadAvailableTrips(location, eventDate, 'to');
+}
+
+function loadAvailableTrips(location, date, type) {
+    const tripsContainer = document.getElementById('availableTrips');
+    tripsContainer.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Chargement des trajets...</p>
+        </div>
+    `;
+
+    // Update the modal title based on trip type
+    const modalTitle = document.getElementById('tripsModalLabel');
+    modalTitle.innerHTML = type === 'to' 
+        ? '<i class="fa fa-bus me-2"></i>Trajets vers l\'événement'
+        : '<i class="fa fa-bus me-2"></i>Trajets depuis l\'événement';
+
+    fetch(`/trajet/search-trips?location=${encodeURIComponent(location)}&date=${encodeURIComponent(date)}&type=${type}`)
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Une erreur est survenue lors du chargement des trajets');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            tripsContainer.innerHTML = '';
+            
+            if (data.trips.length === 0) {
+                tripsContainer.innerHTML = `
+                    <div class="alert alert-info">
+                        <i class="fa fa-info-circle me-2"></i>
+                        Aucun trajet disponible pour cette date et ce lieu.
+                    </div>
+                `;
+                return;
+            }
+            
+            data.trips.forEach(trip => {
+                const departureTime = new Date(trip.dateDepart).toLocaleTimeString('fr-FR', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                
+                tripsContainer.innerHTML += `
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">
+                                <i class="fa fa-route me-2"></i>
+                                ${type === 'to' ? `${trip.pointDepart} → ${trip.pointArrivee}` : `${trip.pointArrivee} → ${trip.pointDepart}`}
+                            </h5>
+                            <small class="text-success">${trip.prix} DT</small>
+                        </div>
+                        <p class="mb-1">
+                            <i class="fa fa-clock me-2"></i>
+                            Départ: ${departureTime}
+                        </p>
+                        <p class="mb-1">
+                            <i class="fa fa-chair me-2"></i>
+                            Places disponibles: ${trip.vehicule.capacite}
+                        </p>
+                        <div class="mt-2">
+                            <a href="/trajet/${trip.id}" class="btn btn-primary btn-sm">
+                                <i class="fa fa-ticket-alt me-2"></i>Réserver
+                            </a>
+                        </div>
+                    </div>
+                `;
+            });
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            tripsContainer.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fa fa-exclamation-circle me-2"></i>
+                    ${error.message || 'Une erreur est survenue lors du chargement des trajets'}
+                </div>
+            `;
+        });
 }
 
 function updateEvents() {
@@ -140,21 +296,30 @@ function updateEvents() {
                                 </p>
                                 <div class="container">
                                     <div class="row">
-                                        <div class="col-md-4">
-                                            <a href="/front/afficher_fedback/${event.id}" class="btn btn-primary">Voir</a>
+                                        <div class="col-md-3">
+                                            <a href="/front/afficher_fedback/${event.id}" class="btn btn-primary">
+                                                <i class="fa fa-eye"></i>
+                                            </a>
                                         </div>
-                                        <div class="col-md-4">
-                                            <a href="/front/ajouter_fedback/${event.id}" class="btn btn-secondary">Feedback</a>
+                                        <div class="col-md-3">
+                                            <a href="/front/ajouter_fedback/${event.id}" class="btn btn-secondary">
+                                                <i class="fa fa-comment"></i>
+                                            </a>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-3">
                                             <button class="btn btn-info" onclick="showQRCode('/event/${event.id}/qr_image')">
-                                                <i class="fa fa-qrcode"></i> QR
+                                                <i class="fa fa-qrcode"></i>
                                             </button>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-3">
                                             <a href="/events/pdf" class="btn btn-danger">
-                                                <i class="fa fa-file-pdf"></i> PDF
+                                                <i class="fa fa-file-pdf"></i>
                                             </a>
+                                        </div>
+                                        <div class="col-md-12 mt-2">
+                                            <button class="btn btn-success w-100" onclick="showAvailableTrips('${event.location}', '${event.date}')">
+                                                <i class="fa fa-bus me-2"></i>Réserver un trajet
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
