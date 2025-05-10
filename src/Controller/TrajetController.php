@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/trajet')]
@@ -20,6 +21,54 @@ class TrajetController extends AbstractController
         return $this->render('trajet/index.html.twig', [
             'trajets' => $trajetRepository->findAll(),
         ]);
+    }
+
+    #[Route('/search-trips', name: 'search_trips', methods: ['GET'])]
+    public function searchTrips(Request $request, TrajetRepository $trajetRepository): JsonResponse
+    {
+        try {
+            $location = $request->query->get('location');
+            $date = $request->query->get('date');
+            $type = $request->query->get('type', 'to');
+
+            if (!$location || !$date) {
+                return new JsonResponse([
+                    'error' => 'Location and date are required',
+                    'location' => $location,
+                    'date' => $date
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            $dateObj = new \DateTime($date);
+            
+            // Search for trips based on type (to/from event)
+            if ($type === 'to') {
+                $trips = $trajetRepository->findByPointArriveeAndDate($location, $dateObj);
+            } else {
+                $trips = $trajetRepository->findByPointDepartAndDate($location, $dateObj);
+            }
+
+            $formattedTrips = array_map(function(Trajet $trip) {
+                return [
+                    'id' => $trip->getId(),
+                    'pointDepart' => $trip->getPointDepart(),
+                    'pointArrivee' => $trip->getPointArrivee(),
+                    'dateDepart' => $trip->getDateDepart()->format('Y-m-d H:i'),
+                    'prix' => $trip->getPrix(),
+                    'vehicule' => [
+                        'capacite' => $trip->getVehicule()->getCapacite(),
+                        'type' => $trip->getVehicule()->getType()
+                    ]
+                ];
+            }, $trips);
+
+            return new JsonResponse(['trips' => $formattedTrips]);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'error' => 'An error occurred while searching for trips',
+                'message' => $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     #[Route('/new', name: 'trajet_new', methods: ['GET', 'POST'])]
@@ -82,6 +131,4 @@ class TrajetController extends AbstractController
 
         return $this->redirectToRoute('trajet_index');
     }
-
-    
 } 

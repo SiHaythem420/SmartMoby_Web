@@ -643,10 +643,12 @@ body {
     color: white;
     overflow: hidden;
     position: relative;
+    perspective: 1000px;
+    transform-style: preserve-3d;
 }
 
 .weather-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-5px) rotateX(5deg);
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
 }
 
@@ -666,23 +668,33 @@ body {
     margin-bottom: 1rem;
     position: relative;
     z-index: 2;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .weather-icon {
     position: relative;
     z-index: 2;
     margin-bottom: 1rem;
+    transform: translateZ(20px);
+    transition: transform 0.3s ease;
 }
 
 .weather-icon img {
     width: 80px;
     height: 80px;
     filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
 }
 
 .weather-details {
     position: relative;
     z-index: 2;
+    transform: translateZ(10px);
 }
 
 .weather-details h3 {
@@ -690,6 +702,9 @@ body {
     font-weight: 700;
     margin-bottom: 0.5rem;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(45deg, #fff, #e0e0e0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .weather-details p {
@@ -700,6 +715,145 @@ body {
 
 .weather-details small {
     opacity: 0.8;
+}
+
+/* 5D Weather Elements */
+.weather-3d-container {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    margin: 20px 0;
+    perspective: 1000px;
+}
+
+.weather-3d-element {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.5s ease;
+}
+
+.weather-3d-element:hover {
+    transform: rotateY(180deg);
+}
+
+.weather-front, .weather-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.weather-front {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.weather-back {
+    background: rgba(0, 0, 0, 0.2);
+    transform: rotateY(180deg);
+}
+
+.weather-data-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.weather-data-item {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.weather-data-item:hover {
+    transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.weather-data-item i {
+    font-size: 1.5em;
+    margin-bottom: 5px;
+}
+
+.weather-data-item .value {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.weather-data-item .label {
+    font-size: 0.8em;
+    opacity: 0.8;
+}
+
+.weather-timeline {
+    position: relative;
+    height: 60px;
+    margin: 20px 0;
+    overflow: hidden;
+}
+
+.weather-timeline::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-50%);
+}
+
+.weather-timeline-item {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.weather-timeline-item:hover {
+    transform: translateY(-50%) scale(1.2);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.weather-timeline-item i {
+    font-size: 1.2em;
+}
+
+.weather-animation {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+.weather-particle {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: particleFloat 3s infinite;
+}
+
+@keyframes particleFloat {
+    0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
 }
 
 /* Weather History Styles */
@@ -769,6 +923,68 @@ body {
         font-size: 2rem;
     }
 }
+
+/* Transport Public Section */
+.list-group-item {
+    transition: all 0.3s ease;
+    border: none;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+    transform: translateX(5px);
+}
+
+.list-group-item.active {
+    background-color: #f8f9fa;
+    color: #000;
+    border-left: 4px solid #28a745;
+}
+
+.list-group-item .badge {
+    transition: all 0.3s ease;
+}
+
+.list-group-item:hover .badge {
+    transform: translateX(3px);
+}
+
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
+}
+
+.filter-link {
+    text-decoration: none;
+    color: #333;
+}
+
+.filter-link:hover {
+    text-decoration: none;
+    color: #333;
+}
+
+.filter-link.active {
+    background-color: #f8f9fa;
+}
+
+.card-header {
+    border-radius: 0.25rem 0.25rem 0 0 !important;
+}
+
+.list-group-item i {
+    width: 20px;
+    text-align: center;
+}
 </style>
 
 <!-- Add Leaflet.Search CSS and JS -->
@@ -779,6 +995,7 @@ body {
 {% block content %}
 <!-- Start Content -->
 <div class="container py-5">
+
     <!-- Map Interface -->
     <div class="row mb-4">
         <div class="col-12">
@@ -921,6 +1138,7 @@ body {
         <i class="fas fa-chart-bar"></i>
     </button>
 
+
     <!-- Search Form -->
     <div class="row mb-4">
         <div class="col-12">
@@ -949,12 +1167,21 @@ body {
                         </div>
                         <div class="col-md-4">
                             <button type="submit" class="btn btn-primary w-100">
-                                <i class="fas fa-search me-2"></i>Search Trips
+                                <i class="fas fa-search me-2"></i>
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <a href="{{ path('afficher_event') }}" class="btn btn-success btn-lg shadow rounded-pill">
+                <i class="fa fa-calendar me-2"></i> Découvrir événements
+            </a>
         </div>
     </div>
 
@@ -1077,85 +1304,149 @@ body {
             <br>
             <br>
             <ul class="list-unstyled templatemo-accordion">
+                <!-- Transport Public Section -->
                 <li class="pb-3">
-                    <a class="collapsed d-flex justify-content-between h3 text-decoration-none" href="#">
-                        {{ 'app.shop.filters.vehicle_type'|trans }}
-                        <i class="fa fa-fw fa-chevron-circle-down mt-1"></i>
-                    </a>
-                    <ul class="collapse show list-unstyled pl-3">
-                        <li>
-                            <a class="text-decoration-none filter-link {% if vehicleType == 'Bus' %}text-success{% endif %}" 
-                               href="#" data-filter="vehicle_type" data-value="Bus">
-                                Bus
-                            </a>
-                        </li>
-                        <li>
-                            <a class="text-decoration-none filter-link {% if vehicleType == 'Métro' %}text-success{% endif %}" 
-                               href="#" data-filter="vehicle_type" data-value="Métro">
-                                Métro
-                            </a>
-                        </li>
-                        <li>
-                            <a class="text-decoration-none filter-link {% if vehicleType == 'Taxi' %}text-success{% endif %}" 
-                               href="#" data-filter="vehicle_type" data-value="Taxi">
-                                Taxi
-                            </a>
-                        </li>
-                    </ul>
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-bus me-2"></i>Transport Public
+                            </h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="list-group list-group-flush">
+                                <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center filter-link {% if vehicleType == 'Metro' %}active{% endif %}" 
+                                   data-filter="vehicle_type" data-value="Metro">
+                                    <div>
+                                        <i class="fas fa-train text-primary me-2"></i>
+                                        <span>Métro</span>
+                                    </div>
+                                    <span class="badge bg-primary rounded-pill">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </span>
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center filter-link {% if vehicleType == 'Bus' %}active{% endif %}" 
+                                   data-filter="vehicle_type" data-value="Bus">
+                                    <div>
+                                        <i class="fas fa-bus text-primary me-2"></i>
+                                        <span>Bus</span>
+                                    </div>
+                                    <span class="badge bg-primary rounded-pill">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </span>
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center filter-link {% if vehicleType == 'Moto' %}active{% endif %}" 
+                                   data-filter="vehicle_type" data-value="Moto">
+                                    <div>
+                                        <i class="fas fa-motorcycle text-primary me-2"></i>
+                                        <span>Moto</span>
+                                    </div>
+                                    <span class="badge bg-primary rounded-pill">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </li>
+
+                <!-- Transport Privé Section -->
                 <li class="pb-3">
-                    <a class="collapsed d-flex justify-content-between h3 text-decoration-none" href="#">
-                        {{ 'app.shop.filters.time'|trans }}
-                        <i class="pull-right fa fa-fw fa-chevron-circle-down mt-1"></i>
-                    </a>
-                    <ul id="collapseTwo" class="collapse list-unstyled pl-3">
-                        <li>
-                            <a class="text-decoration-none filter-link {% if timeFilter == 'all' %}text-success{% endif %}" 
-                               href="#" data-filter="time" data-value="all">
-                                {{ 'app.shop.filters.all'|trans }}
-                            </a>
-                        </li>
-                        <li>
-                            <a class="text-decoration-none filter-link {% if timeFilter == 'today' %}text-success{% endif %}" 
-                               href="#" data-filter="time" data-value="today">
-                                {{ 'app.shop.filters.today'|trans }}
-                            </a>
-                        </li>
-                        <li>
-                            <a class="text-decoration-none filter-link {% if timeFilter == 'tomorrow' %}text-success{% endif %}" 
-                               href="#" data-filter="time" data-value="tomorrow">
-                                {{ 'app.shop.filters.tomorrow'|trans }}
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="pb-3">
-                    <a class="collapsed d-flex justify-content-between h3 text-decoration-none" href="#">
-                        {{ 'app.shop.filters.price_range'|trans }}
-                        <i class="pull-right fa fa-fw fa-chevron-circle-down mt-1"></i>
-                    </a>
-                    <ul id="collapseThree" class="collapse list-unstyled pl-3">
-                        <li>
-                            <a class="text-decoration-none filter-link {% if priceRange == 'under_10' %}text-success{% endif %}" 
-                               href="#" data-filter="price_range" data-value="under_10">
-                                {{ 'app.shop.filters.under_10'|trans }}
-                            </a>
-                        </li>
-                        <li>
-                            <a class="text-decoration-none filter-link {% if priceRange == '10_15' %}text-success{% endif %}" 
-                               href="#" data-filter="price_range" data-value="10_15">
-                                {{ 'app.shop.filters.between_10_15'|trans }}
-                            </a>
-                        </li>
-                        <li>
-                            <a class="text-decoration-none filter-link {% if priceRange == 'over_20' %}text-success{% endif %}" 
-                               href="#" data-filter="price_range" data-value="over_20">
-                                {{ 'app.shop.filters.over_20'|trans }}
-                            </a>
-                        </li>
-                    </ul>
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-car me-2"></i>Transport Privé
+                            </h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="list-group list-group-flush">
+                                <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center filter-link {% if vehicleType == 'Taxi' %}active{% endif %}" 
+                                   data-filter="vehicle_type" data-value="Taxi">
+                                    <div>
+                                        <i class="fas fa-taxi text-success me-2"></i>
+                                        <span>Taxi</span>
+                                    </div>
+                                    <span class="badge bg-success rounded-pill">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </span>
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center filter-link {% if vehicleType == 'Car' %}active{% endif %}" 
+                                   data-filter="vehicle_type" data-value="Car">
+                                    <div>
+                                        <i class="fas fa-car text-success me-2"></i>
+                                        <span>Voiture</span>
+                                    </div>
+                                    <span class="badge bg-success rounded-pill">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </li>
             </ul>
+
+            <style>
+                .list-group-item {
+                    transition: all 0.3s ease;
+                    border: none;
+                    border-bottom: 1px solid rgba(0,0,0,0.05);
+                }
+
+                .list-group-item:last-child {
+                    border-bottom: none;
+                }
+
+                .list-group-item:hover {
+                    background-color: #f8f9fa;
+                    transform: translateX(5px);
+                }
+
+                .list-group-item.active {
+                    background-color: #f8f9fa;
+                    color: #000;
+                    border-left: 4px solid #28a745;
+                }
+
+                .list-group-item .badge {
+                    transition: all 0.3s ease;
+                }
+
+                .list-group-item:hover .badge {
+                    transform: translateX(3px);
+                }
+
+                .card {
+                    transition: all 0.3s ease;
+                }
+
+                .card:hover {
+                    transform: translateY(-5px);
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
+                }
+
+                .filter-link {
+                    text-decoration: none;
+                    color: #333;
+                }
+
+                .filter-link:hover {
+                    text-decoration: none;
+                    color: #333;
+                }
+
+                .filter-link.active {
+                    background-color: #f8f9fa;
+                }
+
+                .card-header {
+                    border-radius: 0.25rem 0.25rem 0 0 !important;
+                }
+
+                .list-group-item i {
+                    width: 20px;
+                    text-align: center;
+                }
+            </style>
         </div>
 
         <div class="col-lg-9">
@@ -1222,21 +1513,63 @@ body {
                                         <div class="weather-card p-3 text-center">
                                             <h5 class="mb-3">{{ city }}</h5>
                                             {% if weather.error is not defined %}
-                                                <div class="weather-icon mb-2">
-                                                    <img src="http://openweathermap.org/img/wn/{{ weather.weather[0].icon }}@2x.png" alt="{{ weather.weather[0].description }}">
-                                                </div>
-                                                <div class="weather-details">
-                                                    <h3 class="mb-2">{{ weather.main.temp|round }}°C</h3>
-                                                    <p class="mb-1">{{ weather.weather[0].description|capitalize }}</p>
-                                                    <small class="text-muted">
-                                                        {{ 'app.shop.weather.feels_like'|trans }}: {{ weather.main.feels_like|round }}°C
-                                                    </small>
-                                                    <div class="mt-2">
-                                                        <small class="text-muted">
-                                                            <i class="fas fa-wind"></i> {{ weather.wind.speed }} m/s
-                                                            <i class="fas fa-tint ms-2"></i> {{ weather.main.humidity }}%
-                                                        </small>
+                                                <div class="weather-3d-container">
+                                                    <div class="weather-3d-element">
+                                                        <div class="weather-front">
+                                                            <div class="weather-icon mb-2">
+                                                                <img src="http://openweathermap.org/img/wn/{{ weather.weather[0].icon }}@2x.png" 
+                                                                     alt="{{ weather.weather[0].description }}">
+                                                            </div>
+                                                            <div class="weather-details">
+                                                                <h3 class="mb-2">{{ weather.main.temp|round }}°C</h3>
+                                                                <p class="mb-1">{{ weather.weather[0].description|capitalize }}</p>
+                                                                <small class="text-muted">
+                                                                    {{ 'app.shop.weather.feels_like'|trans }}: {{ weather.main.feels_like|round }}°C
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                        <div class="weather-back">
+                                                            <div class="weather-data-grid">
+                                                                <div class="weather-data-item">
+                                                                    <i class="fas fa-wind"></i>
+                                                                    <div class="value">{{ weather.wind.speed }} m/s</div>
+                                                                    <div class="label">Wind Speed</div>
+                                                                </div>
+                                                                <div class="weather-data-item">
+                                                                    <i class="fas fa-tint"></i>
+                                                                    <div class="value">{{ weather.main.humidity }}%</div>
+                                                                    <div class="label">Humidity</div>
+                                                                </div>
+                                                                <div class="weather-data-item">
+                                                                    <i class="fas fa-compress-arrows-alt"></i>
+                                                                    <div class="value">{{ weather.main.pressure }} hPa</div>
+                                                                    <div class="label">Pressure</div>
+                                                                </div>
+                                                                <div class="weather-data-item">
+                                                                    <i class="fas fa-eye"></i>
+                                                                    <div class="value">{{ weather.visibility / 1000 }} km</div>
+                                                                    <div class="label">Visibility</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
+                                                </div>
+                                                <div class="weather-timeline">
+                                                    {% for i in 0..5 %}
+                                                        <div class="weather-timeline-item" style="left: {{ i * 20 }}%">
+                                                            <i class="fas fa-{{ ['sun', 'cloud', 'cloud-rain', 'wind', 'bolt', 'snowflake'][i % 6] }}"></i>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                                <div class="weather-animation">
+                                                    {% for i in 0..10 %}
+                                                        <div class="weather-particle" 
+                                                             style="width: {{ random(2, 4) }}px; 
+                                                                    height: {{ random(2, 4) }}px;
+                                                                    left: {{ random(0, 100) }}%;
+                                                                    animation-delay: {{ random(0, 2) }}s;">
+                                                        </div>
+                                                    {% endfor %}
                                                 </div>
                                             {% else %}
                                                 <p class="text-muted">{{ weather.error }}</p>

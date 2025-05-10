@@ -174,6 +174,56 @@
         <h5 class="mb-0"><strong>Trips</strong></h5>
         <span class="text-secondary">Dashboard <i class="fa fa-angle-right"></i> Trips</span>
 
+        <!-- Statistics Cards -->
+        <div class="row mt-4 mb-4">
+            <div class="col-xl-6 col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    Total Trajets</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    {{ trajets|length }}
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-route fa-2x text-primary"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-6 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    Trajets Aujourd'hui</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    {{ trajets|filter(t => t.dateDepart|date('Y-m-d') == "now"|date('Y-m-d'))|length }}
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-calendar-day fa-2x text-success"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Trip Button -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <a href="{{ path('trajet_new') }}" class="btn btn-primary">
+                    <i class="fa fa-plus"></i> Ajouter un trajet
+                </a>
+            </div>
+        </div>
+
         <!-- Search Bar -->
         <div class="card shadow mb-4">
             <div class="card-header py-3">
@@ -183,7 +233,7 @@
                     </div>
                     <div class="col-md-6">
                         <div class="input-group">
-                            <input type="text" id="searchInput" class="form-control" placeholder="Rechercher par ID, point de départ ou d'arrivée...">
+                            <input type="text" id="searchInput" class="form-control" placeholder="Rechercher un trajet...">
                             <div class="input-group-append">
                                 <span class="input-group-text">
                                     <i class="fa fa-search"></i>
@@ -252,15 +302,6 @@
                 </div>
             </div>
         </div>
-
-        <div class="row mt-3">
-            <div class="col-12">
-                <a href="{{ path('trajet_new') }}" class="btn btn-primary">
-                    <i class="fa fa-plus"></i> Add New Trip
-                </a>
-            </div>
-        </div>
-    </div>
 
                 <!--Footer-->
                 <div class="row mt-5 mb-4 footer">

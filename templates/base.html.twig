@@ -20,6 +20,28 @@
     color: white;
     border-color: #0d6efd;
 }
+
+/* Navigation hover effects */
+.nav-link {
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+    color: #198754 !important;
+}
+
+.nav-link:hover span {
+    width: 100% !important;
+}
+
+/* Sticky header shadow */
+.navbar.sticky-top {
+    transition: box-shadow 0.3s ease;
+}
+
+.navbar.sticky-top.scrolled {
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+}
 </style>
 
     <title> Zay Shop eCommerce HTML CSS Template  </title>
@@ -81,37 +103,53 @@ https://templatemo.com/tm-559-zay-shop
 
     {% block header %}
     <!-- Header -->
-    <nav class="navbar navbar-expand-lg navbar-light shadow">
+    <nav class="navbar navbar-expand-lg navbar-light shadow-sm bg-white py-3 sticky-top">
         <div class="container d-flex justify-content-between align-items-center">
-
-            <a class="navbar-brand text-success logo h1 align-self-center" href="index.html">
-                SMART MOBY
+            <a class="navbar-brand d-flex align-items-center" href="index.html">
+                <img src="{{ asset('img/logooo.png') }}" alt="Logo" style="height:48px;width:auto;margin-right:12px;">
+                <span class="text-success logo h1 align-self-center mb-0" style="font-weight:900;letter-spacing:1px;">SMART MOBY</span>
             </a>
-
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#templatemo_main_nav" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-
-            <div class="align-self-center collapse navbar-collapse flex-fill  d-lg-flex justify-content-lg-between" id="templatemo_main_nav">
+            <div class="align-self-center collapse navbar-collapse flex-fill d-lg-flex justify-content-lg-between" id="templatemo_main_nav">
                 <div class="flex-fill">
                     <ul class="nav navbar-nav d-flex justify-content-evenly align-items-center w-100">
                         <li class="nav-item">
-                            <a class="nav-link" href={{path('app_controller')}}>Accueil</a>
+                            <a class="nav-link position-relative px-3" href={{path('app_controller')}}>
+                                Accueil
+                                <span class="position-absolute bottom-0 start-50 translate-middle-x" style="width:0;height:2px;background:#198754;transition:width 0.3s ease;"></span>
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="about.html">Services</a>
+                            <a class="nav-link position-relative px-3" href="about.html">
+                                Services
+                                <span class="position-absolute bottom-0 start-50 translate-middle-x" style="width:0;height:2px;background:#198754;transition:width 0.3s ease;"></span>
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{path ('app_shop')}}">Trajet Du Trafic</a>
+                            <a class="nav-link position-relative px-3" href="{{path ('app_shop')}}">
+                                Trajet Du Trafic
+                                <span class="position-absolute bottom-0 start-50 translate-middle-x" style="width:0;height:2px;background:#198754;transition:width 0.3s ease;"></span>
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{path ('afficher_event')}}">Evenements</a>
+                            <a class="nav-link position-relative px-3" href="{{path ('afficher_event')}}">
+                                Evenements
+                                <span class="position-absolute bottom-0 start-50 translate-middle-x" style="width:0;height:2px;background:#198754;transition:width 0.3s ease;"></span>
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{path('list-blog')}}">Blog</a>
+                            <a class="nav-link position-relative px-3" href="{{path('list-blog')}}">
+                                Blog
+                                <span class="position-absolute bottom-0 start-50 translate-middle-x" style="width:0;height:2px;background:#198754;transition:width 0.3s ease;"></span>
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href={{path('app_ai')}}>SmartMoby AI</a>
+                            <a class="nav-link position-relative px-3" href={{path('app_ai')}}>
+                                Moby AI
+                                <span class="position-absolute bottom-0 start-50 translate-middle-x" style="width:0;height:2px;background:#198754;transition:width 0.3s ease;"></span>
+                            </a>
                         </li>
                     </ul>
                 </div>
@@ -125,7 +163,7 @@ https://templatemo.com/tm-559-zay-shop
                         </div>
                     </div>
                     <div class="dropdown me-3">
-                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button class="btn btn-outline-success dropdown-toggle" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             {{ app.request.locale|upper }}
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="languageDropdown">
@@ -148,7 +186,6 @@ https://templatemo.com/tm-559-zay-shop
                     </div>
                 </div>
             </div>
-
         </div>
     </nav>
     {% endblock %}
@@ -175,192 +212,141 @@ https://templatemo.com/tm-559-zay-shop
 
 
     <!-- Start Banner Hero -->
-    <div id="template-mo-zay-hero-carousel" class="carousel slide" data-bs-ride="carousel">
-        
-        <div class="carousel-inner">
-            <div class="carousel-item active">
-                <div class="container">
-                    <div class="row p-5">
-                        <div class="mx-auto col-md-8 col-lg-6 order-lg-last">
-                            <img class="img-fluid image-animation" src="{{asset('img/LOGO_pi.png')}}" alt="">
-                        </div>
-                        <div class="col-lg-6 mb-0 d-flex align-items-center">
-                            <div class="text-align-left align-self-center">
-                                <h1 class="h1 text-success"><b>Smart Moby</b> {{ 'app.shop.banner.title'|trans }}</h1>
-                                <h3 class="h2">{{ 'app.shop.banner.subtitle'|trans }}</h3>
-                                <p>{{ 'app.shop.banner.description'|trans }}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-           
+    <div class="w-100 d-flex flex-column align-items-center justify-content-center position-relative" style="min-height:80vh;background:linear-gradient(135deg, #1a1a1a 0%, #2d3436 100%);">
+        <!-- Animated background elements -->
+        <div class="position-absolute w-100 h-100" style="opacity:0.1;">
+            <div class="position-absolute" style="top:20%;left:10%;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,0.1);"></div>
+            <div class="position-absolute" style="top:40%;right:15%;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,0.1);"></div>
+            <div class="position-absolute" style="bottom:30%;left:20%;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.1);"></div>
         </div>
         
+        <div class="text-center position-relative" style="margin-top:60px;z-index:1;">
+            <div class="fw-bold text-success mb-2" style="font-size:2.5rem;letter-spacing:text-transform;">Moby</div>
+            <div class="fw-bolder text-white mb-4" style="font-size:5.5rem;line-height:1.2;text-shadow:2px 2px 4px rgba(0,0,0,0.3);font-weight:900;">
+                Où vous voulez,<br>quand vous le voulez.
+            </div>
+            <div class="text-light mb-5" style="font-size:1.4rem;opacity:0.9;">Moby est l'application de mobilité tout-en-un.</div>
+            <div class="d-flex gap-3 justify-content-center">
+                <a href="#" class="btn btn-success btn-lg px-5 py-3 rounded-pill shadow-lg" style="font-weight:600;font-size:1.2rem;transition:all 0.3s ease;">
+                    <i class="fas fa-download me-2"></i>Télécharger l'appli Moby
+                </a>
+                <a href="#" class="btn btn-outline-light btn-lg px-5 py-3 rounded-pill" style="font-weight:600;font-size:1.2rem;transition:all 0.3s ease;">
+                    <i class="fas fa-info-circle me-2"></i>En savoir plus
+                </a>
+            </div>
+        </div>
         
+        <!-- Decorative wave -->
+        <div class="position-absolute bottom-0 w-100" style="height:100px;background:linear-gradient(to bottom right, transparent 49%, #fafcfb 50%);"></div>
     </div>
     <!-- End Banner Hero -->
 
-
-    <!-- Start Oussema -->
-    <section class="container py-5" data-aos="fade-left">
-        <div class="row text-center pt-3">
-            <div class="col-lg-6 m-auto">
-                <h1 class="h1">{{ 'app.shop.events.title'|trans }}</h1>
-                <p>{{ 'app.shop.events.description'|trans }}</p>
-                
-            </div>
-        </div>
-        <div class="row">
-            {% for event in events|slice(0, 3) %}
-            <div class="col-12 col-md-4 p-5 mt-3">
-                <a href="#"><img src="{{ asset('img/evenements.jpg') }}" class="rounded-circle img-fluid border"></a>
-                <h5 class="text-center mt-3 mb-3">{{ event.getNom() }}</h5>
-                <p class="text-center"><a class="btn btn-success" href="{{path ('afficher_event')}}" >Accéder à l'événement</a></p>
-            </div>
-            {% endfor %}
-        </div>
-    </section>
-    <!-- End Oussema -->
-
-
-    
-
-    <!-- Start Featured Trips Section -->
-    <section id="trips" style="background-color: #f8f9fa;" data-aos="fade-left">
-        <div class="container py-5">
-            <div class="row text-center py-3">
-                <div class="col-lg-6 m-auto">
-                    <h1 class="h1">{{ 'app.shop.title'|trans }}</h1>
-                    <p>
-                        {{ 'app.shop.trip.discover'|trans }}
-                    </p>
-                </div>
-            </div>
-            <div class="row">
-                
-                {% if trajets is defined and trajets|length > 0 %}
-                    {% set itemsPerPage = 3 %}
-                    {% set totalPages = (trajets|length / itemsPerPage)|round(0, 'ceil') %}
-                    {% set currentPage = app.request.query.getInt('page', 1) %}
-                    {% set start = (currentPage - 1) * itemsPerPage %}
-                    
-                    {% for trajet in trajets|slice(start, itemsPerPage) %}
-                    <div class="col-12 col-md-4 mb-4">
-                        <div class="card h-100 shadow-sm">
-                            <div class="card-header bg-primary text-white">
-                                <h5 class="mb-0">{{ trajet.pointDepart }} → {{ trajet.pointArrivee }}</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between mb-3">
-                                    <span class="badge bg-info">
-                                        <i class="fa fa-calendar"></i> {{ trajet.dateDepart|date('Y-m-d') }}
-                                    </span>
-                                    <span class="badge bg-success">
-                                        <i class="fa fa-clock"></i> {{ trajet.dateDepart|date('H:i') }}
-                                    </span>
-                                </div>
-                                <div class="mb-3">
-                                    <p class="mb-1"><i class="fa fa-car text-primary"></i> {{ 'app.shop.trip.details.vehicle'|trans }}: {{ trajet.vehicule.type }}</p>
-                                    <p class="mb-1"><i class="fa fa-road text-primary"></i> {{ 'app.shop.trip.details.distance'|trans }}: {{ trajet.distance }} km</p>
-                                    <p class="mb-1"><i class="fa fa-tag text-primary"></i> {{ 'app.shop.trip.details.price'|trans }}: {{ trajet.prix }} TND</p>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="btn-group">
-                                        <a href="/front/shop" class="btn btn-sm btn-outline-primary">
-                                            <i class="fa fa-map-marker-alt"></i> {{ 'app.shop.trip.details.view_route'|trans }}
-                                        </a>
-                                        
-                                    </div>
-                                    <small class="text-muted">
-                                        <i class="fa fa-users"></i> {{ random(5, 20) }} {{ 'app.shop.trip.details.seats_left'|trans }}
-                                    </small>
-                                </div>
-                            </div>
-                            <div class="card-footer bg-light">
-                                <div class="d-flex justify-content-between">
-                                    <span>
-                                        <i class="fa fa-star text-warning"></i>
-                                        <i class="fa fa-star text-warning"></i>
-                                        <i class="fa fa-star text-warning"></i>
-                                        <i class="fa fa-star text-warning"></i>
-                                        <i class="fa fa-star-half-alt text-warning"></i>
-                                    </span>
-                                    <span class="text-muted">({{ random(10, 50) }} {{ 'app.shop.trip.details.reviews'|trans }})</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="col-12 text-center">
-                        <p class="text-muted">{{ 'app.shop.pagination.no_trips'|trans }}</p>
-                    </div>
-                {% endif %}
-            </div>
-            
-            <!-- View All Trips Button -->
-            <div class="row mt-4">
-                <div class="col-12 text-center">
-                    <a href="/front/shop" class="btn btn-success btn-lg">
-                        <i class="fa fa-list"></i> {{ 'app.shop.pagination.view_all'|trans }}
-                    </a>
-                </div>
-            </div>
-            
-            <!-- Pagination -->
-            {% if trajets is defined and trajets|length > 3 %}
-            <div class="row mt-4">
-                <div class="col-12">
-                    <nav aria-label="Page navigation">
-                        <ul class="pagination justify-content-center">
-                            <li class="page-item {% if currentPage == 1 %}disabled{% endif %}">
-                                <a class="page-link" href="{{ path('app_home', {'page': currentPage - 1}) }}#trips" aria-label="{{ 'app.shop.pagination.previous'|trans }}">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </a>
-                            </li>
-                            {% for i in 1..totalPages %}
-                                <li class="page-item {% if currentPage == i %}active{% endif %}">
-                                    <a class="page-link" href="{{ path('app_home', {'page': i}) }}#trips">{{ i }}</a>
-                                </li>
-                            {% endfor %}
-                            <li class="page-item {% if currentPage == totalPages %}disabled{% endif %}">
-                                <a class="page-link" href="{{ path('app_home', {'page': currentPage + 1}) }}#trips" aria-label="{{ 'app.shop.pagination.next'|trans }}">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
-            </div>
-            {% endif %}
-        </div>
-    </section>
-    <!-- End Featured Trips Section -->
-
-    <!-- Start Hazem -->
-<div id="template-mo-zay-hero-carousel" class="carousel slide" data-bs-ride="carousel" data-aos="fade-right">
-    <div class="carousel-inner">
-        <div class="carousel-item active">
-            <div class="container">
-                <div class="row p-5">
-                    <div class="mx-auto col-md-8 col-lg-6 order-lg-last">
-                        <img class="img-fluid" src="{{asset('img/avis.png')}}" alt="">
-                    </div>
-                    <div class="col-lg-6 mb-0 d-flex align-items-center justify-content-center">
-                        <div class="text-center">
-                            <a class="nav-link" href="{{ path('list-blog') }}" style="color: inherit;" onmouseover="this.children[0].style.color='#28a745';" onmouseout="this.children[0].style.color='#808080';">
-                                <h1><b>Laissez Un Avis ?</b></h1>
-                            </a>
-                            <h3 class="h2">Accédez au blog et partagez vos avis !</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!-- Animated Driving Image -->
+    <div class="w-100 d-flex justify-content-center align-items-center" style="background:transparent;">
+        <img src="{{ asset('img/driving.jpg') }}" alt="Driving" class="driving-animated"
+             style="max-width:1000px;width:100vw;height:auto;display:block;margin:0 auto;" />
     </div>
-</div>
-<!-- End Hazem -->
+    <style>
+    @keyframes drive {
+        0% { transform: translateX(-30px) scale(1.02); }
+        50% { transform: translateX(30px) scale(1.07); }
+        100% { transform: translateX(-30px) scale(1.02); }
+    }
+    .driving-animated {
+        animation: drive 3.5s ease-in-out infinite;
+        filter: drop-shadow(0 8px 24px rgba(0,0,0,0.12));
+        will-change: transform;
+    }
+    </style>
+
+    <!-- New Animated Cards Section -->
+    <section class="container py-5">
+        <div class="row g-4 justify-content-center">
+            <!-- Card 1: Trajets -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card custom-animated-card h-100 text-white" style="background:#133826; border-radius:20px; overflow:hidden;">
+                    <div class="card-body d-flex flex-column justify-content-between p-4">
+                        <div>
+                            <h2 class="fw-bold mb-3">Trajets</h2>
+                            <p class="mb-4">Quelques secondes pour commander et quelques minutes pour arriver.</p>
+                            <a href="{{ path('app_shop') }}" class="btn btn-success fw-bold px-4 py-2 mb-3">Commencer dès maintenant</a>
+                        </div>
+                        <img src="{{ asset('img/tr.jpg') }}" alt="Trajets" class="img-fluid rounded mt-auto" style="max-height:180px;object-fit:cover;">
+                    </div>
+                </div>
+            </div>
+            <!-- Card 2: Events -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card custom-animated-card h-100 text-white" style="background:#2a3d4d; border-radius:20px; overflow:hidden;">
+                    <div class="card-body d-flex flex-column justify-content-between p-4">
+                        <div>
+                            <h2 class="fw-bold mb-3">Événements</h2>
+                            <p class="mb-4">Participez à nos événements exclusifs et vivez des expériences uniques.</p>
+                            <a href="{{ path('afficher_event') }}" class="btn btn-success fw-bold px-4 py-2 mb-3">Voir les événements</a>
+                        </div>
+                        <img src="{{ asset('img/ev.jpg') }}" alt="Événements" class="img-fluid rounded mt-auto" style="max-height:180px;object-fit:cover;">
+                    </div>
+                </div>
+            </div>
+            <!-- Card 3: Autopartage -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card custom-animated-card h-100 text-white" style="background:#1a232a; border-radius:20px; overflow:hidden;">
+                    <div class="card-body d-flex flex-column justify-content-between p-4">
+                        <div>
+                            <h2 class="fw-bold mb-3">Autopartage</h2>
+                            <p class="mb-4">Location de voiture haut de gamme facile et rapide.</p>
+                            <a href="{{ path('app_shop') }}" class="btn btn-success fw-bold px-4 py-2 mb-3">Voir Autopartage</a>
+                        </div>
+                        <img src="{{ asset('img/dd.jpg') }}" alt="Autopartage" class="img-fluid rounded mt-auto" style="max-height:180px;object-fit:cover;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="container my-5">
+        <div class="row justify-content-center align-items-center">
+            <div class="col-12 col-lg-6 text-center mb-4 mb-lg-0">
+                <img src="{{ asset('img/poeple.jpg') }}" alt="People" class="img-fluid rounded shadow" style="max-width: 90%;"/>
+            </div>
+            <div class="col-12 col-lg-6 d-flex flex-column justify-content-center align-items-center">
+                <h2 class="fw-bold mb-3 text-success" style="font-size:2.2rem;">Des villes pour les habitants, pas pour les voitures.</h2>
+                <p class="mb-2 fs-5">En partageant nos connaissances sur l'industrie et nos données en temps réel, nous contribuons à améliorer nos villes.<br>Des villes pour les habitants, pas pour les voitures.</p>
+                <p class="mb-4 fs-5">Partage des meilleures pratiques<br>Nous sommes en mesure de fournir des informations qui aident les autorités locales à rendre leurs villes plus connectées et plus agréables à vivre.</p>
+                <a href="#" class="btn btn-success btn-lg px-4 fw-bold">En savoir plus</a>
+            </div>
+        </div>
+    </section>
+    <style>
+    .custom-animated-card {
+        transition: transform 0.3s cubic-bezier(.4,2,.3,1), box-shadow 0.3s;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+    .custom-animated-card:hover {
+        transform: translateY(-12px) scale(1.03) rotate(-1deg);
+        box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+        z-index:2;
+    }
+    </style>
+    <!-- Download App Section -->
+    <section class="w-100 py-5" style="background:#151817; color:#fff;">
+        <div class="container">
+            <h1 class="fw-bold text-center mb-2" style="font-size:3rem;">Téléchargez nos applis</h1>
+            <p class="text-center mb-5" style="color:#bfc3c2;font-size:1.25rem;">Scan the QR code with your phone camera to download the Moby app.</p>
+            <div class="row justify-content-center align-items-center g-5 flex-column flex-lg-row">
+                <div class="col-12 col-lg-5 d-flex justify-content-center mb-4 mb-lg-0">
+                    <img src="{{ asset('img/qrr.jpg') }}" alt="QR Code" class="img-fluid rounded shadow" style="max-width:370px;width:100%;background:#fff;" />
+                </div>
+                <div class="col-12 col-lg-6">
+                    <div class="mb-3 d-flex align-items-end gap-4" style="font-size:1.2rem;">
+                        <span class="fw-bold border-0 border-bottom border-3 pb-1" style="border-color:#3be07a;">Trajets</span>
+                        <span class="text-secondary pb-1" style="opacity:0.7;">Drivers</span>
+                    </div>
+                    <h2 class="fw-bold mb-3" style="font-size:2.3rem;line-height:1.1;">Tous vos déplacements au meilleur prix.</h2>
+                    <p class="fs-5 text-secondary" style="color:#bfc3c2!important;">Disponible pour les appareils iOS et Android.</p>
+                </div>
+            </div>
+        </div>
+    </section>
     {% endblock %}
 
 
@@ -422,20 +408,20 @@ https://templatemo.com/tm-559-zay-shop
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
     <script>
         AOS.init(); // Initialise AOS
+        
+        // Handle sticky header shadow
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar.sticky-top');
+            if (window.scrollY > 0) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
     </script>
     {% endblock %}
     <!-- End Script -->
     <script>
         document.getElementById('search-input').addEventListener('input', function () {
         const query = this.value;
-        fetch(`/back/search_event?q=${encodeURIComponent(query)}`)
-        .then(response => response.text())
-        .then(html => {
-            document.getElementById('events-list').innerHTML = html;
-        });
-});
-</script>
-
-</body>
-
-</html>
+        fetch(`
