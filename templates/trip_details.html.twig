@@ -392,6 +392,7 @@ function showReceipt(receipt) {
                     <span>Booked Seats:</span>
                     <strong>${numberOfSeats}</strong>
                 </div>
+            </div>
 
             <!-- Price Breakdown -->
             <div class="price-breakdown mt-3 p-3 bg-light rounded">
@@ -455,7 +456,7 @@ function printReceipt() {
     printWindow.document.close();
 }
 
-// Add this to your existing JavaScript
+
 document.getElementById('numberOfSeats').addEventListener('input', function(e) {
     const maxSeats = {{ trip.vehicule.capacite }};
     const selectedSeats = parseInt(this.value);
